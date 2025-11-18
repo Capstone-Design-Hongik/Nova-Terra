@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.landmark.governance.domain.Proposal;
+import org.landmark.governance.domain.VoteType;
 import org.landmark.properties.domain.Property;
 import org.landmark.user.domain.User;
 
@@ -25,21 +28,23 @@ public record ProposalCreateRequest(
     Long startAt, // Unix time
 
     @NotNull(message = "투표 마감 시간은 필수입니다.")
-    Long endAt, // Unix time
+    Long endAt // Unix time
 
-    @NotEmpty(message = "선택지는 1개 이상이어야 합니다.")
-    List<String> choices
 ) {
     public Proposal toEntity(Property property, User proposer, BigInteger onChainProposalId) {
-      return Proposal.builder()
-          .property(property)
-          .proposer(proposer)
-          .title(title)
-          .description(description)
-          .startAt(startAt)
-          .endAt(endAt)
-          .choices(choices)
-          .onChainProposalId(onChainProposalId)
-          .build();
+        List<String> fixedChoices = Stream.of(VoteType.values())
+            .map(Enum::name)
+            .collect(Collectors.toList());
+
+        return Proposal.builder()
+            .property(property)
+            .proposer(proposer)
+            .title(title)
+            .description(description)
+            .startAt(startAt)
+            .endAt(endAt)
+            .choices(fixedChoices)
+            .onChainProposalId(onChainProposalId)
+            .build();
     }
 }
