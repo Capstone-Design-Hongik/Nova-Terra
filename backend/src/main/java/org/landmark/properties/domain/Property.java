@@ -18,8 +18,11 @@ public class Property {
     @Column(name = "sto_token_address", length = 42) // STO 토큰 주소를 PK로 사용
     private String id;
 
-    @Column(name = "dao_token_address", length = 42, unique = true) //의결권(DAO) 토큰의 스마트 컨트랙트 주소
+    @Column(name = "dao_token_address", length = 42, unique = true) //의결권(DAO) 토큰 주소
     private String daoTokenAddress;
+
+    @Column(name = "dao_contract_address", length = 42, unique = true)  // 의사결정 DAO 토큰 주소
+    private String daoContractAddress;
 
     @Column(nullable = false)
     private String name;
