@@ -1,6 +1,7 @@
 package org.landmark.governance.domain;
 
 import jakarta.persistence.*;
+import java.math.BigInteger;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +20,11 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Proposal {
     @Id
-    @Column(name = "proposal_contract_address", length = 42)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "on_chain_proposal_id", nullable = false, unique = true)
+    private BigInteger onChainProposalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false) // Property의 PK (sto_token_address)를 참조
@@ -39,6 +43,9 @@ public class Proposal {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
+    @Column(name = "start_at", nullable = false, updatable = false)
+    private Long startAt;
+
     @Column(name = "end_at", nullable = false)
     private Long endAt;
 
@@ -51,19 +58,25 @@ public class Proposal {
     private ProposalStatus status;
 
     @Builder
-    public Proposal(String proposalContractAddress, Property property, User proposer, String title,
-                    String description, Long endAt, Long snapshotBlock, List<String> choices) {
+    public Proposal(BigInteger onChainProposalId, Property property, User proposer, String title,
+                    String description, Long startAt, Long endAt, List<String> choices) {
 
-        this.id = proposalContractAddress;
+        this.onChainProposalId = onChainProposalId;
         this.property = property;
         this.proposer = proposer;
         this.title = title;
         this.description = description;
+        this.startAt = startAt;
         this.endAt = endAt;
         this.choices = choices;
 
         this.createdAt = System.currentTimeMillis() / 1000L;
-        this.status = ProposalStatus.PENDING;
+
+        if (startAt > this.createdAt) {
+            this.status = ProposalStatus.PENDING;
+        } else {
+            this.status = ProposalStatus.ACTIVE;
+        }
     }
 
     // --- 비즈니스 메소드 ---
@@ -74,7 +87,7 @@ public class Proposal {
     }
 
     public void cancel() {
-        if (this.status == ProposalStatus.PENDING) {
+        if (this.status == ProposalStatus.PENDING || this.status == ProposalStatus.ACTIVE) {
             this.status = ProposalStatus.CANCELLED;
         }
     }
