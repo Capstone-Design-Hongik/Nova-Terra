@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 25% 10%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 20% 15%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 226 99% 57%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 226 99% 67%;
+
+    --secondary: 226 99% 57%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 15% 25%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 45 90% 60%;
+    --accent-foreground: 220 25% 10%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 140 60% 50%;
+    --success-foreground: 210 40% 98%;
+
+    --border: 220 15% 25%;
+    --input: 220 15% 20%;
+    --ring: 226 99% 57%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(226 99% 57%), hsl(226 99% 57%));
+    --gradient-secondary: linear-gradient(135deg, hsl(226 99% 57%), hsl(226 92% 53%));
+    --gradient-hero: linear-gradient(180deg, hsl(220 25% 10%), hsl(240 30% 15%));
+    --gradient-card: linear-gradient(135deg, hsl(220 20% 15% / 0.8), hsl(240 25% 18% / 0.8));
+
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(226 99% 57% / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(0 0% 0% / 0.5);
+    --shadow-elevation: 0 20px 50px -15px hsl(0 0% 0% / 0.6);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background: linear-gradient(180deg, hsl(220 25% 10%), hsl(240 30% 15%));
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary;
+  }
+
+  .card-gradient {
+    background: linear-gradient(135deg, hsl(220 20% 15% / 0.8), hsl(240 25% 18% / 0.8));
+  }
+
+  .glow-effect {
+    box-shadow: 0 0 40px hsl(226 99% 57% / 0.3);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elevation;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(226 99% 57% / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(226 99% 57% / 0.6);
+    }
+  }
+}
