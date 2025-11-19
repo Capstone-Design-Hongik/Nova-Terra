@@ -1,5 +1,6 @@
 package org.landmark.properties.controller;
 
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.landmark.global.dto.ApiResponse;
 import org.landmark.properties.dto.PropertyCreateRequest;
@@ -20,13 +21,15 @@ public class PropertyAdminController {
   private final PropertyService propertyService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse<String>> createProperty(
+  public ResponseEntity<ApiResponse<Map<String, String>>> createProperty(
       @RequestPart(value = "data") PropertyCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
-    propertyService.createProperty(request, image);
+    String propertyId = propertyService.createProperty(request, image);
+
+    Map<String, String> responseData = Map.of("propertyId", propertyId);
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.created("부동산 상품이 등록되었습니다."));
+        .body(ApiResponse.created("부동산 상품이 등록되었습니다.", responseData));
   }
 }

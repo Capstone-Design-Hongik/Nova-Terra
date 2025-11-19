@@ -16,7 +16,7 @@ public class PropertyServiceImpl implements PropertyService {
   private final S3Service s3Service;
 
   @Transactional
-  public Long createProperty(PropertyCreateRequest request, MultipartFile coverImage) {
+  public String createProperty(PropertyCreateRequest request, MultipartFile coverImage) {
 
     String coverImageUrl = null;
     if (coverImage != null && !coverImage.isEmpty()) {
@@ -24,9 +24,8 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     Property property = request.toEntity(coverImageUrl);
-
     propertyRepository.save(property);
 
-    return 1L; // 임시
+    return property.getId();
   }
 }
