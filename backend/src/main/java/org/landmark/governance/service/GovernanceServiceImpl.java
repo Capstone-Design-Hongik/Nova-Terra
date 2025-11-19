@@ -31,9 +31,17 @@ public class GovernanceServiceImpl implements GovernanceService {
 
   /* 모든 제안 목록 조회 */
   @Override
-  public List<ProposalResponse> findAllProposals() {
-    List<Proposal> proposals = proposalRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+  public List<ProposalResponse> findAllProposals(String propertyId) {
+    List<Proposal> proposals;
+    Sort sort = Sort.by(Sort.Direction.DESC, "id");;
 
+    if (propertyId != null && !propertyId.isEmpty()) {
+      // 특정 부동산 필터링 조회
+      proposals = proposalRepository.findByProperty_Id(propertyId);
+    } else {
+      proposals = proposalRepository.findAll(sort);
+    }
+    
     return proposals.stream()
         .map(ProposalResponse::from)
         .collect(Collectors.toList());

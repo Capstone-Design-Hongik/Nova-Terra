@@ -31,6 +31,10 @@ public class ApiResponse<T> {
     return new ApiResponse<>(HttpStatus.CREATED.value(), "✅ 리소스가 성공적으로 생성되었습니다.", data);
   }
 
+  public static <T> ApiResponse<T> created(String message, T data) {
+    return new ApiResponse<>(HttpStatus.CREATED.value(), message, data);
+  }
+
   public static <T> ApiResponse<T> error(int code, String message) {
     return new ApiResponse<>(code, message, null);
   }
