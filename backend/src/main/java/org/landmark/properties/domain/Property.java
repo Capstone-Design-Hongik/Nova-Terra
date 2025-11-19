@@ -94,7 +94,7 @@ public class Property {
     private PropertyStatus status;
 
     @Builder
-    public Property(String stoTokenAddress, String daoTokenAddress, String name, String description, String address, String coverImageUrl,
+    public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress, String name, String description, String address, String coverImageUrl,
                     String buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
                     String floor, Long useApprovalDate, Integer parkingSpaces,
                     String direction, Integer roomCount, Integer bathroomCount,
@@ -105,6 +105,7 @@ public class Property {
         // 필수 값
         this.id = stoTokenAddress;
         this.daoTokenAddress = daoTokenAddress;
+        this.daoContractAddress = daoContractAddress;
         this.name = name;
         this.totalValuation = totalValuation;
         this.totalTokens = totalTokens;
