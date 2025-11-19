@@ -27,8 +27,10 @@ public class GovernanceController {
   private final GovernanceService governanceService;
 
   @GetMapping("/proposals")
-  public ResponseEntity<ApiResponse<List<ProposalResponse>>> getAllActiveProposals() {
-    List<ProposalResponse> proposals = governanceService.findAllProposals();
+  public ResponseEntity<ApiResponse<List<ProposalResponse>>> getAllActiveProposals(
+      @RequestParam(required = false) String propertyId
+  ) {
+    List<ProposalResponse> proposals = governanceService.findAllProposals(propertyId);
 
     return ResponseEntity.ok(ApiResponse.ok(proposals));
   }
