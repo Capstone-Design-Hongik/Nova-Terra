@@ -1,1 +1,10 @@
 /// <reference types="vite/client" />
+
+interface Window {
+  ethereum?: {
+    request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    send: (method: string, params: unknown[]) => Promise<unknown>;
+    on: (eventName: string, handler: (...args: unknown[]) => void) => void;
+    removeListener: (eventName: string, handler: (...args: unknown[]) => void) => void;
+  };
+}
