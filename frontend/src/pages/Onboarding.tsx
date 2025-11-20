@@ -14,7 +14,7 @@ export default function Onboarding() {
       setShowError(false);
       // 메타마스크 연결 성공 시 홈 페이지로 이동
       setTimeout(() => {
-        navigate("/");
+        navigate("/home");
       }, 1000);
     } catch (err) {
       setShowError(true);
