@@ -18,8 +18,11 @@ public class Property {
     @Column(name = "sto_token_address", length = 42) // STO 토큰 주소를 PK로 사용
     private String id;
 
-    @Column(name = "dao_token_address", length = 42, unique = true) //의결권(DAO) 토큰의 스마트 컨트랙트 주소
+    @Column(name = "dao_token_address", length = 42, unique = true) //의결권(DAO) 토큰 주소
     private String daoTokenAddress;
+
+    @Column(name = "dao_contract_address", length = 42, unique = true)  // 의사결정 DAO 토큰 주소
+    private String daoContractAddress;
 
     @Column(nullable = false)
     private String name;
@@ -91,7 +94,7 @@ public class Property {
     private PropertyStatus status;
 
     @Builder
-    public Property(String stoTokenAddress, String daoTokenAddress, String name, String description, String address, String coverImageUrl,
+    public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress, String name, String description, String address, String coverImageUrl,
                     String buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
                     String floor, Long useApprovalDate, Integer parkingSpaces,
                     String direction, Integer roomCount, Integer bathroomCount,
@@ -102,6 +105,7 @@ public class Property {
         // 필수 값
         this.id = stoTokenAddress;
         this.daoTokenAddress = daoTokenAddress;
+        this.daoContractAddress = daoContractAddress;
         this.name = name;
         this.totalValuation = totalValuation;
         this.totalTokens = totalTokens;

@@ -10,6 +10,7 @@ import Portfolio from "./pages/Portfolio";
 import Marketplace from "./pages/Marketplace";
 import Governance from "./pages/Governance";
 import NotFound from "./pages/NotFound";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -20,12 +21,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Onboarding />} />
+          <Route path="/home" element={<Index />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/:id" element={<PropertyDetail />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/governance" element={<Governance />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
