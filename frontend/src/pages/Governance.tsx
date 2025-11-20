@@ -123,250 +123,267 @@ const Governance = () => {
           {/* Properties List */}
           <div>
             <h2 className="text-2xl font-bold mb-6">내 부동산 포트폴리오</h2>
-            <div className="grid md:grid-cols-1 gap-4">
-              {properties.map((property, index) => (
-                <Card
-                  key={property.id}
-                  className={`card-gradient hover-lift animate-fade-in cursor-pointer transition-all ${
-                    selectedProperty === property.name
-                      ? "ring-2 ring-primary bg-primary/5"
-                      : ""
-                  }`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                  onClick={() =>
-                    setSelectedProperty(
-                      selectedProperty === property.name ? null : property.name
-                    )
-                  }
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="p-3 rounded-lg bg-primary/10 mt-1">
-                          <Building2 className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg mb-1">
-                            {property.name}
-                          </CardTitle>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {property.location}
-                          </p>
-                          <div className="flex gap-6 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">
-                                평가액
-                              </span>
-                              <p className="font-semibold text-primary">
-                                {property.value}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">
-                                지분율
-                              </span>
-                              <p className="font-semibold">
-                                {property.ownership}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">
-                                진행중인 투표
-                              </span>
-                              <p className="font-semibold text-accent">
-                                {property.activeVotes}건
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-3">
-                        <ChevronDown
-                          className={`w-5 h-5 text-muted-foreground transition-transform ${
-                            selectedProperty === property.name
-                              ? "rotate-180"
-                              : ""
-                          }`}
-                        />
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">
-                            보유 토큰
-                          </p>
-                          <p className="text-2xl font-bold text-accent">
-                            {property.tokens}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Voting Proposals for Selected Property */}
-          {selectedProperty && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold">
-                {properties.find((p) => p.name === selectedProperty)?.name} -
-                투표 현황
-              </h2>
-              {filteredProposals.length > 0 ? (
-                filteredProposals.map((proposal, index) => {
-                  const votePercentage = getVotePercentage(
-                    proposal.votesFor,
-                    proposal.totalVotes
-                  );
-                  const progressPercentage = getProgressPercentage(
-                    proposal.totalVotes,
-                    proposal.requiredVotes
-                  );
-                  const userVote = votes[proposal.id];
+              {properties.map((property, index) => {
+                const propertyProposals = proposals.filter(
+                  (p) => p.property === property.name
+                );
+                const isPropertySelected = selectedProperty === property.name;
 
-                  return (
+                return (
+                  <div key={property.id} className="space-y-4">
                     <Card
-                      key={proposal.id}
-                      className="card-gradient hover-lift animate-fade-in"
+                      className={`card-gradient hover-lift animate-fade-in cursor-pointer transition-all ${
+                        isPropertySelected
+                          ? "ring-2 ring-primary bg-primary/5"
+                          : ""
+                      }`}
                       style={{ animationDelay: `${index * 100}ms` }}
+                      onClick={() =>
+                        setSelectedProperty(
+                          isPropertySelected ? null : property.name
+                        )
+                      }
                     >
                       <CardHeader>
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <Badge
-                                className={
-                                  proposal.status === "active"
-                                    ? "bg-primary"
-                                    : "bg-success"
-                                }
-                              >
-                                {proposal.status === "active"
-                                  ? "투표 진행중"
-                                  : "가결"}
-                              </Badge>
-                              <span className="text-sm text-muted-foreground flex items-center">
-                                <Clock className="w-4 h-4 mr-1" />
-                                {proposal.endDate}까지
-                              </span>
+                          <div className="flex items-start gap-4 flex-1">
+                            <div className="p-3 rounded-lg bg-primary/10 mt-1">
+                              <Building2 className="w-6 h-6 text-primary" />
                             </div>
-                            <CardTitle className="text-2xl mb-2">
-                              {proposal.title}
-                            </CardTitle>
+                            <div className="flex-1">
+                              <CardTitle className="text-lg mb-1">
+                                {property.name}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground mb-3">
+                                {property.location}
+                              </p>
+                              <div className="flex gap-6 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">
+                                    평가액
+                                  </span>
+                                  <p className="font-semibold text-primary">
+                                    {property.value}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">
+                                    지분율
+                                  </span>
+                                  <p className="font-semibold">
+                                    {property.ownership}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">
+                                    진행중인 투표
+                                  </span>
+                                  <p className="font-semibold text-accent">
+                                    {property.activeVotes}건
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-3">
+                            <ChevronDown
+                              className={`w-5 h-5 text-muted-foreground transition-transform ${
+                                isPropertySelected ? "rotate-180" : ""
+                              }`}
+                            />
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">
+                                보유 토큰
+                              </p>
+                              <p className="text-2xl font-bold text-accent">
+                                {property.tokens}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
-
-                      <CardContent className="space-y-6">
-                        {/* Description */}
-                        <p className="text-muted-foreground leading-relaxed">
-                          {proposal.description}
-                        </p>
-
-                        {/* Vote Stats */}
-                        <div className="space-y-4">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              찬성률
-                            </span>
-                            <span className="font-semibold">
-                              {votePercentage.toFixed(1)}%
-                            </span>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-success flex items-center">
-                                <CheckCircle2 className="w-4 h-4 mr-1" />
-                                찬성 {proposal.votesFor.toLocaleString()}표
-                              </span>
-                              <span className="text-destructive flex items-center">
-                                <XCircle className="w-4 h-4 mr-1" />
-                                반대 {proposal.votesAgainst.toLocaleString()}표
-                              </span>
-                            </div>
-                            <Progress
-                              value={votePercentage}
-                              className="h-3"
-                            />
-                          </div>
-
-                          <div className="pt-4 border-t border-border">
-                            <div className="flex justify-between text-sm mb-2">
-                              <span className="text-muted-foreground">
-                                투표 참여율
-                              </span>
-                              <span className="font-semibold">
-                                {proposal.totalVotes.toLocaleString()} /{" "}
-                                {proposal.requiredVotes.toLocaleString()}표
-                              </span>
-                            </div>
-                            <Progress
-                              value={progressPercentage}
-                              className="h-2"
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-
-                      {proposal.status === "active" && proposal.myTokens > 0 && (
-                        <CardFooter className="flex gap-3">
-                          {!userVote ? (
-                            <>
-                              <Button
-                                className="flex-1 bg-success hover:bg-success/90"
-                                onClick={() => handleVote(proposal.id, "yes")}
-                              >
-                                <CheckCircle2 className="w-4 h-4 mr-2" />
-                                찬성 ({proposal.myTokens}표)
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
-                                onClick={() => handleVote(proposal.id, "no")}
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                반대 ({proposal.myTokens}표)
-                              </Button>
-                            </>
-                          ) : (
-                            <div className="w-full p-4 rounded-lg bg-primary/10 border border-primary text-center">
-                              <p className="font-semibold">
-                                {userVote === "yes" ? "찬성" : "반대"} 투표 완료
-                              </p>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {proposal.myTokens}표로 투표하셨습니다
-                              </p>
-                            </div>
-                          )}
-                        </CardFooter>
-                      )}
-
-                      {proposal.status === "passed" && (
-                        <CardFooter>
-                          <div className="w-full p-4 rounded-lg bg-success/10 border border-success text-center">
-                            <p className="font-semibold text-success">
-                              투표가 가결되었습니다
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              제안이 실행될 예정입니다
-                            </p>
-                          </div>
-                        </CardFooter>
-                      )}
                     </Card>
-                  );
-                })
-              ) : (
-                <Card className="card-gradient">
-                  <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">
-                      이 부동산에 진행 중인 투표가 없습니다
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+
+                    {/* Voting Proposals for This Property */}
+                    {isPropertySelected && (
+                      <div className="space-y-4 pl-4 border-l-2 border-primary/30">
+                        {propertyProposals.length > 0 ? (
+                          propertyProposals.map((proposal, proposalIndex) => {
+                            const votePercentage = getVotePercentage(
+                              proposal.votesFor,
+                              proposal.totalVotes
+                            );
+                            const progressPercentage = getProgressPercentage(
+                              proposal.totalVotes,
+                              proposal.requiredVotes
+                            );
+                            const userVote = votes[proposal.id];
+
+                            return (
+                              <Card
+                                key={proposal.id}
+                                className="card-gradient hover-lift animate-fade-in"
+                                style={{
+                                  animationDelay: `${proposalIndex * 100}ms`,
+                                }}
+                              >
+                                <CardHeader>
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-3 mb-2">
+                                        <Badge
+                                          className={
+                                            proposal.status === "active"
+                                              ? "bg-primary"
+                                              : "bg-success"
+                                          }
+                                        >
+                                          {proposal.status === "active"
+                                            ? "투표 진행중"
+                                            : "가결"}
+                                        </Badge>
+                                        <span className="text-sm text-muted-foreground flex items-center">
+                                          <Clock className="w-4 h-4 mr-1" />
+                                          {proposal.endDate}까지
+                                        </span>
+                                      </div>
+                                      <CardTitle className="text-2xl mb-2">
+                                        {proposal.title}
+                                      </CardTitle>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+
+                                <CardContent className="space-y-6">
+                                  {/* Description */}
+                                  <p className="text-muted-foreground leading-relaxed">
+                                    {proposal.description}
+                                  </p>
+
+                                  {/* Vote Stats */}
+                                  <div className="space-y-4">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-muted-foreground">
+                                        찬성률
+                                      </span>
+                                      <span className="font-semibold">
+                                        {votePercentage.toFixed(1)}%
+                                      </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between text-sm">
+                                        <span className="text-success flex items-center">
+                                          <CheckCircle2 className="w-4 h-4 mr-1" />
+                                          찬성{" "}
+                                          {proposal.votesFor.toLocaleString()}
+                                          표
+                                        </span>
+                                        <span className="text-destructive flex items-center">
+                                          <XCircle className="w-4 h-4 mr-1" />
+                                          반대{" "}
+                                          {proposal.votesAgainst.toLocaleString()}
+                                          표
+                                        </span>
+                                      </div>
+                                      <Progress
+                                        value={votePercentage}
+                                        className="h-3"
+                                      />
+                                    </div>
+
+                                    <div className="pt-4 border-t border-border">
+                                      <div className="flex justify-between text-sm mb-2">
+                                        <span className="text-muted-foreground">
+                                          투표 참여율
+                                        </span>
+                                        <span className="font-semibold">
+                                          {proposal.totalVotes.toLocaleString()}{" "}
+                                          / {proposal.requiredVotes.toLocaleString()}
+                                          표
+                                        </span>
+                                      </div>
+                                      <Progress
+                                        value={progressPercentage}
+                                        className="h-2"
+                                      />
+                                    </div>
+                                  </div>
+                                </CardContent>
+
+                                {proposal.status === "active" &&
+                                  proposal.myTokens > 0 && (
+                                    <CardFooter className="flex gap-3">
+                                      {!userVote ? (
+                                        <>
+                                          <Button
+                                            className="flex-1 bg-success hover:bg-success/90"
+                                            onClick={() =>
+                                              handleVote(proposal.id, "yes")
+                                            }
+                                          >
+                                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                                            찬성 ({proposal.myTokens}표)
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                                            onClick={() =>
+                                              handleVote(proposal.id, "no")
+                                            }
+                                          >
+                                            <XCircle className="w-4 h-4 mr-2" />
+                                            반대 ({proposal.myTokens}표)
+                                          </Button>
+                                        </>
+                                      ) : (
+                                        <div className="w-full p-4 rounded-lg bg-primary/10 border border-primary text-center">
+                                          <p className="font-semibold">
+                                            {userVote === "yes"
+                                              ? "찬성"
+                                              : "반대"}{" "}
+                                            투표 완료
+                                          </p>
+                                          <p className="text-sm text-muted-foreground mt-1">
+                                            {proposal.myTokens}표로 투표하셨습니다
+                                          </p>
+                                        </div>
+                                      )}
+                                    </CardFooter>
+                                  )}
+
+                                {proposal.status === "passed" && (
+                                  <CardFooter>
+                                    <div className="w-full p-4 rounded-lg bg-success/10 border border-success text-center">
+                                      <p className="font-semibold text-success">
+                                        투표가 가결되었습니다
+                                      </p>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        제안이 실행될 예정입니다
+                                      </p>
+                                    </div>
+                                  </CardFooter>
+                                )}
+                              </Card>
+                            );
+                          })
+                        ) : (
+                          <Card className="card-gradient">
+                            <CardContent className="py-8 text-center">
+                              <p className="text-muted-foreground">
+                                이 부동산에 진행 중인 투표가 없습니다
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Create Proposal CTA */}
