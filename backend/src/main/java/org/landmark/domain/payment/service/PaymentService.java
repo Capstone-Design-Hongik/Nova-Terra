@@ -2,6 +2,9 @@ package org.landmark.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.landmark.domain.blockchain.client.BlockchainClient;
+import org.landmark.domain.blockchain.dto.TransferTokenRequest;
+import org.landmark.domain.blockchain.dto.TransferTokenResponse;
 import org.landmark.domain.investment.domain.Investment;
 import org.landmark.domain.investment.repository.InvestmentRepository;
 import org.landmark.domain.payment.client.TossPaymentsClientInterface;
@@ -34,6 +37,7 @@ public class PaymentService {
     private final PropertyRepository propertyRepository;
     private final InvestmentRepository investmentRepository;
     private final TossPaymentsClientInterface tossPaymentsClient;
+    private final BlockchainClient blockchainClient;
 
     /* 가상계좌 발급 요청 */
     @Transactional
@@ -138,12 +142,18 @@ public class PaymentService {
 
         investmentRepository.save(investment);
 
-        // TODO: 5. 블록체인 서버로 토큰 전송 요청
-        // String txHash = blockchainClient.transferToken(...)
-        // investment.updateTransferTxHash(txHash);
+        // 블록체인 서버로 토큰 전송 요청
+        TransferTokenRequest transferRequest = new TransferTokenRequest(
+                payment.getPropertyId(),
+                payment.getUserId(),
+                payment.getTokenAmount()
+        );
 
-        log.info("입금 완료 처리 성공 - paymentId: {}, investmentId: {}",
-                payment.getId(), investment.getId());
+        TransferTokenResponse transferResponse = blockchainClient.transferToken(transferRequest);
+        investment.updateTransferTxHash(transferResponse.txHash());
+
+        log.info("입금 완료 처리 성공 - paymentId: {}, investmentId: {}, txHash: {}",
+                payment.getId(), investment.getId(), transferResponse.txHash());
     }
 
     /* 주문 ID 생성 */

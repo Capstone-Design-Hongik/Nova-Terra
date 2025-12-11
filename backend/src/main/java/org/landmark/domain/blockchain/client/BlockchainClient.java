@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.landmark.domain.blockchain.dto.MintRequest;
 import org.landmark.domain.blockchain.dto.MintResponse;
+import org.landmark.domain.blockchain.dto.TransferTokenRequest;
+import org.landmark.domain.blockchain.dto.TransferTokenResponse;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
 import org.springframework.stereotype.Component;
@@ -41,6 +43,39 @@ public class BlockchainClient {
             }
 
             log.info("토큰 발행 성공 - txHash: {}", response.txHash());
+            return response;
+
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("블록체인 서버 통신 중 예외 발생", e);
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_SERVER_ERROR);
+        }
+    }
+
+    /* 토큰 전송 */
+    public TransferTokenResponse transferToken(TransferTokenRequest request) {
+        log.info("블록체인 서버로 토큰 전송 요청 - propertyId: {}, toAddress: {}, tokenAmount: {}",
+                request.propertyId(), request.toAddress(), request.tokenAmount());
+
+        try {
+            TransferTokenResponse response = blockchainRestClient.post()
+                    .uri("/api/tokens/transfer")
+                    .body(request)
+                    .retrieve()
+                    .body(TransferTokenResponse.class);
+
+            if (response == null) {
+                log.error("블록체인 서버로부터 응답이 없습니다.");
+                throw new BusinessException(ErrorCode.BLOCKCHAIN_SERVER_ERROR);
+            }
+
+            if (!response.success()) {
+                log.error("토큰 전송 실패 - message: {}", response.message());
+                throw new BusinessException(ErrorCode.BLOCKCHAIN_SERVER_ERROR);
+            }
+
+            log.info("토큰 전송 성공 - txHash: {}", response.txHash());
             return response;
 
         } catch (BusinessException e) {
