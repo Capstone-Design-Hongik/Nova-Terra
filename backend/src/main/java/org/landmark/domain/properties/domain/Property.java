@@ -1,4 +1,4 @@
-package org.landmark.properties.domain;
+package org.landmark.domain.properties.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "Properties")
@@ -88,6 +87,10 @@ public class Property {
     @Column(name = "fee_rate")
     private BigDecimal feeRate;
 
+    /* 토큰 발행 트랜잭션 해시 (블록체인 민팅 후 저장) */
+    @Column(name = "mint_tx_hash", length = 66)
+    private String mintTxHash;
+
     /* 부동산 상품의 현재 상태 (청약중, 운영중, 비활성 등) */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -143,5 +146,16 @@ public class Property {
         if (this.status == PropertyStatus.FUNDING) {
             this.status = PropertyStatus.ACTIVE;
         }
+    }
+
+    /* 토큰 발행 완료 후 트랜잭션 해시 저장 */
+    public void updateMintTxHash(String txHash) {
+        this.mintTxHash = txHash;
+    }
+
+    /* 가치 평가 및 토큰 수량 업데이트 */
+    public void updateValuationAndTokens(BigDecimal valuationPrice, Long totalSupply) {
+        this.totalValuation = valuationPrice;
+        this.totalTokens = totalSupply;
     }
 }
