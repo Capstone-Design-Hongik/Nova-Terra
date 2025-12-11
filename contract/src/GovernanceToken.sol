@@ -12,7 +12,7 @@ contract GovernanceToken is ERC20, ERC20Permit, ERC20Votes, Ownable {
 
     constructor(address _stoTokenAddress)
         ERC20("GovernanceToken", "GOV")
-        ERC20Permit("GovernanceToken")
+        ERC20Permit("GovernanceToken") //approve+transfer 한번에 하는거
         Ownable(msg.sender)  // Ownable 생성자에 초기 소유자 전달
     {
         stoToken = IERC20(_stoTokenAddress);
