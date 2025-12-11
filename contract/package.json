@@ -1,5 +1,12 @@
 {
+  "name": "giwa-test",
+  "type": "module",
+  "scripts": {
+    "query": "npx tsx query.ts",
+    "query2": "npx tsx query2.ts"
+  },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.4.0"
+    "@openzeppelin/contracts": "^5.4.0",
+    "viem": "^2.41.2"
   }
 }
