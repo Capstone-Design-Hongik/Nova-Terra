@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/governance")
+@RequestMapping("/api/v1/governance")
 @RequiredArgsConstructor
 public class GovernanceController {
   private final GovernanceService governanceService;

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/admin/properties")
+@RequestMapping("/api/v1/admin/properties")
 @RequiredArgsConstructor
 public class PropertyAdminController {
   private final PropertyService propertyService;
