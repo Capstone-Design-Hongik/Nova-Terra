@@ -1,4 +1,4 @@
-package org.landmark.governance.domain;
+package org.landmark.domain.governance.domain;
 
 public enum ProposalStatus {
     PENDING,  // 유예 기간 (취소 가능)

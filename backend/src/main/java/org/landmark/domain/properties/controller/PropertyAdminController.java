@@ -1,10 +1,10 @@
-package org.landmark.properties.controller;
+package org.landmark.domain.properties.controller;
 
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.landmark.global.dto.ApiResponse;
-import org.landmark.properties.dto.PropertyCreateRequest;
-import org.landmark.properties.service.PropertyService;
+import org.landmark.domain.properties.dto.PropertyCreateRequest;
+import org.landmark.domain.properties.service.PropertyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

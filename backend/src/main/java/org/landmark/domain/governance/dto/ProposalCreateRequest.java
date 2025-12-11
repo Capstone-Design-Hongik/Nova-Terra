@@ -1,4 +1,4 @@
-package org.landmark.governance.dto;
+package org.landmark.domain.governance.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -7,10 +7,10 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.landmark.governance.domain.Proposal;
-import org.landmark.governance.domain.VoteType;
-import org.landmark.properties.domain.Property;
-import org.landmark.user.domain.User;
+import org.landmark.domain.governance.domain.Proposal;
+import org.landmark.domain.governance.domain.VoteType;
+import org.landmark.domain.properties.domain.Property;
+import org.landmark.domain.user.domain.User;
 
 
 public record ProposalCreateRequest(

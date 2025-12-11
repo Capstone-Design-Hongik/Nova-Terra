@@ -1,4 +1,4 @@
-package org.landmark.properties.domain;
+package org.landmark.domain.properties.domain;
 
 public enum PropertyStatus {
     FUNDING,    // 청약 중

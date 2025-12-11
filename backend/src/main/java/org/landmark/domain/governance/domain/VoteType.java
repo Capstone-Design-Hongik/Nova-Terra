@@ -1,4 +1,4 @@
-package org.landmark.governance.domain;
+package org.landmark.domain.governance.domain;
 
 public enum VoteType {
   FOR,      // 찬성

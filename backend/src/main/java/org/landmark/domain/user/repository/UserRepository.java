@@ -1,6 +1,6 @@
-package org.landmark.user.repository;
+package org.landmark.domain.user.repository;
 
-import org.landmark.user.domain.User;
+import org.landmark.domain.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

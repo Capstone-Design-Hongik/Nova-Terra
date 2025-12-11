@@ -1,6 +1,6 @@
-package org.landmark.properties.service;
+package org.landmark.domain.properties.service;
 
-import org.landmark.properties.dto.PropertyCreateRequest;
+import org.landmark.domain.properties.dto.PropertyCreateRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface PropertyService {

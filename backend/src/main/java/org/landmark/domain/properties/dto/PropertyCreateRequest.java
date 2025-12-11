@@ -1,8 +1,8 @@
-package org.landmark.properties.dto;
+package org.landmark.domain.properties.dto;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import org.landmark.properties.domain.Property;
+import org.landmark.domain.properties.domain.Property;
 
 public record PropertyCreateRequest(
     @NotNull String stoTokenAddress,

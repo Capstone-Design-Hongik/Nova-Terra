@@ -1,4 +1,4 @@
-package org.landmark.user.domain;
+package org.landmark.domain.user.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

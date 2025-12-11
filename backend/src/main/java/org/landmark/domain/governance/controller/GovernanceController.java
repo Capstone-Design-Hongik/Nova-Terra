@@ -1,14 +1,13 @@
-package org.landmark.governance.controller;
+package org.landmark.domain.governance.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.landmark.global.dto.ApiResponse;
-import org.landmark.governance.domain.Proposal;
-import org.landmark.governance.dto.ProposalCreateRequest;
-import org.landmark.governance.dto.ProposalResponse;
-import org.landmark.governance.service.GovernanceService;
+import org.landmark.domain.governance.dto.ProposalCreateRequest;
+import org.landmark.domain.governance.dto.ProposalResponse;
+import org.landmark.domain.governance.service.GovernanceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

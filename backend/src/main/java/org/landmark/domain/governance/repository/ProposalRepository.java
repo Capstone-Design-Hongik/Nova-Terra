@@ -1,7 +1,7 @@
-package org.landmark.governance.repository;
+package org.landmark.domain.governance.repository;
 
-import org.landmark.governance.domain.Proposal;
-import org.landmark.governance.domain.ProposalStatus;
+import org.landmark.domain.governance.domain.Proposal;
+import org.landmark.domain.governance.domain.ProposalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

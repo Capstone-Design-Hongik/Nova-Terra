@@ -1,8 +1,8 @@
-package org.landmark.governance.dto;
+package org.landmark.domain.governance.dto;
 
 import java.util.List;
-import org.landmark.governance.domain.Proposal;
-import org.landmark.governance.domain.ProposalStatus;
+import org.landmark.domain.governance.domain.Proposal;
+import org.landmark.domain.governance.domain.ProposalStatus;
 
 public record ProposalResponse(
     String id,

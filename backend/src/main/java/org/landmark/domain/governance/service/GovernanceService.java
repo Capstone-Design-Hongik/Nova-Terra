@@ -1,8 +1,8 @@
-package org.landmark.governance.service;
+package org.landmark.domain.governance.service;
 
 import java.util.List;
-import org.landmark.governance.dto.ProposalCreateRequest;
-import org.landmark.governance.dto.ProposalResponse;
+import org.landmark.domain.governance.dto.ProposalCreateRequest;
+import org.landmark.domain.governance.dto.ProposalResponse;
 
 public interface GovernanceService {
   List<ProposalResponse> findAllProposals(String propertyId);

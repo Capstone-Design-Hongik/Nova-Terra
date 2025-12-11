@@ -1,7 +1,7 @@
-package org.landmark.properties.repository;
+package org.landmark.domain.properties.repository;
 
-import org.landmark.properties.domain.Property;
-import org.landmark.properties.domain.PropertyStatus;
+import org.landmark.domain.properties.domain.Property;
+import org.landmark.domain.properties.domain.PropertyStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

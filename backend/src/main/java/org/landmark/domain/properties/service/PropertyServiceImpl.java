@@ -1,10 +1,10 @@
-package org.landmark.properties.service;
+package org.landmark.domain.properties.service;
 
 import lombok.RequiredArgsConstructor;
 import org.landmark.global.service.S3Service;
-import org.landmark.properties.domain.Property;
-import org.landmark.properties.dto.PropertyCreateRequest;
-import org.landmark.properties.repository.PropertyRepository;
+import org.landmark.domain.properties.domain.Property;
+import org.landmark.domain.properties.dto.PropertyCreateRequest;
+import org.landmark.domain.properties.repository.PropertyRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;

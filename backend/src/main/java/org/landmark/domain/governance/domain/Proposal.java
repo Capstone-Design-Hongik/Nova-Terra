@@ -1,4 +1,4 @@
-package org.landmark.governance.domain;
+package org.landmark.domain.governance.domain;
 
 import jakarta.persistence.*;
 import java.math.BigInteger;
@@ -8,10 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.landmark.properties.domain.Property;
-import org.landmark.user.domain.User;
+import org.landmark.domain.properties.domain.Property;
+import org.landmark.domain.user.domain.User;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
