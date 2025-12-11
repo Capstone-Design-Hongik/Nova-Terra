@@ -1,9 +1,5 @@
 package org.landmark.global.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.landmark.global.exception.BusinessException;
@@ -14,6 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -64,7 +65,7 @@ public class S3Service {
       throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-    // URL 생성: https://{bucket}.s3.{region}.amazonaws.com/{key}
+    // S3 URL 생성: https://{bucket}.s3.{region}.amazonaws.com/{key}
     return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, fileName);
   }
 

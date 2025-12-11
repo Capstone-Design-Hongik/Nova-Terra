@@ -23,8 +23,13 @@ public enum ErrorCode {
   PROPERTY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 부동산 상품입니다."),
   PROPOSAL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 제안입니다."),
 
+  // 422 Unprocessable Entity
+  ALREADY_MINTED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 토큰이 발행된 부동산입니다."),
+  VALUATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "부동산 가치 평가에 실패했습니다."),
+
   // 500 Internal Server Error
-  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
+  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+  BLOCKCHAIN_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 서버와의 통신 중 오류가 발생했습니다.");
 
   private final HttpStatus status;
   private final String message;
