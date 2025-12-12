@@ -89,19 +89,27 @@ public class RentalIncomeService {
 
     /* 임대 수익 입금 완료 처리 (Webhook에서 호출) */
     @Transactional
-    public void completeRentalIncome(String orderId, String paymentKey, Long amount) {
-        log.info("임대 수익 입금 완료 처리 시작 - orderId: {}, amount: {}", orderId, amount);
+    public void completeRentalIncome(String accountNumberOrOrderId, String paymentKey, Long amount) {
+        log.info("임대 수익 입금 완료 처리 시작 - accountNumberOrOrderId: {}, amount: {}", accountNumberOrOrderId, amount);
 
-        // PropertyVirtualAccount 조회
-        PropertyVirtualAccount virtualAccount = propertyVirtualAccountRepository.findByTossOrderId(orderId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND));
+        // PropertyVirtualAccount 조회 (가상계좌 번호 또는 tossOrderId로)
+        PropertyVirtualAccount virtualAccount = propertyVirtualAccountRepository
+                .findByVirtualAccountNumber(accountNumberOrOrderId)
+                .or(() -> propertyVirtualAccountRepository.findByTossOrderId(accountNumberOrOrderId))
+                .orElseThrow(() -> {
+                    log.error("가상계좌를 찾을 수 없습니다 - accountNumberOrOrderId: {}", accountNumberOrOrderId);
+                    return new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND);
+                });
+
+        log.info("가상계좌 조회 성공 - propertyId: {}, accountNumber: {}",
+                virtualAccount.getPropertyId(), virtualAccount.getVirtualAccountNumber());
 
         // RentalIncome 생성
         RentalIncome rentalIncome = RentalIncome.builder()
                 .propertyId(virtualAccount.getPropertyId())
                 .amount(amount)
                 .tenantName(null)
-                .tossOrderId(orderId)
+                .tossOrderId(virtualAccount.getTossOrderId())
                 .build();
 
         rentalIncome.completeDeposit(paymentKey);

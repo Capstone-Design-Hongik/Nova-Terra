@@ -26,19 +26,18 @@ public class RentalWebhookController {
 
         // 입금 완료 이벤트만 처리
         if ("Payment.Confirm".equals(request.eventType()) && "DONE".equals(request.data().status())) {
-            String orderId = request.data().orderId();
+            String accountNumberOrOrderId = request.data().orderId();
 
-            // RENTAL_ 로 시작하는 orderId만 처리 (임대 수익)
-            if (orderId.startsWith("RENTAL_")) {
+            try {
                 rentalIncomeService.completeRentalIncome(
-                        orderId,
+                        accountNumberOrOrderId,
                         request.data().paymentKey(),
                         request.data().totalAmount()
                 );
                 log.info("임대 수익 입금 완료 처리 성공 - orderId: {}, amount: {}",
-                        orderId, request.data().totalAmount());
-            } else {
-                log.warn("임대 수익용 orderId가 아닙니다 - orderId: {}", orderId);
+                        accountNumberOrOrderId, request.data().totalAmount());
+            } catch (Exception e) {
+                log.error("임대 수익 입금 처리 실패 - orderId: {}", accountNumberOrOrderId, e);
             }
         } else {
             log.info("처리하지 않는 이벤트 - eventType: {}, status: {}",
