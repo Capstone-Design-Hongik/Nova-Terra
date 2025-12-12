@@ -138,9 +138,7 @@ public class RentalIncomeService {
     /* Property별 임대 수익 내역 조회 */
     @Transactional(readOnly = true)
     public List<RentalIncomeResponse> getRentalIncomesByProperty(String propertyId) {
-        // TODO: Property별 조회 쿼리 메서드 추가 필요
-        return rentalIncomeRepository.findAll().stream()
-                .filter(rentalIncome -> rentalIncome.getPropertyId().equals(propertyId))
+        return rentalIncomeRepository.findByPropertyIdOrderByDepositDateDesc(propertyId).stream()
                 .map(this::toResponse)
                 .toList();
     }
