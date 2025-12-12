@@ -22,7 +22,7 @@ public class RentalIncomeController {
     private final RentalIncomeService rentalIncomeService;
 
     @Operation(summary = "임대 수익 가상계좌 발급", description = "Property별 임대 수익 전용 고정 가상계좌를 발급합니다.")
-    @PostMapping("/properties/{propertyId}/virtual-account")
+    @PostMapping("/properties/{propertyId}/virtual-accounts")
     public ApiResponse<PropertyVirtualAccountResponse> issueVirtualAccount(@PathVariable String propertyId) {
         log.info("임대 수익 가상계좌 발급 요청 - propertyId: {}", propertyId);
         PropertyVirtualAccountResponse response = rentalIncomeService.issueVirtualAccountForProperty(propertyId);
@@ -30,7 +30,7 @@ public class RentalIncomeController {
     }
 
     @Operation(summary = "임대 수익 가상계좌 조회", description = "Property별 임대 수익 가상계좌 정보를 조회합니다.")
-    @GetMapping("/properties/{propertyId}/virtual-account")
+    @GetMapping("/properties/{propertyId}/virtual-accounts")
     public ApiResponse<PropertyVirtualAccountResponse> getVirtualAccount(@PathVariable String propertyId) {
         log.info("임대 수익 가상계좌 조회 요청 - propertyId: {}", propertyId);
         PropertyVirtualAccountResponse response = rentalIncomeService.getVirtualAccountByProperty(propertyId);
@@ -38,7 +38,7 @@ public class RentalIncomeController {
     }
 
     @Operation(summary = "임대 수익 내역 조회", description = "Property별 임대 수익 입금 내역을 조회합니다.")
-    @GetMapping("/properties/{propertyId}/incomes")
+    @GetMapping("/properties/{propertyId}/rental-incomes")
     public ApiResponse<List<RentalIncomeResponse>> getRentalIncomes(@PathVariable String propertyId) {
         log.info("임대 수익 내역 조회 요청 - propertyId: {}", propertyId);
         List<RentalIncomeResponse> responses = rentalIncomeService.getRentalIncomesByProperty(propertyId);
