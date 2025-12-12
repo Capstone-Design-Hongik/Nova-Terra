@@ -11,5 +11,4 @@ public interface PropertyVirtualAccountRepository extends JpaRepository<Property
     Optional<PropertyVirtualAccount> findByPropertyId(String propertyId);
     Optional<PropertyVirtualAccount> findByTossOrderId(String tossOrderId);
     Optional<PropertyVirtualAccount> findByVirtualAccountNumber(String virtualAccountNumber);
-    boolean existsByPropertyId(String propertyId);
 }

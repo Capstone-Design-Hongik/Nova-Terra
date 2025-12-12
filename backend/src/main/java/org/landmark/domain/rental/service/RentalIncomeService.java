@@ -41,15 +41,17 @@ public class RentalIncomeService {
     public PropertyVirtualAccountResponse issueVirtualAccountForProperty(String propertyId) {
         log.info("Property별 임대 수익 가상계좌 발급 시작 - propertyId: {}", propertyId);
 
-        // 이미 발급된 가상계좌가 있는지 확인
-        if (propertyVirtualAccountRepository.existsByPropertyId(propertyId)) {
-            log.warn("이미 발급된 가상계좌가 있습니다 - propertyId: {}", propertyId);
-            throw new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS);
-        }
-
         // Property 존재 여부 확인
         var property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
+
+        // 이미 발급된 가상계좌가 있는지 확인 (existsBy 대신 findBy 사용)
+        propertyVirtualAccountRepository.findByPropertyId(propertyId)
+                .ifPresent(existing -> {
+                    log.warn("이미 발급된 가상계좌가 있습니다 - propertyId: {}, accountNumber: {}",
+                            propertyId, existing.getVirtualAccountNumber());
+                    throw new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS);
+                });
 
         // 토스페이먼츠 가상계좌 발급 요청
         String orderId = generateRentalOrderId(propertyId);
