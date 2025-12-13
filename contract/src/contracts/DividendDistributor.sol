@@ -33,7 +33,7 @@ contract DividendDistributor {
         uint256 dividendPerToken;   // 토큰당 배당금
         uint256 claimedAmount;      // 청구된 금액 (청구될때마다 ++)
         uint256 timestamp;          // 배당 생성 시간
-        bool active;                // 활성화 여부
+        bool active;                // 활성화 여부 (1년 뒤 미청구 회수 시 false)
     }
     
     // 배당 ID => 배당 정보
