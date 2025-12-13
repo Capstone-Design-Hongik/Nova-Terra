@@ -75,7 +75,22 @@ contract PropertyToken is IPropertyToken {
     // 부동산 정보
     bytes32 public propertyId;
     string public propertyURI;
+
+    // ============================================
+    //              SNAPSHOT STATE
+    // ============================================
     
+    uint256 public currentSnapshotId;
+    
+    // 스냅샷 ID => 총 발행량
+    mapping(uint256 => uint256) private _snapshotTotalSupply;
+    
+    // 스냅샷 ID => 주소 => 잔액
+    mapping(uint256 => mapping(address => uint256)) private _snapshotBalances;
+    
+    // 스냅샷 ID => 주소 => 기록 여부
+    mapping(uint256 => mapping(address => bool)) private _snapshotted;
+
     // ============================================
     //                  EVENTS
     // ============================================
@@ -90,6 +105,7 @@ contract PropertyToken is IPropertyToken {
     event TokensPurchased(address indexed buyer, uint256 amount, uint256 cost);
     event Withdrawn(address indexed to, uint256 amount);
     event TokenPriceUpdated(uint256 oldPrice, uint256 newPrice);
+    event SnapshotCreated(uint256 indexed snapshotId, uint256 totalSupply);
     
     // ============================================
     //                MODIFIERS
@@ -136,6 +152,61 @@ contract PropertyToken is IPropertyToken {
         paymentToken = IERC20(_paymentToken);
         tokenPrice = _tokenPrice;
     }
+
+    // ============================================
+    //              SNAPSHOT FUNCTIONS
+    // ============================================
+    
+    /**
+     * @dev 스냅샷 생성 (배당 기준일)
+     */
+    function snapshot() external onlyOwner returns (uint256 snapshotId) {
+        currentSnapshotId++;
+        snapshotId = currentSnapshotId;
+        
+        _snapshotTotalSupply[snapshotId] = totalSupply;
+        
+        emit SnapshotCreated(snapshotId, totalSupply);
+    }
+
+    /**
+     * @dev 스냅샷 시점 잔액 조회
+     */
+    function balanceOfAt(address account, uint256 snapshotId) 
+        external view returns (uint256) 
+    {
+        require(snapshotId > 0 && snapshotId <= currentSnapshotId, "PropertyToken: invalid snapshot");
+        
+        // 스냅샷에 기록됐으면 그 값 반환
+        if (_snapshotted[snapshotId][account]) {
+            return _snapshotBalances[snapshotId][account];
+        }
+        
+        // 기록 안 됐으면 현재 잔액 반환
+        // (스냅샷 이후 변동 없었다는 뜻)
+        return balanceOf[account];
+    }
+
+    /**
+     * @dev 스냅샷 시점 총 발행량 조회
+     */
+    function totalSupplyAt(uint256 snapshotId) external view returns (uint256) {
+        require(snapshotId > 0 && snapshotId <= currentSnapshotId, "PropertyToken: invalid snapshot");
+        return _snapshotTotalSupply[snapshotId];
+    }
+    
+    /**
+     * @dev 스냅샷 업데이트 (내부 함수)
+     *      전송 전에 호출해서 현재 잔액 기록
+     */
+    function _updateSnapshot(address account) private {
+        if (currentSnapshotId > 0 && !_snapshotted[currentSnapshotId][account]) {
+            _snapshotBalances[currentSnapshotId][account] = balanceOf[account];
+            _snapshotted[currentSnapshotId][account] = true;
+        }
+    }
+
+
     
     // ============================================
     //              TOKEN OPERATIONS
@@ -227,6 +298,9 @@ contract PropertyToken is IPropertyToken {
             signature
         );
         
+        // 스냅샷 업데이트
+        _updateSnapshot(msg.sender);
+
         // 발행
         totalSupply += amount;
         balanceOf[msg.sender] += amount;
@@ -265,6 +339,9 @@ contract PropertyToken is IPropertyToken {
             "PropertyToken: payment failed"
         );
         
+        // 스냅샷 업데이트
+        _updateSnapshot(msg.sender);
+
         // 발행
         totalSupply += amount;
         balanceOf[msg.sender] += amount;
@@ -296,6 +373,9 @@ contract PropertyToken is IPropertyToken {
             "PropertyToken: compliance failed"
         );
         
+        // 스냅샷 업데이트
+        _updateSnapshot(to);
+
         totalSupply += amount;
         balanceOf[to] += amount;
         
@@ -310,7 +390,10 @@ contract PropertyToken is IPropertyToken {
     function burn(address from, uint256 amount) external override onlyOwner whenNotPaused {
         require(from != address(0), "PropertyToken: burn from zero");
         require(balanceOf[from] >= amount, "PropertyToken: insufficient balance");
-        
+
+        // 스냅샷 업데이트
+        _updateSnapshot(from);
+
         balanceOf[from] -= amount;
         totalSupply -= amount;
         
@@ -365,6 +448,10 @@ contract PropertyToken is IPropertyToken {
             compliance.canTransfer(from, to, amount),
             "PropertyToken: compliance failed"
         );
+
+        // 스냅샷 업데이트 (전송 전!)
+        _updateSnapshot(from);
+        _updateSnapshot(to);
         
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
@@ -455,6 +542,10 @@ contract PropertyToken is IPropertyToken {
         external onlyOwner returns (bool) 
     {
         require(balanceOf[from] >= amount, "PropertyToken: insufficient balance");
+        
+        // 스냅샷 업데이트
+        _updateSnapshot(from);
+        _updateSnapshot(to);
         
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
