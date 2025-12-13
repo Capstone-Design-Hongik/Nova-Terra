@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./PropertyToken.sol";
+import "./interfaces/IInterfaces.sol";
 
 interface IERC20 {
-    function transfer(address to, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
 }
 
@@ -23,8 +23,8 @@ contract DividendDistributor {
     // ============================================
     
     address public owner;
-    PropertyToken public token;
-    IERC20 public paymentToken; //KRWT
+    IPropertyToken public token;  // 
+    IERC20 public paymentToken;   // KRWT
     
     // 배당 정보
     struct Dividend {
@@ -75,9 +75,9 @@ contract DividendDistributor {
     constructor(address _token, address _paymentToken) {
         require(_token != address(0), "DividendDistributor: zero token");
         require(_paymentToken != address(0), "DividendDistributor: zero payment token");
-        
+
         owner = msg.sender;
-        token = PropertyToken(_token);
+        token = IPropertyToken(_token); 
         paymentToken = IERC20(_paymentToken);
     }
     
