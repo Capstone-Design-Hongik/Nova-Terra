@@ -97,4 +97,11 @@ interface IPropertyToken {
     function unpause() external;
     function setIdentityRegistry(address registry) external;
     function setCompliance(address compliance) external;
+
+    // ERC20 표준 함수
+    function balanceOf(address account) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function maxSupply() external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
