@@ -104,4 +104,9 @@ interface IPropertyToken {
     function maxSupply() external view returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
+
+    // 스냅샷 함수 (배당 분배용)
+    function currentSnapshotId() external view returns (uint256);
+    function balanceOfAt(address account, uint256 snapshotId) external view returns (uint256);
+    function totalSupplyAt(uint256 snapshotId) external view returns (uint256);
 }
