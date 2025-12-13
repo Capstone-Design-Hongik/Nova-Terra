@@ -77,14 +77,14 @@ interface IModularCompliance {
     function destroyed(address from, uint256 amount) external;
     function getModules() external view returns (address[] memory);
 }
-/*
+
 interface IComplianceModule {
-    function canTransfer(address from, address to, uint256 amount) external view returns (bool);
-    function transferred(address from, address to, uint256 amount) external;
-    function created(address to, uint256 amount) external;
-    function destroyed(address from, uint256 amount) external;
+    function canTransfer(address from, address to, uint256 amount) external view returns (bool); //propertyToken 전송 가능여부 체크
+    function transferred(address from, address to, uint256 amount) external; //propertyToken 전송되엇을때 모듈에서 기록할 것들 구현
+    function created(address to, uint256 amount) external; //mint,buy 시 호출
+    function destroyed(address from, uint256 amount) external; // 
 }
- */
+
  
 // ============================================
 //              TOKEN INTERFACES
@@ -97,4 +97,11 @@ interface IPropertyToken {
     function unpause() external;
     function setIdentityRegistry(address registry) external;
     function setCompliance(address compliance) external;
+
+    // ERC20 표준 함수
+    function balanceOf(address account) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function maxSupply() external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
