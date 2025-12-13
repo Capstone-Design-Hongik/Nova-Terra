@@ -158,8 +158,23 @@ contract PropertyToken is IPropertyToken {
         initialized = true;
         
         if (ownerAmount > 0) {
+            //신원 검증
+            require(
+              identityRegistry.isVerified(propertyOwner),
+              "PropertyToken: owner not verified"
+            );
+
+            //컴플라이언스 체크
+            require(
+              compliance.canTransfer(address(0), propertyOwner, ownerAmount),
+              "PropertyToken: compliance failed"
+            );
+
             totalSupply = ownerAmount;
             balanceOf[propertyOwner] = ownerAmount;
+
+            compliance.created(propertyOwner, ownerAmount); 
+
             emit Transfer(address(0), propertyOwner, ownerAmount);
         }
         
