@@ -1,5 +1,6 @@
 package org.landmark.domain.properties.dto;
 
+import org.landmark.domain.properties.domain.BuildingType;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.domain.PropertyStatus;
 
@@ -11,7 +12,7 @@ public record PropertyResponse(
         String description,
         String address,
         String coverImageUrl,
-        String buildingType,
+        BuildingType buildingType,
         BigDecimal exclusiveAreaSqm,
         Integer totalFloors,
         String floor,

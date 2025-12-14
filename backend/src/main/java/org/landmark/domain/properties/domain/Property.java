@@ -35,8 +35,9 @@ public class Property {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "building_type")
-    private String buildingType;
+    private BuildingType buildingType;
 
     @Column(name = "exclusive_area_sqm")
     private BigDecimal exclusiveAreaSqm;
@@ -98,7 +99,7 @@ public class Property {
 
     @Builder
     public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress, String name, String description, String address, String coverImageUrl,
-                    String buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
+                    BuildingType buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
                     String floor, Long useApprovalDate, Integer parkingSpaces,
                     String direction, Integer roomCount, Integer bathroomCount,
                     Long managementFee, BigDecimal occupancyRate, String majorTenants,
