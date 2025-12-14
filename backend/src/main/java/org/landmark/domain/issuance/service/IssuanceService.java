@@ -2,9 +2,6 @@ package org.landmark.domain.issuance.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.blockchain.client.BlockchainClient;
-import org.landmark.domain.blockchain.dto.MintRequest;
-import org.landmark.domain.blockchain.dto.MintResponse;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
 import org.landmark.domain.properties.domain.Property;
@@ -23,7 +20,8 @@ public class IssuanceService {
 
     private final PropertyRepository propertyRepository;
     private final ValuationStrategy valuationStrategy;
-    private final BlockchainClient blockchainClient;
+    // TODO: BlockchainWalletService로 교체 필요 (블록체인 팀 스펙 확정 후)
+    // private final BlockchainWalletService blockchainWalletService;
 
     /*  부동산 토큰 발행 프로세스 */
     @Transactional
@@ -48,14 +46,15 @@ public class IssuanceService {
 
         property.updateValuationAndTokens(valuationPrice, totalSupply);
 
-        // 블록체인 서버로 발행 요청
-        MintRequest mintRequest = new MintRequest(propertyId, totalSupply, valuationPrice);
-        MintResponse mintResponse = blockchainClient.mintToken(mintRequest);
+        // TODO: 블록체인 팀과 토큰 발행 스펙 확정 후 구현
+        // 현재는 SecurityToken 컨트랙트에 민팅 기능이 없으므로 보류
+        // String txHash = blockchainWalletService.mintPropertyToken(propertyId, totalSupply);
+        // property.updateMintTxHash(txHash);
 
-        String txHash = mintResponse.txHash();
+        String txHash = "PENDING_BLOCKCHAIN_INTEGRATION";
         property.updateMintTxHash(txHash);
 
-        log.info("부동산 토큰 발행 완료 - propertyId: {}, txHash: {}", propertyId, txHash);
+        log.warn("블록체인 연동 대기 중 - propertyId: {}, totalSupply: {}", propertyId, totalSupply);
 
         return txHash;
     }

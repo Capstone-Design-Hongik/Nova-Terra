@@ -2,9 +2,6 @@ package org.landmark.domain.rental.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.blockchain.client.BlockchainClient;
-import org.landmark.domain.blockchain.dto.DistributeRentalIncomeRequest;
-import org.landmark.domain.blockchain.dto.DistributeRentalIncomeResponse;
 import org.landmark.global.toss.client.TossPaymentsClient;
 import org.landmark.global.toss.dto.TossVirtualAccountRequest;
 import org.landmark.global.toss.dto.TossVirtualAccountResponse;
@@ -34,7 +31,8 @@ public class RentalIncomeService {
     private final PropertyVirtualAccountRepository propertyVirtualAccountRepository;
     private final PropertyRepository propertyRepository;
     private final TossPaymentsClient tossPaymentsClient;
-    private final BlockchainClient blockchainClient;
+    // TODO: BlockchainWalletService로 교체 필요 (블록체인 팀 스펙 확정 후)
+    // private final BlockchainWalletService blockchainWalletService;
 
     /* Property별 임대 수익 전용 가상계좌 발급 */
     @Transactional
@@ -117,24 +115,26 @@ public class RentalIncomeService {
         rentalIncome.completeDeposit(paymentKey);
         rentalIncomeRepository.save(rentalIncome);
 
-        // 블록체인 서버로 KRWT 분배 요청
-        try {
-            DistributeRentalIncomeRequest distributeRequest = new DistributeRentalIncomeRequest(
-                    virtualAccount.getPropertyId(),
-                    rentalIncome.getKrwtAmount()
-            );
+        // TODO: 블록체인 팀과 배당 분배 스펙 확정 후 구현
+        // 현재는 SecurityToken 컨트랙트의 배당 분배 방식이 네이티브 코인 기반이므로
+        // KRWT 기반으로 변경되면 아래 로직으로 구현 예정:
+        // try {
+        //     String txHash = blockchainWalletService.sendKrwtToStoContract(
+        //         Long.parseLong(virtualAccount.getPropertyId()),
+        //         rentalIncome.getKrwtAmount()
+        //     );
+        //     rentalIncome.completeDistribution(txHash);
+        //     log.info("임대 수익 분배 완료 - rentalIncomeId: {}, txHash: {}", rentalIncome.getId(), txHash);
+        // } catch (Exception e) {
+        //     log.error("임대 수익 분배 실패 - rentalIncomeId: {}", rentalIncome.getId(), e);
+        //     rentalIncome.failDistribution();
+        //     throw e;
+        // }
 
-            DistributeRentalIncomeResponse distributeResponse = blockchainClient.distributeRentalIncome(distributeRequest);
-            rentalIncome.completeDistribution(distributeResponse.txHash());
-
-            log.info("임대 수익 분배 완료 - rentalIncomeId: {}, txHash: {}",
-                    rentalIncome.getId(), distributeResponse.txHash());
-
-        } catch (Exception e) {
-            log.error("임대 수익 분배 실패 - rentalIncomeId: {}", rentalIncome.getId(), e);
-            rentalIncome.failDistribution();
-            throw e;
-        }
+        // 임시: 블록체인 연동 전까지는 분배 완료 처리
+        rentalIncome.completeDistribution("PENDING_BLOCKCHAIN_INTEGRATION");
+        log.warn("블록체인 연동 대기 중 - rentalIncomeId: {}, krwtAmount: {}",
+                rentalIncome.getId(), rentalIncome.getKrwtAmount());
     }
 
     /* Property별 임대 수익 내역 조회 */
