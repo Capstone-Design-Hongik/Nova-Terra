@@ -1,4 +1,4 @@
-package org.landmark.domain.payment.dto.webhook;
+package org.landmark.global.toss.dto;
 
 public record TossWebhookRequest(
         String eventType,

@@ -1,10 +1,10 @@
 package org.landmark.domain.blockchain.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.landmark.domain.blockchain.dto.DistributeRentalIncomeRequest;
+import org.landmark.domain.blockchain.dto.DistributeRentalIncomeResponse;
 import org.landmark.domain.blockchain.dto.MintRequest;
 import org.landmark.domain.blockchain.dto.MintResponse;
-import org.landmark.domain.blockchain.dto.TransferTokenRequest;
-import org.landmark.domain.blockchain.dto.TransferTokenResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,26 +39,24 @@ public class MockBlockchainController {
         );
     }
 
-    @PostMapping("/api/tokens/transfer")
-    public TransferTokenResponse mockTransfer(@RequestBody TransferTokenRequest request) {
+    @PostMapping("/api/rental/distribute")
+    public DistributeRentalIncomeResponse mockDistributeRentalIncome(@RequestBody DistributeRentalIncomeRequest request) {
         log.info("===== Mock 블록체인 서버 =====");
-        log.info("토큰 전송 요청 수신:");
+        log.info("임대 수익 분배 요청 수신:");
         log.info("  - Property ID: {}", request.propertyId());
-        log.info("  - To Address: {}", request.toAddress());
-        log.info("  - Token Amount: {}", request.tokenAmount());
+        log.info("  - KRWT Amount: {}", request.krwtAmount());
 
         // 가짜 트랜잭션 해시 생성
         String mockTxHash = "0x" + UUID.randomUUID().toString().replace("-", "");
 
         log.info("Mock Transaction Hash 생성: {}", mockTxHash);
-        log.info("토큰 전송 완료: {} → {} ({} 토큰)",
-                request.propertyId(), request.toAddress(), request.tokenAmount());
+        log.info("KRWT 분배 완료: STO 컨트랙트로 {} KRWT 전송", request.krwtAmount());
         log.info("==============================");
 
-        return new TransferTokenResponse(
+        return new DistributeRentalIncomeResponse(
                 true,
                 mockTxHash,
-                "Mock: 토큰 전송이 성공적으로 완료되었습니다."
+                "Mock: 임대 수익 분배가 성공적으로 완료되었습니다."
         );
     }
 }

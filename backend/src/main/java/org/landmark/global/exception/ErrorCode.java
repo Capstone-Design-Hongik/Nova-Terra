@@ -27,14 +27,13 @@ public enum ErrorCode {
   ALREADY_MINTED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 토큰이 발행된 부동산입니다."),
   VALUATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "부동산 가치 평가에 실패했습니다."),
 
-  // 404 Not Found - Payment
-  PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
-  INVESTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 투자 기록입니다."),
+  // 404 Not Found - Rental Income
+  VIRTUAL_ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 가상계좌입니다."),
+  RENTAL_INCOME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 임대 수익 기록입니다."),
 
-  // 422 Unprocessable Entity - Payment
-  PAYMENT_ALREADY_COMPLETED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 완료된 결제입니다."),
-  PAYMENT_EXPIRED(HttpStatus.UNPROCESSABLE_ENTITY, "만료된 가상계좌입니다."),
-  INSUFFICIENT_TOKEN_SUPPLY(HttpStatus.UNPROCESSABLE_ENTITY, "부동산의 남은 토큰 수량이 부족합니다."),
+  // 422 Unprocessable Entity - Rental Income
+  VIRTUAL_ACCOUNT_ALREADY_EXISTS(HttpStatus.UNPROCESSABLE_ENTITY, "이미 발급된 가상계좌가 있습니다."),
+  RENTAL_INCOME_DISTRIBUTION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "임대 수익 분배에 실패했습니다."),
 
   // 500 Internal Server Error
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),

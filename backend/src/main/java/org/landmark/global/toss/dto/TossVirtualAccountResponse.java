@@ -1,4 +1,4 @@
-package org.landmark.domain.payment.dto.toss;
+package org.landmark.global.toss.dto;
 
 public record TossVirtualAccountResponse(
         String mId,

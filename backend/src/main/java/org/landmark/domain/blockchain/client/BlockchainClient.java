@@ -2,10 +2,10 @@ package org.landmark.domain.blockchain.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.landmark.domain.blockchain.dto.DistributeRentalIncomeRequest;
+import org.landmark.domain.blockchain.dto.DistributeRentalIncomeResponse;
 import org.landmark.domain.blockchain.dto.MintRequest;
 import org.landmark.domain.blockchain.dto.MintResponse;
-import org.landmark.domain.blockchain.dto.TransferTokenRequest;
-import org.landmark.domain.blockchain.dto.TransferTokenResponse;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
 import org.springframework.stereotype.Component;
@@ -53,17 +53,17 @@ public class BlockchainClient {
         }
     }
 
-    /* 토큰 전송 */
-    public TransferTokenResponse transferToken(TransferTokenRequest request) {
-        log.info("블록체인 서버로 토큰 전송 요청 - propertyId: {}, toAddress: {}, tokenAmount: {}",
-                request.propertyId(), request.toAddress(), request.tokenAmount());
+    /* 임대 수익 분배 - 백엔드 지갑에서 STO 컨트랙트로 KRWT 전송 */
+    public DistributeRentalIncomeResponse distributeRentalIncome(DistributeRentalIncomeRequest request) {
+        log.info("블록체인 서버로 임대 수익 분배 요청 - propertyId: {}, krwtAmount: {}",
+                request.propertyId(), request.krwtAmount());
 
         try {
-            TransferTokenResponse response = blockchainRestClient.post()
-                    .uri("/api/tokens/transfer")
+            DistributeRentalIncomeResponse response = blockchainRestClient.post()
+                    .uri("/api/rental/distribute")
                     .body(request)
                     .retrieve()
-                    .body(TransferTokenResponse.class);
+                    .body(DistributeRentalIncomeResponse.class);
 
             if (response == null) {
                 log.error("블록체인 서버로부터 응답이 없습니다.");
@@ -71,11 +71,11 @@ public class BlockchainClient {
             }
 
             if (!response.success()) {
-                log.error("토큰 전송 실패 - message: {}", response.message());
+                log.error("임대 수익 분배 실패 - message: {}", response.message());
                 throw new BusinessException(ErrorCode.BLOCKCHAIN_SERVER_ERROR);
             }
 
-            log.info("토큰 전송 성공 - txHash: {}", response.txHash());
+            log.info("임대 수익 분배 성공 - txHash: {}", response.txHash());
             return response;
 
         } catch (BusinessException e) {
@@ -85,4 +85,5 @@ public class BlockchainClient {
             throw new BusinessException(ErrorCode.BLOCKCHAIN_SERVER_ERROR);
         }
     }
+
 }

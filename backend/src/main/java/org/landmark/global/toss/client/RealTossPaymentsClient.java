@@ -1,11 +1,11 @@
-package org.landmark.domain.payment.client;
+package org.landmark.global.toss.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.payment.dto.toss.TossVirtualAccountRequest;
-import org.landmark.domain.payment.dto.toss.TossVirtualAccountResponse;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
+import org.landmark.global.toss.dto.TossVirtualAccountRequest;
+import org.landmark.global.toss.dto.TossVirtualAccountResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestClient;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "payment.mock.enabled", havingValue = "false", matchIfMissing = false)
-public class RealTossPaymentsClient implements TossPaymentsClientInterface {
+public class RealTossPaymentsClient implements TossPaymentsClient {
 
     private final RestClient tossPaymentsRestClient;
 

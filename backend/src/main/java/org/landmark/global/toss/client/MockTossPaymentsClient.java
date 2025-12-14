@@ -1,8 +1,8 @@
-package org.landmark.domain.payment.client;
+package org.landmark.global.toss.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.payment.dto.toss.TossVirtualAccountRequest;
-import org.landmark.domain.payment.dto.toss.TossVirtualAccountResponse;
+import org.landmark.global.toss.dto.TossVirtualAccountRequest;
+import org.landmark.global.toss.dto.TossVirtualAccountResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "payment.mock.enabled", havingValue = "true", matchIfMissing = false)
-public class MockTossPaymentsClient implements TossPaymentsClientInterface {
+public class MockTossPaymentsClient implements TossPaymentsClient {
 
     @Value("${payment.mock.account-number}")
     private String mockAccountNumber;
