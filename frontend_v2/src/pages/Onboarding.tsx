@@ -72,7 +72,7 @@ export default function Onboarding() {
 
       <button
         onClick={connectWallet}
-        className="cursor-pointer bg-[#1ABCF7] text-black font-semibold py-3 px-8 rounded-lg hover:bg-[#15a8dc] transition duration-200 flex items-center gap-3"
+        className="cursor-pointer bg-[#1ABCF7] text-black font-semibold rounded-lg hover:bg-[#15a8dc] transition duration-200 flex items-center gap-3 py-3 pr-5 pl-7"
       >
         <img src={walletIcon} alt="wallet" className="w-6 h-6" />
         지갑연결
