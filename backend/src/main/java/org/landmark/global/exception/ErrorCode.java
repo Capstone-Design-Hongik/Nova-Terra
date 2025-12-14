@@ -37,8 +37,24 @@ public enum ErrorCode {
 
   // 500 Internal Server Error
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+  PAYMENT_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 API 통신 중 오류가 발생했습니다."),
+
+  // Blockchain - Connection & Server
   BLOCKCHAIN_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 서버와의 통신 중 오류가 발생했습니다."),
-  PAYMENT_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 API 통신 중 오류가 발생했습니다.");
+  BLOCKCHAIN_NOT_INITIALIZED(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 연동이 초기화되지 않았습니다."),
+
+  // Blockchain - Transaction
+  BLOCKCHAIN_TRANSACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 트랜잭션 전송에 실패했습니다."),
+  BLOCKCHAIN_TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "트랜잭션을 찾을 수 없습니다."),
+  BLOCKCHAIN_TRANSACTION_RECEIPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "트랜잭션 영수증 조회에 실패했습니다."),
+
+  // Blockchain - Query & Interface
+  BLOCKCHAIN_BALANCE_QUERY_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 잔액 조회에 실패했습니다."),
+  BLOCKCHAIN_INTERFACE_NOT_READY(HttpStatus.UNPROCESSABLE_ENTITY, "블록체인 인터페이스가 아직 준비되지 않았습니다."),
+
+  // Blockchain - KRWT Transfer
+  INSUFFICIENT_KRWT_BALANCE(HttpStatus.UNPROCESSABLE_ENTITY, "백엔드 지갑의 KRWT 잔액이 부족합니다."),
+  BLOCKCHAIN_KRWT_TRANSFER_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "KRWT 토큰 전송에 실패했습니다.");
 
   private final HttpStatus status;
   private final String message;

@@ -13,25 +13,11 @@ import java.util.Base64;
 @Configuration
 public class RestClientConfig {
 
-    @Value("${blockchain.server.url}")
-    private String blockchainServerUrl;
-
     @Value("${toss.payments.url}")
     private String tossPaymentsUrl;
 
     @Value("${toss.payments.secret-key}")
     private String tossPaymentsSecretKey;
-
-    @Bean
-    public RestClient blockchainRestClient() {
-        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
-        requestFactory.setReadTimeout(Duration.ofSeconds(30));
-
-        return RestClient.builder()
-                .baseUrl(blockchainServerUrl)
-                .requestFactory(requestFactory)
-                .build();
-    }
 
     @Bean
     public RestClient tossPaymentsRestClient() {
