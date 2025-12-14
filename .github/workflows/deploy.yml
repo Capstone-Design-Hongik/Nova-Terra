@@ -28,11 +28,11 @@ jobs:
 
       # (3) gradlew 파일에 실행 권한 부여
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x ./backend/gradlew
 
       # (4) Gradle로 빌드하기
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
+        run: cd backend && ./gradlew clean build -x test
 
       # (5) 빌드된 .jar 파일을 EC2 서버로 전송 (SCP)
       - name: SCP JAR to EC2
@@ -42,9 +42,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "build/libs/*.jar"
+          source: "backend/build/libs/*.jar"
           target: "~/Nova-Terra/backend"
-          strip_components: 2
+          strip_components: 3
 
       # (6) EC2 서버에 SSH로 접속해서 재배포 스크립트 실행
       - name: SSH into EC2 and Restart Server
