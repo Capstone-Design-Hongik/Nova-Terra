@@ -1,5 +1,7 @@
 package org.landmark.domain.governance.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/governance")
 @RequiredArgsConstructor
+@Tag(name = "Governance", description = "거버넌스 제안 관리 API")
 public class GovernanceController {
   private final GovernanceService governanceService;
 
+  @Operation(summary = "제안 목록 조회", description = "활성화된 거버넌스 제안 목록을 조회합니다. propertyId로 필터링할 수 있습니다.")
   @GetMapping("/proposals")
   public ResponseEntity<ApiResponse<List<ProposalResponse>>> getAllActiveProposals(
       @RequestParam(required = false) String propertyId
@@ -34,6 +38,7 @@ public class GovernanceController {
     return ResponseEntity.ok(ApiResponse.ok(proposals));
   }
 
+  @Operation(summary = "제안 생성", description = "새로운 거버넌스 제안을 생성합니다.")
   @PostMapping("/proposals")
   public ResponseEntity<ApiResponse<ProposalResponse>> createProposal(
       @RequestParam String userId, // 임시로 파라미터로 받음
@@ -45,6 +50,7 @@ public class GovernanceController {
         .body(ApiResponse.created(newProposal));
   }
 
+  @Operation(summary = "제안 취소", description = "생성된 거버넌스 제안을 취소합니다.")
   @DeleteMapping("/proposals/{proposalId}")
   public ResponseEntity<ApiResponse<Object>> cancelProposal(
       @RequestParam String userId, // 임시로 파라미터로 받음
