@@ -22,3 +22,11 @@ spring:
 toss:
   payments:
     url: https://api.tosspayments.com
+
+# Application Settings
+app:
+  cors:
+    allowed-origins: http://localhost:3000
+  swagger:
+    server-url: http://localhost:8080
+    description: Local Development Server
