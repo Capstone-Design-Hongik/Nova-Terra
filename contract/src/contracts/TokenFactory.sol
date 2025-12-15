@@ -118,11 +118,12 @@ contract TokenFactory {
         require(properties[propertyId].tokenAddress == address(0), "TokenFactory: exists");
         
         // maxSupply 계산 (총 가치 / 토큰 가격)
-        uint256 maxSupply = totalValue / tokenPrice;
+        uint256 maxSupply = (totalValue * 1e18) / tokenPrice;
         require(maxSupply > 0, "TokenFactory: zero supply");
         
         // PropertyToken 배포
         PropertyToken token = new PropertyToken(
+            msg.sender,
             name,
             symbol,
             propertyId,
