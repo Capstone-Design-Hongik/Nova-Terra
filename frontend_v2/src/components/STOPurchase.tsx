@@ -7,7 +7,7 @@ interface STOPurchaseProps {
   onNext: (quantity: number) => void
 }
 
-export default function STOPurchase({ stoPrice, propertyName, maxAvailable = 4500, onNext }: STOPurchaseProps) {
+export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: STOPurchaseProps) {
   const [quantity, setQuantity] = useState(10)
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
