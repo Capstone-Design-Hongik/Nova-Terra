@@ -80,6 +80,31 @@ forge create src/contracts/compliance/ModularCompliance.sol:ModularCompliance \
 
 #### 2-2. Compliance 모듈 배포 (선택)
 
+#### 2-3. TokenFactory 배포
+```bash
+forge create src/contracts/TokenFactory.sol:TokenFactory \
+  --rpc-url <RPC_URL> \
+  --private-key <PRIVATE_KEY> \
+  --constructor-args <IDENTITY_REGISTRY> <KRWT_ADDRESS>
+```
+**역할**: 부동산 토큰 자동 배포
+**저장**: `TOKEN_FACTORY=0x...`
+
+#### 2-4. PropertyToken 생성 (via TokenFactory)
+```bash
+cast send <TOKEN_FACTORY> \
+  "createPropertyToken(string,string,uint256,uint256,address)" \
+  "Gangnam Tower Token" "GANG" 10000000000 1000000 <COMPLIANCE> \
+  --rpc-url <RPC_URL> \
+  --private-key <PRIVATE_KEY>
+
+# 10000000000 = 총 부동산 가치 100억 원
+# 1000000 = 토큰당 가격 100만 원
+# → maxSupply = 10,000개 자동 계산
+```
+**확인**: 이벤트에서 PropertyToken 주소 확인
+**저장**: `PROPERTY_TOKEN=0x...`
+
 ##### LockupModule (락업 기간)
 ```bash
 forge create src/contracts/compliance/modules/LockupModule.sol:LockupModule \
@@ -112,30 +137,6 @@ forge create src/contracts/compliance/modules/MaxInvestmentModule.sol:MaxInvestm
 **저장**: `MAX_INVESTMENT_MODULE=0x...`
 **기본 한도**: 일반투자자 연 1000만원/총 2000만원
 
-#### 2-3. TokenFactory 배포
-```bash
-forge create src/contracts/TokenFactory.sol:TokenFactory \
-  --rpc-url <RPC_URL> \
-  --private-key <PRIVATE_KEY> \
-  --constructor-args <IDENTITY_REGISTRY> <KRWT_ADDRESS>
-```
-**역할**: 부동산 토큰 자동 배포
-**저장**: `TOKEN_FACTORY=0x...`
-
-#### 2-4. PropertyToken 생성 (via TokenFactory)
-```bash
-cast send <TOKEN_FACTORY> \
-  "createPropertyToken(string,string,uint256,uint256,address)" \
-  "Gangnam Tower Token" "GANG" 10000000000 1000000 <COMPLIANCE> \
-  --rpc-url <RPC_URL> \
-  --private-key <PRIVATE_KEY>
-
-# 10000000000 = 총 부동산 가치 100억 원
-# 1000000 = 토큰당 가격 100만 원
-# → maxSupply = 10,000개 자동 계산
-```
-**확인**: 이벤트에서 PropertyToken 주소 확인
-**저장**: `PROPERTY_TOKEN=0x...`
 
 #### 2-5. DividendDistributor 배포
 ```bash
