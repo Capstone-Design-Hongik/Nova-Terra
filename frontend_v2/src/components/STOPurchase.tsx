@@ -2,12 +2,13 @@ import { useState } from 'react'
 
 interface STOPurchaseProps {
   stoPrice: string
+  propertyName: string
   maxAvailable?: number
+  onNext: (quantity: number) => void
 }
 
-export default function STOPurchase({ stoPrice, maxAvailable = 4500 }: STOPurchaseProps) {
+export default function STOPurchase({ stoPrice, propertyName, maxAvailable = 4500, onNext }: STOPurchaseProps) {
   const [quantity, setQuantity] = useState(10)
-  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'card'>('crypto')
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
   const subtotal = quantity * pricePerToken
@@ -17,6 +18,10 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500 }: STOPurcha
 
   const handleMaxClick = () => {
     setQuantity(maxAvailable)
+  }
+
+  const handleNext = () => {
+    onNext(quantity)
   }
 
   return (
@@ -42,14 +47,14 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500 }: STOPurcha
           <div className="flex w-8 h-8 items-center justify-center rounded-full border border-gray-600 bg-black text-gray-400 font-bold text-sm">
             2
           </div>
-          <span className="text-xs font-medium text-gray-400">검토</span>
+          <span className="text-xs font-medium text-gray-400">확인</span>
         </div>
         <div className="h-px flex-1 bg-gray-600 mx-2"></div>
         <div className="flex flex-col items-center gap-2">
           <div className="flex w-8 h-8 items-center justify-center rounded-full border border-gray-600 bg-black text-gray-400 font-bold text-sm">
             3
           </div>
-          <span className="text-xs font-medium text-gray-400">확인</span>
+          <span className="text-xs font-medium text-gray-400">완료</span>
         </div>
       </div>
 
@@ -114,7 +119,10 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500 }: STOPurcha
         </div>
 
         {/* Purchase Button */}
-        <button className="w-full rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5">
+        <button
+          onClick={handleNext}
+          className="w-full rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5"
+        >
           구매 진행하기 (KRW)
         </button>
 

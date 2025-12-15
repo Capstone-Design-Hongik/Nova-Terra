@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import STOPurchase from './STOPurchase'
+import STOConfirm from './STOConfirm'
 
 interface PropertyDetailProps {
   name: string
@@ -27,6 +29,22 @@ export default function PropertyDetail({
   fundingPercentage,
   investors,
 }: PropertyDetailProps) {
+  const [step, setStep] = useState(1)
+  const [quantity, setQuantity] = useState(10)
+
+  const handleNext = (purchaseQuantity: number) => {
+    setQuantity(purchaseQuantity)
+    setStep(2)
+  }
+
+  const handleBack = () => {
+    setStep(1)
+  }
+
+  const handleConfirm = () => {
+    alert('구매가 완료되었습니다!')
+    setStep(1)
+  }
   return (
     <>
       {/* Hero Section with Property Image */}
@@ -94,7 +112,17 @@ export default function PropertyDetail({
           </div>
 
           {/* STO Purchase */}
-          <STOPurchase stoPrice={stoPrice} />
+          {step === 1 ? (
+            <STOPurchase stoPrice={stoPrice} propertyName={name} onNext={handleNext} />
+          ) : (
+            <STOConfirm
+              stoPrice={stoPrice}
+              propertyName={name}
+              quantity={quantity}
+              onBack={handleBack}
+              onConfirm={handleConfirm}
+            />
+          )}
         </div>
       </section>
     </>
