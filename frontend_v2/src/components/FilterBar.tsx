@@ -36,7 +36,7 @@ export default function FilterBar() {
 
   return (
     <section className="w-full px-4 py-4 lg:px-10">
-      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-medium text-gray-400 mr-2">필터:</span>
 
@@ -45,7 +45,7 @@ export default function FilterBar() {
               onClick={() => setSelectedLocation(null)}
               className="group flex h-9 items-center gap-2 rounded-full border border-[#1ABCF7] bg-[#1ABCF7] pl-4 pr-3 transition-colors"
             >
-              <span className="text-sm font-medium text-black font-bold">위치: {selectedLocation}</span>
+              <span className="text-sm text-black font-bold">위치: {selectedLocation}</span>
               <span className="text-black text-lg font-bold cursor-pointer">×</span>
             </button>
           ) : (
@@ -61,7 +61,7 @@ export default function FilterBar() {
               onClick={() => setSelectedYield(null)}
               className="group flex h-9 items-center gap-2 rounded-full border border-[#1ABCF7] bg-[#1ABCF7] pl-4 pr-3 transition-colors"
             >
-              <span className="text-sm font-medium text-black font-bold">수익률 &gt; {selectedYield}%</span>
+              <span className="text-sm text-black font-bold">수익률 &gt; {selectedYield}%</span>
               <span className="text-black text-lg font-bold cursor-pointer">×</span>
             </button>
           ) : (
@@ -78,7 +78,7 @@ export default function FilterBar() {
               onClick={() => setSelectedAsset(null)}
               className="group flex h-9 items-center gap-2 rounded-full border border-[#1ABCF7] bg-[#1ABCF7] pl-4 pr-3 transition-colors"
             >
-              <span className="text-sm font-medium text-black font-bold">{selectedAsset}</span>
+              <span className="text-sm text-black font-bold">{selectedAsset}</span>
               <span className="text-black text-lg font-bold cursor-pointer">×</span>
             </button>
           ) : (
