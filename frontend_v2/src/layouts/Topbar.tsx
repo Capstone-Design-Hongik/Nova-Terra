@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { BrowserProvider } from 'ethers'
 import copyIcon from '../assets/copy.svg'
 
 interface TopbarProps {
@@ -7,7 +9,31 @@ interface TopbarProps {
   walletAddress?: string
 }
 
-export default function Topbar({ onConnectWallet, isConnected, walletAddress }: TopbarProps) {
+export default function Topbar({ onConnectWallet, isConnected, walletAddress: externalWalletAddress }: TopbarProps) {
+  const [internalWalletAddress, setInternalWalletAddress] = useState<string>('')
+
+  useEffect(() => {
+    if (!externalWalletAddress) {
+      const getConnectedWallet = async () => {
+        try {
+          if (typeof window.ethereum !== 'undefined') {
+            const provider = new BrowserProvider(window.ethereum)
+            const accounts = await provider.listAccounts()
+            if (accounts.length > 0) {
+              setInternalWalletAddress(accounts[0].address)
+            }
+          }
+        } catch (error) {
+          console.error('지갑 주소 가져오기 실패:', error)
+        }
+      }
+
+      getConnectedWallet()
+    }
+  }, [externalWalletAddress])
+
+  const walletAddress = externalWalletAddress || internalWalletAddress
+
   const handleCopyAddress = () => {
     if (walletAddress) {
       navigator.clipboard.writeText(walletAddress)

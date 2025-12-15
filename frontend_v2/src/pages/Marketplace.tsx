@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { BrowserProvider } from 'ethers'
+import { useState } from 'react'
 import Topbar from '../layouts/Topbar'
 import SearchBar from '../components/SearchBar'
 import FilterBar from '../components/FilterBar'
@@ -7,7 +6,6 @@ import PropertyCard from '../components/PropertyCard'
 import arrowdownIcon from '../assets/arrowdown.svg'
 
 export default function Marketplace() {
-  const [walletAddress, setWalletAddress] = useState<string>('')
   const [visibleCount, setVisibleCount] = useState(6)
 
   const properties = [
@@ -125,25 +123,6 @@ export default function Marketplace() {
     },
   ]
 
-  const getConnectedWallet = async () => {
-    try {
-      if (typeof window.ethereum !== 'undefined') {
-        const provider = new BrowserProvider(window.ethereum)
-        const accounts = await provider.listAccounts()
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0].address)
-        }
-      }
-    } catch (error) {
-      console.error('지갑 주소 가져오기 실패:', error)
-    }
-  }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    getConnectedWallet()
-  }, [])
-
   const handleLoadMore = () => {
     setVisibleCount((prevCount) => prevCount + 6)
   }
@@ -153,7 +132,7 @@ export default function Marketplace() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Topbar isConnected={true} walletAddress={walletAddress} />
+      <Topbar isConnected={true} />
 
       <section className="relative flex flex-col items-center justify-center gap-8 overflow-hidden px-4 text-center" style={{ marginTop: '120px' }}>
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-surface-dark via-background-dark to-background-dark opacity-60"></div>
