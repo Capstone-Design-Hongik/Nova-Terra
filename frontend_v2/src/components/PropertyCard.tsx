@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import emptyHeartIcon from '../assets/emptyheart.svg'
 import heartIcon from '../assets/heart.svg'
 import locationIcon from '../assets/location.svg'
@@ -19,6 +20,7 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({
+  id,
   name,
   location,
   type,
@@ -31,11 +33,17 @@ export default function PropertyCard({
   fundingPercentage,
   investors,
 }: PropertyCardProps) {
+  const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
     setIsFavorite(!isFavorite)
+  }
+
+  const handleBuyClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    navigate(`/trade/${id}`)
   }
   return (
     <div className="cursor-pointer group relative flex flex-col overflow-hidden rounded-xl border border-gray-600 bg-gray-800 shadow-xl transition-all hover:border-[#1ABCF7]/50 hover:shadow-2xl hover:shadow-[#1ABCF7]/10">
@@ -104,7 +112,10 @@ export default function PropertyCard({
               style={{ width: `${fundingPercentage}%` }}
             ></div>
           </div>
-          <button className="cursor-pointer mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#1ABCF7] py-2.5 text-sm font-bold text-black transition-colors hover:bg-white hover:text-black">
+          <button
+            onClick={handleBuyClick}
+            className="cursor-pointer mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#1ABCF7] py-2.5 text-sm font-bold text-black transition-colors hover:bg-white hover:text-black"
+          >
             STO 구매
           </button>
         </div>
