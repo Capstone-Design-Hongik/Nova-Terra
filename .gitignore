@@ -134,3 +134,9 @@ out/
 tmp/
 temp/
 .tmp/
+
+# Ignore code.html
+code.html
+code4.html
+code2.html
+code3.html
