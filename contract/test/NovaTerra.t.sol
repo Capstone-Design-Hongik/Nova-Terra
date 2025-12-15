@@ -1,0 +1,459 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+import "forge-std/Test.sol";
+
+// Identity
+import "../src/contracts/identity/TrustedIssuersRegistry.sol";
+import "../src/contracts/identity/ClaimTopicsRegistry.sol";
+import "../src/contracts/identity/IdentityRegistry.sol";
+import "../src/contracts/identity/ONCHAINID.sol";
+
+// Compliance
+import "../src/contracts/compliance/ModularCompliance.sol";
+// import "../src/contracts/compliance/modules/LockupModule.sol";
+import "../src/contracts/compliance/modules/MaxBalanceModule.sol";
+// import "../src/contracts/compliance/modules/MaxInvestmentModule.sol";
+
+// Core
+import "../src/contracts/TokenFactory.sol";
+import "../src/contracts/PropertyToken.sol";
+import "../src/contracts/DividendDistributor.sol";
+import "../src/KRWT.sol";
+
+// Governance
+import "../src/contracts/governance/GovernanceToken.sol";
+import "../src/contracts/governance/Governance.sol";
+
+/**
+ * @title NovaTerra Integration Test (Simple)
+ * @dev 발행사 + 투자자 2명으로 단순화
+ */
+contract NovaTerraIntegrationTest is Test {
+    
+    // ============================================
+    //              CONTRACTS
+    // ============================================
+    
+    KRWT public krwt;
+    TrustedIssuersRegistry public trustedIssuers;
+    ClaimTopicsRegistry public claimTopics;
+    IdentityRegistry public identityRegistry;
+    ModularCompliance public compliance;
+    // LockupModule public lockupModule;
+    TokenFactory public tokenFactory;
+    PropertyToken public propertyToken;
+    DividendDistributor public dividendDistributor;
+    GovernanceToken public governanceToken;
+    Governance public governance;
+
+    ONCHAINID public investor1Identity;
+    ONCHAINID public investor2Identity;
+    
+    // ============================================
+    //              USERS
+    // ============================================
+    
+    address public admin = address(1);           // 발행사 (증권사)
+    address public trustedIssuer = address(2);   // KYC 발급 기관
+    address public investor1 = address(3);       // 투자자1
+    address public investor2 = address(4);       // 투자자2
+    
+    // ============================================
+    //              CONSTANTS
+    // ============================================
+    
+    uint256 public constant TOTAL_VALUE = 10_000_000_000; // 100억 원
+    uint256 public constant TOKEN_PRICE = 1_000_000;       // 100만 원
+    // uint256 public constant LOCKUP_PERIOD = 0;             // 데모용: 락업 없음
+    
+    uint256 public propertyId;
+    
+    // ============================================
+    //              SETUP
+    // ============================================
+    
+    function setUp() public {
+        vm.startPrank(admin);
+        
+        // ========== Phase 1: 인프라 배포 ==========
+        
+        krwt = new KRWT();
+        trustedIssuers = new TrustedIssuersRegistry();
+        claimTopics = new ClaimTopicsRegistry();
+        identityRegistry = new IdentityRegistry(
+            address(trustedIssuers),
+            address(claimTopics)
+        );
+        
+        // 신뢰 기관 등록
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = 1; // KYC
+        trustedIssuers.addTrustedIssuer(trustedIssuer, topics);
+        claimTopics.addClaimTopic(1);  // KYC만 필요
+        // ========== Phase 2: 부동산 토큰 배포 ==========
+        
+        compliance = new ModularCompliance();
+        // lockupModule = new LockupModule(address(compliance), LOCKUP_PERIOD);
+        
+        tokenFactory = new TokenFactory(
+            address(identityRegistry),
+            address(krwt)
+        );
+        
+        (address tokenAddress, uint256 _propertyId) = tokenFactory.createPropertyToken(
+            "Gangnam Tower Token",
+            "GANG",
+            TOTAL_VALUE,
+            TOKEN_PRICE,
+            address(compliance)
+        );
+        propertyToken = PropertyToken(tokenAddress);
+        propertyId = _propertyId;
+        
+        dividendDistributor = new DividendDistributor(
+            address(propertyToken),
+            address(krwt)
+        );
+
+        governanceToken = new GovernanceToken(address(propertyToken));
+        governance = new Governance(address(governanceToken));
+
+        // ========== Phase 3: 설정 ==========
+
+        // compliance.addModule(address(lockupModule));
+        compliance.bindToken(address(propertyToken));
+        tokenFactory.setDividendContract(propertyId, address(dividendDistributor));
+        tokenFactory.setGovernanceContract(propertyId, address(governance));
+        
+        // ========== Phase 4: 투자자 온보딩 ==========
+        
+        investor1Identity = new ONCHAINID(investor1);
+        investor2Identity = new ONCHAINID(investor2);
+        
+        vm.stopPrank();
+        
+        // KYC Claim 발급
+        vm.startPrank(trustedIssuer);
+        uint256 validFrom = block.timestamp;
+        uint256 validTo = block.timestamp + 365 days;
+        investor1Identity.addClaim(1, 'kr', validFrom, validTo);
+        investor2Identity.addClaim(1, 'kr', validFrom, validTo);
+        vm.stopPrank();
+        
+        // IdentityRegistry 등록
+        vm.startPrank(admin);
+        identityRegistry.registerIdentity(investor1, address(investor1Identity));
+        identityRegistry.registerIdentity(investor2, address(investor2Identity));
+        
+        // 초기 발행 (판매 준비)
+        propertyToken.initialMint(admin, 0);
+        
+        // KRWT 지급 (테스트용)
+        krwt.mint(admin, 1_000_000_000 * 1e18);
+        krwt.mint(investor1, 100_000_000 * 1e18);
+        krwt.mint(investor2, 100_000_000 * 1e18);
+        vm.stopPrank();
+    }
+    
+    // ============================================
+    //              TESTS
+    // ============================================
+    
+    function test_DeploymentSuccess() public view {
+        assertTrue(address(propertyToken) != address(0));
+        assertTrue(address(dividendDistributor) != address(0));
+        assertEq(propertyToken.name(), "Gangnam Tower Token");
+    }
+    
+    function test_KYCVerification() public view {
+        assertTrue(identityRegistry.isVerified(investor1));
+        assertTrue(identityRegistry.isVerified(investor2));
+    }
+    
+    function test_InvestorBuyTokens() public {
+        uint256 buyAmount = 100 * 1e18;
+        uint256 cost = buyAmount * TOKEN_PRICE;
+
+        vm.startPrank(investor1);
+        krwt.approve(address(propertyToken), cost);
+        propertyToken.buy(buyAmount);
+        vm.stopPrank();
+
+        assertEq(propertyToken.balanceOf(investor1), buyAmount);
+    }
+    
+    function test_DividendDistribution() public {
+        // 1. 투자자들 토큰 구매
+        vm.startPrank(investor1);
+        krwt.approve(address(propertyToken), 100_000_000 * 1e18);
+        propertyToken.buy(100 * 1e18);
+        vm.stopPrank();
+        
+        vm.startPrank(investor2);
+        krwt.approve(address(propertyToken), 50_000_000 * 1e18);
+        propertyToken.buy(50 * 1e18);
+        vm.stopPrank();
+        
+        // 2. 스냅샷 생성
+        vm.prank(admin);
+        uint256 snapshotId = propertyToken.snapshot();
+        
+        // 3. 배당금 입금
+        uint256 dividendAmount = 15_000_000 * 1e18; // 1500만원
+        vm.startPrank(admin);
+        krwt.approve(address(dividendDistributor), dividendAmount);
+        dividendDistributor.createDividend(snapshotId, dividendAmount);
+        vm.stopPrank();
+        
+        // 4. 배당 청구
+        uint256 before1 = krwt.balanceOf(investor1);
+        uint256 before2 = krwt.balanceOf(investor2);
+        
+        vm.prank(investor1);
+        dividendDistributor.claimDividend(1);
+        
+        vm.prank(investor2);
+        dividendDistributor.claimDividend(1);
+        
+        // 5. 검증
+        assertGt(krwt.balanceOf(investor1), before1);
+        assertGt(krwt.balanceOf(investor2), before2);
+    }
+    
+    // ============================================
+    //              FULL FLOW (데모용!)
+    // ============================================
+    
+    function test_FullFlow_Demo() public {
+        console.log("=== NovaTerra Demo ===");
+        console.log("");
+        
+        // 1. 투자자들 토큰 구매
+        vm.startPrank(investor1);
+        krwt.approve(address(propertyToken), 100_000_000 * 1e18);
+        propertyToken.buy(100 * 1e18);
+        vm.stopPrank();
+        console.log("Investor1 bought: 100 tokens (100M KRW)");
+        
+        vm.startPrank(investor2);
+        krwt.approve(address(propertyToken), 50_000_000 * 1e18);
+        propertyToken.buy(50 * 1e18);
+        vm.stopPrank();
+        console.log("Investor2 bought: 50 tokens (50M KRW)");
+        
+        // 잔액 확인
+        console.log("");
+        console.log("=== Token Balances ===");
+        console.log("Investor1:", propertyToken.balanceOf(investor1) / 1e18, "tokens");
+        console.log("Investor2:", propertyToken.balanceOf(investor2) / 1e18, "tokens");
+        
+        // 2. 스냅샷 생성 (배당 기준일)
+        vm.prank(admin);
+        uint256 snapshotId = propertyToken.snapshot();
+        console.log("");
+        console.log("Snapshot created, ID:", snapshotId);
+        
+        // 3. 배당금 입금 (월 임대수익 1500만원)
+        uint256 dividendAmount = 15_000_000 * 1e18;
+        vm.startPrank(admin);
+        krwt.approve(address(dividendDistributor), dividendAmount);
+        dividendDistributor.createDividend(snapshotId, dividendAmount);
+        vm.stopPrank();
+        console.log("Dividend deposited: 15,000,000 KRWT");
+        
+        // 4. 배당 가능 금액 조회
+        uint256 claimable1 = dividendDistributor.getClaimableDividend(1, investor1);
+        uint256 claimable2 = dividendDistributor.getClaimableDividend(1, investor2);
+        
+        console.log("");
+        console.log("=== Claimable Dividends ===");
+        console.log("Investor1:", claimable1 / 1e18, "KRWT");
+        console.log("Investor2:", claimable2 / 1e18, "KRWT");
+        
+        // 5. 배당 청구
+        vm.prank(investor1);
+        dividendDistributor.claimDividend(1);
+        console.log("");
+        console.log("Investor1 claimed dividend!");
+        
+        vm.prank(investor2);
+        dividendDistributor.claimDividend(1);
+        console.log("Investor2 claimed dividend!");
+        
+        console.log("");
+        console.log("=== Demo Complete ===");
+    }
+
+    // ============================================
+    //       GOVERNANCE TESTS
+    // ============================================
+
+    function test_Governance_FullFlow() public {
+        console.log("\n=== GOVERNANCE TEST 1: Full Flow ===");
+
+        // 1. investor1이 토큰 구매
+        vm.startPrank(investor1);
+        krwt.approve(address(propertyToken), 100_000_000 * 1e18);
+        propertyToken.buy(100 * 1e18);
+        vm.stopPrank();
+        console.log("Step 1: investor1 bought 100 tokens");
+        assertEq(propertyToken.balanceOf(investor1), 100 * 1e18);
+
+        // 2. GovernanceToken 민팅 (admin이 실행)
+        vm.prank(admin);
+        governanceToken.mintGovernanceTokens(investor1);
+        console.log("Step 2: Admin minted governance tokens for investor1");
+        assertEq(governanceToken.balanceOf(investor1), propertyToken.balanceOf(investor1));
+
+        // 3. Self-delegate
+        console.log("Step 3: Self-delegate");
+        uint256 votesBefore = governanceToken.getVotes(investor1);
+        console.log("  Votes before delegate:", votesBefore);
+        assertEq(votesBefore, 0, "Votes should be 0 before delegate");
+
+        vm.prank(investor1);
+        governanceToken.delegate(investor1);
+
+        uint256 votesAfter = governanceToken.getVotes(investor1);
+        console.log("  Votes after delegate:", votesAfter);
+        assertEq(votesAfter, governanceToken.balanceOf(investor1), "Votes should equal balance");
+
+        // 4. 제안 생성
+        console.log("Step 4: Create proposal");
+        vm.prank(investor1);
+        uint256 proposalId = governance.createProposal("Proposal: Increase property value");
+        vm.roll(block.number + 1);
+
+        assertEq(proposalId, 0);
+        assertEq(governance.proposalCount(), 1);
+        console.log("  Proposal ID:", proposalId);
+
+        // 5. 투표
+        console.log("Step 5: Vote on proposal");
+        vm.prank(investor1);
+        governance.vote(proposalId, true);
+
+        assertTrue(governance.hasVoted(proposalId, investor1));
+
+        // 6. 결과 확인
+        (
+            string memory desc,
+            uint256 forVotes,
+            uint256 againstVotes,
+            ,
+            ,
+        ) = governance.getProposal(proposalId);
+
+        console.log("  Description:", desc);
+        console.log("  For votes:", forVotes);
+        console.log("  Against votes:", againstVotes);
+
+        assertEq(forVotes, governanceToken.getVotes(investor1));
+        assertEq(againstVotes, 0);
+
+        console.log("=== GOVERNANCE TEST 1 PASSED ===\n");
+    }
+
+    function test_Governance_NoDelegateNoVote() public {
+        console.log("\n=== GOVERNANCE TEST 2: No Delegate = No Vote ===");
+
+        // 1. investor2가 토큰 구매
+        vm.startPrank(investor2);
+        krwt.approve(address(propertyToken), 50_000_000 * 1e18);
+        propertyToken.buy(50 * 1e18);
+        vm.stopPrank();
+        console.log("Step 1: investor2 bought 50 tokens");
+
+        // 2. GovernanceToken 민팅 (admin이 실행)
+        vm.prank(admin);
+        governanceToken.mintGovernanceTokens(investor2);
+        console.log("Step 2: Admin minted governance tokens for investor2");
+
+        // 3. delegate 호출 안함
+        console.log("Step 3: SKIP delegate");
+        uint256 votes = governanceToken.getVotes(investor2);
+        console.log("  investor2 votes:", votes);
+        assertEq(votes, 0, "Votes should be 0 without delegate");
+
+        // 4. 제안 생성 시도 → 실패
+        console.log("Step 4: Try to create proposal (should fail)");
+        vm.prank(investor2);
+        vm.expectRevert("No voting power");
+        governance.createProposal("Should fail");
+
+        assertEq(governance.proposalCount(), 0);
+        console.log("  Correctly reverted!");
+
+        console.log("=== GOVERNANCE TEST 2 PASSED ===\n");
+    }
+
+    function test_Governance_DelegateToOther() public {
+        console.log("\n=== GOVERNANCE TEST 3: Delegate to Another User ===");
+
+        // 1. investor1이 토큰 구매
+        vm.startPrank(investor1);
+        krwt.approve(address(propertyToken), 100_000_000 * 1e18);
+        propertyToken.buy(100 * 1e18);
+        vm.stopPrank();
+        console.log("Step 1: investor1 bought 100 tokens");
+
+        // 2. GovernanceToken 민팅 (admin이 실행)
+        vm.prank(admin);
+        governanceToken.mintGovernanceTokens(investor1);
+        console.log("Step 2: Admin minted governance tokens for investor1");
+
+        // 3. investor1이 investor2에게 위임
+        console.log("Step 3: investor1 delegates to investor2");
+        vm.prank(investor1);
+        governanceToken.delegate(investor2);
+
+        // 4. 투표권 확인
+        console.log("Step 4: Check voting power");
+        uint256 investor1Votes = governanceToken.getVotes(investor1);
+        uint256 investor2Votes = governanceToken.getVotes(investor2);
+
+        console.log("  investor1 votes:", investor1Votes);
+        console.log("  investor2 votes:", investor2Votes);
+
+        assertEq(investor1Votes, 0, "investor1 should have 0 votes");
+        assertEq(investor2Votes, governanceToken.balanceOf(investor1), "investor2 should have delegated votes");
+
+        // 5. investor2가 제안 생성
+        console.log("Step 5: investor2 creates proposal");
+        vm.prank(investor2);
+        uint256 proposalId = governance.createProposal("Proposal by investor2");
+        vm.roll(block.number + 1);
+        console.log("  Proposal ID:", proposalId);
+
+        // 6. investor1이 투표 시도 → 실패
+        console.log("Step 6: investor1 tries to vote (should fail)");
+        vm.prank(investor1);
+        vm.expectRevert("No voting power at snapshot");
+        governance.vote(proposalId, true);
+        console.log("  Correctly reverted!");
+
+        // 7. investor2가 투표 → 성공
+        console.log("Step 7: investor2 votes (should succeed)");
+        vm.prank(investor2);
+        governance.vote(proposalId, true);
+
+        // 8. 결과 확인
+        console.log("Step 8: Verify results");
+        assertTrue(governance.hasVoted(proposalId, investor2));
+        assertFalse(governance.hasVoted(proposalId, investor1));
+
+        (
+            ,
+            uint256 forVotes,
+            ,
+            ,
+            ,
+        ) = governance.getProposal(proposalId);
+
+        console.log("  For votes:", forVotes);
+        assertEq(forVotes, governanceToken.getVotes(investor2), "Should match delegated votes");
+
+        console.log("=== GOVERNANCE TEST 3 PASSED ===\n");
+    }
+}

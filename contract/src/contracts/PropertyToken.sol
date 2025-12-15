@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IInterfaces.sol";
-
-interface IERC20 {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function transfer(address to, uint256 amount) external returns (bool);
-    function balanceOf(address account) external view returns (uint256);
-}
 
 interface IPermit2 {
     struct TokenPermissions {
@@ -126,6 +120,7 @@ contract PropertyToken is IPropertyToken {
     // ============================================
     
     constructor(
+        address _owner,
         string memory _name,
         string memory _symbol,
         bytes32 _propertyId,
@@ -145,7 +140,7 @@ contract PropertyToken is IPropertyToken {
         symbol = _symbol;
         propertyId = _propertyId;
         maxSupply = _maxSupply;
-        owner = msg.sender;
+        owner = _owner;
         
         identityRegistry = IIdentityRegistry(_identityRegistry);
         compliance = IModularCompliance(_compliance);

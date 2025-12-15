@@ -4,6 +4,8 @@ ERC-3643 표준 기반 부동산 Security Token 발행 플랫폼
 
 ## 📋 목차
 - [시스템 개요](#시스템-개요)
+- [사전 준비: KRWT 배포](#사전-준비-krwt-배포)
+- [빠른 배포 (스크립트)](#빠른-배포-스크립트)
 - [컨트랙트 배포 순서](#컨트랙트-배포-순서)
 - [배포 후 설정](#배포-후-설정)
 - [투자자 온보딩](#투자자-온보딩)
@@ -29,6 +31,140 @@ Token Layer: Security Token (PropertyToken)
     ↓
 Application Layer: 배당/거버넌스
 ```
+
+---
+
+## 🏦 사전 준비: KRWT 배포
+
+Nova-Terra 시스템은 결제 및 배당 지급을 위해 **KRWT (Korean Won Token)**를 사용합니다.
+전체 시스템 배포 전에 먼저 KRWT를 배포해야 합니다.
+
+### KRWT 배포 방법
+
+```bash
+# .env 파일에 PRIVATE_KEY와 RPC_URL 설정
+source .env
+
+# KRWT 배포 스크립트 실행
+forge script script/DeployKRWT.s.sol:DeployKRWT \
+  --rpc-url $RPC_URL \
+  --broadcast
+
+# 배포된 KRWT 주소를 .env에 추가
+# KRWT_ADDRESS=0x...
+```
+
+배포 완료 후 출력되는 KRWT 주소를 `.env` 파일의 `KRWT_ADDRESS`에 저장하세요.
+
+**KRWT info**:
+- 이름: Korean Won Token
+- 심볼: KRWT
+- 초기 발행량: 10억 KRWT
+- 소유자: 배포자 주소
+- 기능: Mint (Owner), Burn (Anyone)
+
+---
+
+## ⚡ 빠른 배포 (스크립트)
+
+배포 스크립트가 **2개로 분리**되어 있습니다:
+
+1. **`DeployInfrastructure.s.sol`** - 관리자가 **한 번만** 실행 (Identity + Compliance + TokenFactory)
+2. **`DeployProperty.s.sol`** - 백엔드가 **부동산마다** 실행 (PropertyToken + Apps + Configuration)
+
+---
+
+### 📦 Step 1: 인프라 배포 (관리자 - 한 번만)
+
+전체 시스템의 기반 인프라를 배포합니다. **한 번만 실행**하면 됩니다.
+
+#### 1-1. 환경 변수 설정
+
+```bash
+# .env.example을 복사
+cp .env.example .env
+
+# .env 파일 수정
+PRIVATE_KEY=0x...
+KRWT_ADDRESS=0x...  # DeployKRWT.s.sol로 먼저 배포한 KRWT 주소
+RPC_URL=https://rpc.giwa.network
+```
+
+#### 1-2. 인프라 배포 실행
+
+```bash
+source .env
+forge script script/DeployInfrastructure.s.sol:DeployInfrastructure \
+  --rpc-url $RPC_URL \
+  --broadcast
+```
+
+#### 1-3. 배포 결과를 .env에 추가
+
+배포 완료 후 콘솔에 출력되는 주소들을 `.env`에 추가하세요:
+
+```bash
+IDENTITY_REGISTRY=0x...
+COMPLIANCE=0x...
+TOKEN_FACTORY=0x...
+```
+
+**배포되는 컨트랙트**:
+- ✅ TrustedIssuersRegistry
+- ✅ ClaimTopicsRegistry
+- ✅ IdentityRegistry
+- ✅ ModularCompliance
+- ✅ TokenFactory
+
+---
+
+### 🏢 Step 2: 부동산 토큰 배포 (백엔드 - 부동산마다)
+
+각 부동산마다 PropertyToken과 관련 컨트랙트를 배포합니다.
+
+#### 2-1. 부동산 정보 설정
+
+`.env` 파일에 부동산 정보를 추가하세요:
+
+```bash
+# PropertyToken 설정
+PROPERTY_NAME="Gangnam Tower Token"
+PROPERTY_SYMBOL="GANG"
+PROPERTY_VALUE=10000000000  # 100억 원
+TOKEN_PRICE=1000000         # 100만 원
+
+# Compliance Module 설정
+MAX_BALANCE_PERCENT=1000    # 10%
+```
+
+#### 2-2. 부동산 토큰 배포 실행
+
+```bash
+source .env
+forge script script/DeployProperty.s.sol:DeployProperty \
+  --rpc-url $RPC_URL \
+  --broadcast
+```
+
+#### 2-3. 배포 결과를 DB에 저장
+
+배포 완료 후 출력되는 주소들을 데이터베이스에 저장하세요:
+
+```
+PROPERTY_TOKEN=0x...
+MAX_BALANCE_MODULE=0x...
+DIVIDEND_DISTRIBUTOR=0x...
+GOVERNANCE_TOKEN=0x...
+GOVERNANCE=0x...
+```
+
+**배포되는 컨트랙트** (부동산마다):
+- ✅ PropertyToken (via TokenFactory.createPropertyToken)
+- ✅ MaxBalanceModule
+- ✅ DividendDistributor
+- ✅ GovernanceToken
+- ✅ Governance
+- ✅ Configuration (모듈 등록, 바인딩, 연결)
 
 ---
 
@@ -80,6 +216,31 @@ forge create src/contracts/compliance/ModularCompliance.sol:ModularCompliance \
 
 #### 2-2. Compliance 모듈 배포 (선택)
 
+#### 2-3. TokenFactory 배포
+```bash
+forge create src/contracts/TokenFactory.sol:TokenFactory \
+  --rpc-url <RPC_URL> \
+  --private-key <PRIVATE_KEY> \
+  --constructor-args <IDENTITY_REGISTRY> <KRWT_ADDRESS>
+```
+**역할**: 부동산 토큰 자동 배포
+**저장**: `TOKEN_FACTORY=0x...`
+
+#### 2-4. PropertyToken 생성 (via TokenFactory)
+```bash
+cast send <TOKEN_FACTORY> \
+  "createPropertyToken(string,string,uint256,uint256,address)" \
+  "Gangnam Tower Token" "GANG" 10000000000 1000000 <COMPLIANCE> \
+  --rpc-url <RPC_URL> \
+  --private-key <PRIVATE_KEY>
+
+# 10000000000 = 총 부동산 가치 100억 원
+# 1000000 = 토큰당 가격 100만 원
+# → maxSupply = 10,000개 자동 계산
+```
+**확인**: 이벤트에서 PropertyToken 주소 확인
+**저장**: `PROPERTY_TOKEN=0x...`
+
 ##### LockupModule (락업 기간)
 ```bash
 forge create src/contracts/compliance/modules/LockupModule.sol:LockupModule \
@@ -112,30 +273,6 @@ forge create src/contracts/compliance/modules/MaxInvestmentModule.sol:MaxInvestm
 **저장**: `MAX_INVESTMENT_MODULE=0x...`
 **기본 한도**: 일반투자자 연 1000만원/총 2000만원
 
-#### 2-3. TokenFactory 배포
-```bash
-forge create src/contracts/TokenFactory.sol:TokenFactory \
-  --rpc-url <RPC_URL> \
-  --private-key <PRIVATE_KEY> \
-  --constructor-args <IDENTITY_REGISTRY> <KRWT_ADDRESS>
-```
-**역할**: 부동산 토큰 자동 배포
-**저장**: `TOKEN_FACTORY=0x...`
-
-#### 2-4. PropertyToken 생성 (via TokenFactory)
-```bash
-cast send <TOKEN_FACTORY> \
-  "createPropertyToken(string,string,uint256,uint256,address)" \
-  "Gangnam Tower Token" "GANG" 10000000000 1000000 <COMPLIANCE> \
-  --rpc-url <RPC_URL> \
-  --private-key <PRIVATE_KEY>
-
-# 10000000000 = 총 부동산 가치 100억 원
-# 1000000 = 토큰당 가격 100만 원
-# → maxSupply = 10,000개 자동 계산
-```
-**확인**: 이벤트에서 PropertyToken 주소 확인
-**저장**: `PROPERTY_TOKEN=0x...`
 
 #### 2-5. DividendDistributor 배포
 ```bash
