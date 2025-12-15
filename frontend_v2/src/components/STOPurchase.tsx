@@ -121,7 +121,7 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: S
         {/* Purchase Button */}
         <button
           onClick={handleNext}
-          className="w-full rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5"
+          className="cursor-pointer w-full rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5"
         >
           구매 진행하기 (KRW)
         </button>

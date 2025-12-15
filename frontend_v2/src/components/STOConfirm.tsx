@@ -124,13 +124,13 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
         <div className="grid grid-cols-3 gap-3 pt-2">
           <button
             onClick={onBack}
-            className="col-span-1 rounded-xl border border-gray-600 bg-black py-4 text-sm font-bold text-gray-400 hover:border-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+            className="cursor-pointer col-span-1 rounded-xl border border-gray-600 bg-black py-4 text-sm font-bold text-gray-400 hover:border-gray-400 hover:text-white hover:bg-gray-800 transition-all"
           >
             이전
           </button>
           <button
             onClick={onConfirm}
-            className="col-span-2 flex items-center justify-center gap-2 rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5"
+            className="cursor-pointer col-span-2 flex items-center justify-center gap-2 rounded-xl bg-[#1ABCF7] py-4 text-base font-bold text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-0.5"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

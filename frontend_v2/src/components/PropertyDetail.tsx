@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import STOPurchase from './STOPurchase'
 import STOConfirm from './STOConfirm'
+import STOComplete from './STOComplete'
 
 interface PropertyDetailProps {
   name: string
@@ -29,8 +31,10 @@ export default function PropertyDetail({
   fundingPercentage,
   investors,
 }: PropertyDetailProps) {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [quantity, setQuantity] = useState(10)
+  const [transactionId] = useState('0x7f3a...9c2b1e4')
 
   const handleNext = (purchaseQuantity: number) => {
     setQuantity(purchaseQuantity)
@@ -42,9 +46,22 @@ export default function PropertyDetail({
   }
 
   const handleConfirm = () => {
-    alert('구매가 완료되었습니다!')
-    setStep(1)
+    setStep(3)
   }
+
+  const handleViewPortfolio = () => {
+    navigate('/portfolio')
+  }
+
+  const handleExploreMore = () => {
+    navigate('/marketplace')
+  }
+
+  const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
+  const subtotal = quantity * pricePerToken
+  const platformFee = subtotal * 0.005
+  const gasFee = 1500
+  const totalAmount = subtotal + platformFee + gasFee
   return (
     <>
       {/* Hero Section with Property Image */}
@@ -112,15 +129,26 @@ export default function PropertyDetail({
           </div>
 
           {/* STO Purchase */}
-          {step === 1 ? (
+          {step === 1 && (
             <STOPurchase stoPrice={stoPrice} propertyName={name} onNext={handleNext} />
-          ) : (
+          )}
+          {step === 2 && (
             <STOConfirm
               stoPrice={stoPrice}
               propertyName={name}
               quantity={quantity}
               onBack={handleBack}
               onConfirm={handleConfirm}
+            />
+          )}
+          {step === 3 && (
+            <STOComplete
+              propertyName={name}
+              quantity={quantity}
+              totalAmount={totalAmount}
+              transactionId={transactionId}
+              onViewPortfolio={handleViewPortfolio}
+              onExploreMore={handleExploreMore}
             />
           )}
         </div>
