@@ -17,6 +17,7 @@ interface PropertyCardProps {
   stoPrice: string
   fundingPercentage: number
   investors: number
+  onClick?: () => void
 }
 
 export default function PropertyCard({
@@ -32,6 +33,7 @@ export default function PropertyCard({
   stoPrice,
   fundingPercentage,
   investors,
+  onClick,
 }: PropertyCardProps) {
   const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
@@ -45,8 +47,17 @@ export default function PropertyCard({
     e.stopPropagation()
     navigate(`/trade/${id}`)
   }
+
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
   return (
-    <div className="cursor-pointer group relative flex flex-col overflow-hidden rounded-xl border border-gray-600 bg-gray-800 shadow-xl transition-all hover:border-[#1ABCF7]/50 hover:shadow-2xl hover:shadow-[#1ABCF7]/10">
+    <div
+      onClick={handleCardClick}
+      className="cursor-pointer group relative flex flex-col overflow-hidden rounded-xl border border-gray-600 bg-gray-800 shadow-xl transition-all hover:border-[#1ABCF7]/50 hover:shadow-2xl hover:shadow-[#1ABCF7]/10">
       <div className="relative aspect-4/3 w-full overflow-hidden bg-gray-900">
         <div className={`absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-xs font-bold backdrop-blur-md border ${typeColor}`}>
           {type}
