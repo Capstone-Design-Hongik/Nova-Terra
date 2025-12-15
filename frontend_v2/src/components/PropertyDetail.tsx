@@ -59,9 +59,8 @@ export default function PropertyDetail({
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
   const subtotal = quantity * pricePerToken
-  const platformFee = subtotal * 0.005
   const gasFee = 1500
-  const totalAmount = subtotal + platformFee + gasFee
+  const totalAmount = subtotal + gasFee
   return (
     <>
       {/* Hero Section with Property Image */}

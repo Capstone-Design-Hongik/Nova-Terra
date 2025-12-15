@@ -12,9 +12,8 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: S
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
   const subtotal = quantity * pricePerToken
-  const platformFee = subtotal * 0.005
   const gasFee = 1500
-  const total = subtotal + platformFee + gasFee
+  const total = subtotal + gasFee
 
   const handleMaxClick = () => {
     setQuantity(maxAvailable)
@@ -93,10 +92,6 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: S
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">소계 ({quantity} STO x ₩{pricePerToken.toLocaleString()})</span>
             <span className="text-white font-medium">₩{subtotal.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">플랫폼 수수료 (0.5%)</span>
-            <span className="text-white font-medium">₩{platformFee.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm">
             <div className="flex items-center gap-1 text-gray-400">
