@@ -35,8 +35,9 @@ public class Property {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "building_type")
-    private String buildingType;
+    private BuildingType buildingType;
 
     @Column(name = "exclusive_area_sqm")
     private BigDecimal exclusiveAreaSqm;
@@ -73,32 +74,30 @@ public class Property {
     private String majorTenants;
 
     @Column(name = "total_monthly_rent")
-    private Long totalMonthlyRent;
+    private Long totalMonthlyRent; // 월 총 임대료
 
     @Column(name = "total_valuation", nullable = false)
-    private BigDecimal totalValuation;
+    private BigDecimal totalValuation; // 부동산 총 가치 평가액
 
     @Column(name = "total_tokens", nullable = false)
-    private Long totalTokens;
+    private Long totalTokens; // 발행된 총 토큰 수량
 
     @Column(name = "expense_rate")
-    private BigDecimal expenseRate;
+    private BigDecimal expenseRate; // 운영 비용 비율
 
     @Column(name = "fee_rate")
-    private BigDecimal feeRate;
+    private BigDecimal feeRate; // 플랫폼 수수료 비율
 
-    /* 토큰 발행 트랜잭션 해시 (블록체인 민팅 후 저장) */
     @Column(name = "mint_tx_hash", length = 66)
-    private String mintTxHash;
+    private String mintTxHash;  // 토큰 발행 트랜잭션 해시 (블록체인 민팅 후 저장)
 
-    /* 부동산 상품의 현재 상태 (청약중, 운영중, 비활성 등) */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PropertyStatus status;
+    private PropertyStatus status; // 부동산 상품의 현재 상태
 
     @Builder
     public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress, String name, String description, String address, String coverImageUrl,
-                    String buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
+                    BuildingType buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
                     String floor, Long useApprovalDate, Integer parkingSpaces,
                     String direction, Integer roomCount, Integer bathroomCount,
                     Long managementFee, BigDecimal occupancyRate, String majorTenants,

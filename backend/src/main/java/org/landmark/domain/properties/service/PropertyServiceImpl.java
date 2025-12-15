@@ -1,6 +1,8 @@
 package org.landmark.domain.properties.service;
 
 import lombok.RequiredArgsConstructor;
+import org.landmark.global.exception.BusinessException;
+import org.landmark.global.exception.ErrorCode;
 import org.landmark.global.service.S3Service;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.dto.PropertyCreateRequest;
@@ -38,5 +40,13 @@ public class PropertyServiceImpl implements PropertyService {
             .stream()
             .map(PropertyResponse::from)
             .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public PropertyResponse getPropertyById(String propertyId) {
+    Property property = propertyRepository.findById(propertyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
+
+    return PropertyResponse.from(property);
   }
 }

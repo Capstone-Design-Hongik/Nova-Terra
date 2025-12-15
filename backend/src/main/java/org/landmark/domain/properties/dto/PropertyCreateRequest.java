@@ -2,6 +2,7 @@ package org.landmark.domain.properties.dto;
 
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import org.landmark.domain.properties.domain.BuildingType;
 import org.landmark.domain.properties.domain.Property;
 
 public record PropertyCreateRequest(
@@ -11,7 +12,7 @@ public record PropertyCreateRequest(
     @NotNull String name,
     String description,
     String address,
-    String buildingType,
+    BuildingType buildingType,
     BigDecimal exclusiveAreaSqm,
     Integer totalFloors,
     String floor,

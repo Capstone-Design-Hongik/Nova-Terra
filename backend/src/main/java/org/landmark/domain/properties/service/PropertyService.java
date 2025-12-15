@@ -10,4 +10,6 @@ public interface PropertyService {
   String createProperty(PropertyCreateRequest request, MultipartFile coverImage);
 
   List<PropertyResponse> getAllProperties();
+
+  PropertyResponse getPropertyById(String propertyId);
 }
