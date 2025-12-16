@@ -206,13 +206,13 @@ contract Deploy is Script {
     function configure() internal {
         console.log("\n[Phase 5] Configuring contracts...");
 
-        // 5-1. Compliance에 MaxBalanceModule 등록
-        compliance.addModule(address(maxBalanceModule));
-        console.log("  MaxBalanceModule added to Compliance");
+        // 5-1. PropertyToken을 Compliance에 등록
+        compliance.registerToken(propertyToken);
+        console.log("  PropertyToken registered to Compliance");
 
-        // 5-2. Compliance를 PropertyToken에 바인딩
-        compliance.bindToken(propertyToken);
-        console.log("  Compliance bound to PropertyToken");
+        // 5-2. Compliance에 MaxBalanceModule 등록
+        compliance.addModuleForToken(propertyToken, address(maxBalanceModule));
+        console.log("  MaxBalanceModule added to PropertyToken");
 
         // 5-3. PropertyToken 주소로 실제 propertyId 조회
         uint256 actualPropertyId = tokenFactory.tokenToProperty(propertyToken);

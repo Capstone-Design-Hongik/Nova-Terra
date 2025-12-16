@@ -121,8 +121,8 @@ contract NovaTerraIntegrationTest is Test {
 
         // ========== Phase 3: 설정 ==========
 
-        // compliance.addModule(address(lockupModule));
-        compliance.bindToken(address(propertyToken));
+        // compliance.addModuleForToken(address(propertyToken), address(lockupModule));
+        compliance.registerToken(address(propertyToken));
         tokenFactory.setDividendContract(propertyId, address(dividendDistributor));
         tokenFactory.setGovernanceContract(propertyId, address(governance));
         

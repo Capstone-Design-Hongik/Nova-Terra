@@ -69,13 +69,15 @@ interface IClaimTopicsRegistry {
 // ============================================
 
 interface IModularCompliance {
-    function addModule(address module) external;
-    function removeModule(address module) external;
+    function registerToken(address token) external;
+    function addModuleForToken(address token, address module) external;
+    function removeModuleForToken(address token, address module) external;
     function canTransfer(address from, address to, uint256 amount) external view returns (bool);
     function transferred(address from, address to, uint256 amount) external;
     function created(address to, uint256 amount) external;
     function destroyed(address from, uint256 amount) external;
     function getModules() external view returns (address[] memory);
+    function getModulesForToken(address token) external view returns (address[] memory);
 }
 
 interface IComplianceModule {
