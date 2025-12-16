@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface PropertyDetailPanelProps {
@@ -28,17 +27,6 @@ interface PropertyDetailPanelProps {
 
 export default function PropertyDetailPanel({ isOpen, onClose, property, onPurchaseClick }: PropertyDetailPanelProps) {
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
 
   if (!property) return null
 

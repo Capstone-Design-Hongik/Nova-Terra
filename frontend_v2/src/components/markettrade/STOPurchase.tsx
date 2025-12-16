@@ -8,7 +8,7 @@ interface STOPurchaseProps {
 }
 
 export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: STOPurchaseProps) {
-  const [quantity, setQuantity] = useState(10)
+  const [quantity, setQuantity] = useState(0)
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
   const subtotal = quantity * pricePerToken
@@ -66,10 +66,20 @@ export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: S
           <div className="relative group">
             <input
               className="block w-full rounded-xl border border-gray-600 bg-black p-4 pr-32 text-lg text-white placeholder:text-gray-600 focus:border-[#1ABCF7] focus:ring-1 focus:ring-[#1ABCF7] transition-all outline-none"
-              placeholder="0"
+              placeholder="수량 입력"
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+              value={quantity === 0 ? '' : quantity}
+              onChange={(e) => {
+                const value = e.target.value
+                if (value === '') {
+                  setQuantity(0)
+                } else {
+                  const num = parseInt(value)
+                  if (!isNaN(num)) {
+                    setQuantity(Math.max(0, num))
+                  }
+                }
+              }}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-right">
               <span className="block text-sm font-bold text-white">STO</span>
