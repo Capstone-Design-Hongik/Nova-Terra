@@ -121,7 +121,7 @@ contract TokenFactory {
         nextPropertyId++;
 
         // maxSupply 계산 (총 가치 / 토큰 가격)
-        uint256 maxSupply = (totalValue * 1e18) / tokenPrice;
+        uint256 maxSupply = totalValue / tokenPrice;
         require(maxSupply > 0, "TokenFactory: zero supply");
 
         // PropertyToken 배포

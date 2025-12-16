@@ -41,7 +41,6 @@ contract PropertyToken is IPropertyToken {
     
     string public name;
     string public symbol;
-    uint8 public constant decimals = 18;
     uint256 public maxSupply; //최대 발행량
     uint256 public totalSupply; //현 유통중인 발행량
     bool public initialized;
