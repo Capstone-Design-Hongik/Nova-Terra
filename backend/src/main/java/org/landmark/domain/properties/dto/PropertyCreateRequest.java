@@ -27,6 +27,7 @@ public record PropertyCreateRequest(
     Long totalMonthlyRent,
     @NotNull BigDecimal totalValuation,
     @NotNull Long totalTokens,
+    @NotNull BigDecimal pricePerToken,
     BigDecimal expenseRate,
     BigDecimal feeRate
 ) {
@@ -54,6 +55,7 @@ public record PropertyCreateRequest(
           .totalMonthlyRent(totalMonthlyRent)
           .totalValuation(totalValuation)
           .totalTokens(totalTokens)
+          .pricePerToken(pricePerToken)
           .expenseRate(expenseRate)
           .feeRate(feeRate)
           .build();
