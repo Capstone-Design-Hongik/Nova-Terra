@@ -102,7 +102,7 @@ export default function Portfolio() {
   }
 
   const handleClaimMonth = (month: string, amount: number) => {
-    alert(`${month} 수익 ₩${amount.toLocaleString()}를 클레임합니다!`)
+    alert(`${month} 수익 KRWT${amount.toLocaleString()}를 클레임합니다!`)
     // TODO: 실제 클레임 로직 구현
   }
 
@@ -143,7 +143,7 @@ export default function Portfolio() {
                 </div>
                 <span className="text-sm font-medium text-gray-400">총 자산 가치</span>
               </div>
-              <div className="text-2xl font-bold text-white">₩{totalAssetValue.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">KRWT {totalAssetValue.toLocaleString()}</div>
               <div className="mt-2 flex items-center gap-1 text-xs text-[#1ABCF7]">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
@@ -163,7 +163,7 @@ export default function Portfolio() {
                 </div>
                 <span className="text-sm font-medium text-gray-400">누적 임대 수익</span>
               </div>
-              <div className="text-2xl font-bold text-white">₩{cumulativeRewards.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">KRWT {cumulativeRewards.toLocaleString()}</div>
               <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
                 <span>최근 지급: 2023.10.01</span>
               </div>
@@ -183,7 +183,7 @@ export default function Portfolio() {
                 </div>
                 <span className="flex h-2 w-2 rounded-full bg-[#1ABCF7] shadow-[0_0_5px_#1ABCF7] animate-pulse"></span>
               </div>
-              <div className="text-2xl font-bold text-white mb-1">₩{totalUnclaimedRewards.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white mb-1">KRWT {totalUnclaimedRewards.toLocaleString()}</div>
             </div>
 
             {/* Average Yield */}

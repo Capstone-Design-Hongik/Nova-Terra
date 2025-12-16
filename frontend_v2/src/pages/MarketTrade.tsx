@@ -39,9 +39,9 @@ export default function MarketTrade() {
           typeColor: getBuildingTypeColor(data.buildingType),
           image: data.coverImageUrl,
           vacancyRate: `${((1 - data.occupancyRate) * 100).toFixed(1)}%`,
-          annualYield: `₩${(data.totalMonthlyRent / 10000).toFixed(0)}만`,
-          totalValue: `₩${(data.totalValuation / 100000000).toFixed(1)}억`,
-          stoPrice: `₩${(data.totalValuation / data.totalTokens).toFixed(0)}`,
+          annualYield: `KRWT ${(data.totalMonthlyRent / 10000).toFixed(0)}만`,
+          totalValue: `KRWT ${(data.totalValuation / 100000000).toFixed(1)}억`,
+          stoPrice: `KRWT ${(data.totalValuation / data.totalTokens).toFixed(0)}`,
           fundingPercentage: 75,
           investors: 1000,
         })

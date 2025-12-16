@@ -101,15 +101,15 @@ export default function PropertyCard({
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">월 임대료</p>
-            <p className="font-medium text-[#1ABCF7]">₩{(monthlyRent / 10000).toFixed(0)}만</p>
+            <p className="font-medium text-[#1ABCF7]">KRWT {(monthlyRent / 10000).toFixed(0)}만</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">총 가치</p>
-            <p className="font-medium text-white">₩{(totalValue / 100000000).toFixed(1)}억</p>
+            <p className="font-medium text-white">KRWT {(totalValue / 100000000).toFixed(1)}억</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">STO 가격</p>
-            <p className="font-medium text-white">₩{stoPrice.toFixed(0)}</p>
+            <p className="font-medium text-white">KRWT {stoPrice.toFixed(0)}</p>
           </div>
         </div>
 

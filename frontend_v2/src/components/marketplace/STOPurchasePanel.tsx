@@ -10,6 +10,7 @@ interface STOPurchasePanelProps {
   property: {
     id: string
     name: string
+    location?: string
     stoPrice: number
   } | null
 }
@@ -53,7 +54,7 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
     setTimeout(() => setStep(1), 300)
   }
 
-  const stoPrice = `₩${property.stoPrice.toFixed(0)}`
+  const stoPrice = `KRWT ${property.stoPrice.toFixed(0)}`
   const pricePerToken = property.stoPrice
   const subtotal = quantity * pricePerToken
   const gasFee = 1500
@@ -90,7 +91,7 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
         <div className="px-8 py-12">
           {/* STO Purchase Steps */}
           {step === 1 && (
-            <STOPurchase stoPrice={stoPrice} propertyName={property.name} onNext={handleNext} />
+            <STOPurchase stoPrice={stoPrice} propertyName={property.name} propertyLocation={property.location} onNext={handleNext} />
           )}
           {step === 2 && (
             <STOConfirm
