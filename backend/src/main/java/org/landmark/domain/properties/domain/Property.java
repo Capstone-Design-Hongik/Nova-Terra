@@ -82,6 +82,9 @@ public class Property {
     @Column(name = "total_tokens", nullable = false)
     private Long totalTokens; // 발행된 총 토큰 수량
 
+    @Column(name = "price_per_token", nullable = false)
+    private BigDecimal pricePerToken; // STO 토큰 1개당 가격 (KRWT)
+
     @Column(name = "expense_rate")
     private BigDecimal expenseRate; // 운영 비용 비율
 
@@ -102,7 +105,7 @@ public class Property {
                     String direction, Integer roomCount, Integer bathroomCount,
                     Long managementFee, BigDecimal occupancyRate, String majorTenants,
                     Long totalMonthlyRent, BigDecimal totalValuation, Long totalTokens,
-                    BigDecimal expenseRate, BigDecimal feeRate) {
+                    BigDecimal pricePerToken, BigDecimal expenseRate, BigDecimal feeRate) {
 
         // 필수 값
         this.id = stoTokenAddress;
@@ -111,6 +114,7 @@ public class Property {
         this.name = name;
         this.totalValuation = totalValuation;
         this.totalTokens = totalTokens;
+        this.pricePerToken = pricePerToken;
         this.description = description;
         this.address = address;
         this.coverImageUrl = coverImageUrl;

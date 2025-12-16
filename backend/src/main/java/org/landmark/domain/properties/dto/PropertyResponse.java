@@ -26,7 +26,7 @@ public record PropertyResponse(
         String majorTenants,
         Long totalMonthlyRent,
         BigDecimal totalValuation,
-        Long totalTokens,
+        BigDecimal pricePerToken,
         BigDecimal expenseRate,
         BigDecimal feeRate,
         PropertyStatus status
@@ -52,7 +52,7 @@ public record PropertyResponse(
                 property.getMajorTenants(),
                 property.getTotalMonthlyRent(),
                 property.getTotalValuation(),
-                property.getTotalTokens(),
+                property.getPricePerToken(),
                 property.getExpenseRate(),
                 property.getFeeRate(),
                 property.getStatus()

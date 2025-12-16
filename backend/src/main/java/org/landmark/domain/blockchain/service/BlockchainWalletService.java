@@ -249,4 +249,62 @@ package org.landmark.domain.blockchain.service;
 //            throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
 //        }
 //    }
+//
+//    /*
+//     * 사용자가 보유한 STO 토큰 목록 조회
+//     * TODO: 블록체인 팀으로부터 인터페이스 스펙 받은 후 구현
+//     *
+//     * @param userWalletAddress 사용자 지갑 주소
+//     * @return 사용자가 보유한 STO 토큰 주소 목록 (propertyId로 사용됨)
+//     */
+//    public List<String> getUserHoldingProperties(String userWalletAddress) {
+//        validateInitialized();
+//
+//        log.info("사용자 보유 자산 조회 시작 - wallet: {}", userWalletAddress);
+//
+//        try {
+//            // TODO: 블록체인 팀으로부터 받을 정보
+//            // 1. 사용자가 보유한 모든 STO 토큰 목록을 조회하는 컨트랙트 함수명
+//            // 2. 함수 파라미터 (userWalletAddress 등)
+//            // 3. 반환값 형식 (STO 토큰 주소 배열 등)
+//            // 4. ABI (Application Binary Interface)
+//
+//            // 예시 구조 (실제 구현 시 수정 필요):
+//            // Function function = new Function(
+//            //     "getUserProperties",  // 함수명
+//            //     Arrays.asList(new Address(userWalletAddress)),
+//            //     Arrays.asList(new TypeReference<DynamicArray<Address>>() {})
+//            // );
+//            //
+//            // String encodedFunction = FunctionEncoder.encode(function);
+//            //
+//            // EthCall response = web3j.ethCall(
+//            //     Transaction.createEthCallTransaction(
+//            //         credentials.getAddress(),
+//            //         blockchainConfig.getRegistryContractAddress(),
+//            //         encodedFunction
+//            //     ),
+//            //     DefaultBlockParameterName.LATEST
+//            // ).send();
+//            //
+//            // List<Type> result = FunctionReturnDecoder.decode(
+//            //     response.getValue(),
+//            //     function.getOutputParameters()
+//            // );
+//            //
+//            // DynamicArray<Address> propertyAddresses = (DynamicArray<Address>) result.get(0);
+//            // return propertyAddresses.getValue().stream()
+//            //     .map(Address::toString)
+//            //     .collect(Collectors.toList());
+//
+//            log.warn("사용자 보유 자산 조회 기능은 블록체인 팀의 인터페이스 스펙이 필요합니다.");
+//            throw new BusinessException(ErrorCode.BLOCKCHAIN_INTERFACE_NOT_READY);
+//
+//        } catch (BusinessException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            log.error("사용자 보유 자산 조회 중 오류 발생 - wallet: {}", userWalletAddress, e);
+//            throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
+//        }
+//    }
 //}

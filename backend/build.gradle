@@ -33,6 +33,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// Configuration Properties
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
 	// AWS S3
 	implementation platform('software.amazon.awssdk:bom:2.20.0')
 	implementation 'software.amazon.awssdk:s3'
