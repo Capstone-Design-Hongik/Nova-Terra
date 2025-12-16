@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import STOPurchase from './STOPurchase'
-import STOConfirm from './STOConfirm'
-import STOComplete from './STOComplete'
+import STOPurchase from '../markettrade/STOPurchase'
+import STOConfirm from '../markettrade/STOConfirm'
+import STOComplete from '../markettrade/STOComplete'
 
 interface PropertyDetailProps {
   name: string
@@ -59,9 +59,8 @@ export default function PropertyDetail({
 
   const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
   const subtotal = quantity * pricePerToken
-  const platformFee = subtotal * 0.005
   const gasFee = 1500
-  const totalAmount = subtotal + platformFee + gasFee
+  const totalAmount = subtotal + gasFee
   return (
     <>
       {/* Hero Section with Property Image */}

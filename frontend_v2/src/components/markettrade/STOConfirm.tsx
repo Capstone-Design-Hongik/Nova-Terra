@@ -7,11 +7,10 @@ interface STOConfirmProps {
 }
 
 export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, onConfirm }: STOConfirmProps) {
-  const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
+  const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
-  const platformFee = subtotal * 0.005
   const gasFee = 1500
-  const total = subtotal + platformFee + gasFee
+  const total = subtotal + gasFee
   const balance = 5200000
 
   return (
@@ -70,10 +69,6 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">상품 금액 ({quantity} STO x ₩{pricePerToken.toLocaleString()})</span>
             <span className="text-white font-medium">₩{subtotal.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">플랫폼 수수료 (0.5%)</span>
-            <span className="text-white font-medium">₩{platformFee.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm">
             <div className="flex items-center gap-1 text-gray-400">

@@ -1,130 +1,116 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Topbar from '../layouts/Topbar'
-import SearchBar from '../components/SearchBar'
-import FilterBar from '../components/FilterBar'
-import PropertyCard from '../components/PropertyCard'
+import SearchBar from '../components/marketplace/SearchBar'
+import FilterBar from '../components/marketplace/FilterBar'
+import PropertyCard from '../components/marketplace/PropertyCard'
+import PropertyDetailPanel from '../components/marketplace/PropertyDetailPanel'
+import STOPurchasePanel from '../components/marketplace/STOPurchasePanel'
 import arrowdownIcon from '../assets/arrowdown.svg'
+import { getProperties, getBuildingTypeLabel, getBuildingTypeColor } from '../apis/properties'
+
+interface Property {
+  id: string
+  name: string
+  location: string
+  locationDetail: string
+  type: string
+  typeColor: string
+  image: string
+  occupancyRate: number
+  monthlyRent: number
+  totalValue: number
+  stoPrice: number
+  fundingPercentage: number
+  investors: number
+  description: string
+  highlights: string[]
+  dividendCycle: string
+  nextDividend: string
+}
 
 export default function Marketplace() {
   const [visibleCount, setVisibleCount] = useState(6)
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [purchaseProperty, setPurchaseProperty] = useState<Property | null>(null)
+  const [isPurchasePanelOpen, setIsPurchasePanelOpen] = useState(false)
+  const [properties, setProperties] = useState<Property[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const properties = [
-    {
-      id: 1,
-      name: '강남 파이낸스 허브 타워 A',
-      location: '서울, 대한민국',
-      type: '상업용',
-      typeColor: 'text-[#1ABCF7] border-[#1ABCF7]/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvW63qZV6K-N-4Usv64ZtwjFMH42E6IHDxXU3O2JMKatuPXGHcZwz-7mu07QQilkcWrw5b8wxuZnMjfBF5HUvhWxSHxhm84a_Oa_lvY-0b1dEtTV4LYJB2z4qyU52GYnnuJPJLbNhJxrUSiBo0iRV4i2dKTW7swhWBbgba6HVQFshKgVQZdGV2KlxoewkCXglSlRAXuDcz4pKppdrjPvvaIP9qgD29s-LkM_LHMGZNrIkRdIqqBCUYXyfsH_V-h_PDmgpN6O1gbx4',
-      vacancyRate: '2.5%',
-      annualYield: '6.8%',
-      totalValue: '$45M',
-      stoPrice: '$50.00',
-      fundingPercentage: 75,
-      investors: 3250,
-    },
-    {
-      id: 2,
-      name: '한남 더 힐 4단지',
-      location: '서울, 대한민국',
-      type: '주거용',
-      typeColor: 'text-blue-400 border-blue-400/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAqqeMwWAJu5M0DcbP-sp7euQ3DyaQbo7lpziImIf4gi6DfRhugIilATcqIXnSxCoJg7Bos7xM59-ZiMdx4MU5OO95cvfT7MUX1-kxpIw5jMIRXuwQm2q2wLfUVkUVtWt0pZJ0gC1E1c9wd0v8C5SnsC5c7Ws3oR_q_P5Z8Gy6I8FuO1a1nSg-OiCLOxopjBCdWBmDsmCVvUkQbmRBys6-_qU68hCwW4yI_dEaFHtPxdKg_UYOmJHT-ug9OOGLyQMol3nvSc6NpP88',
-      vacancyRate: '0.8%',
-      annualYield: '4.2%',
-      totalValue: '$12M',
-      stoPrice: '$25.00',
-      fundingPercentage: 92,
-      investors: 1102,
-    },
-    {
-      id: 3,
-      name: '인천 물류 센터 B',
-      location: '인천, 대한민국',
-      type: '산업용',
-      typeColor: 'text-purple-400 border-purple-400/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBrqVWnw7u2PA0fys35tGuTWc5vLMKSgBMQDwFWIoInHQiTcgR1S-qlRqpaDjhrKGyRe-z_BsVqlPnPIjt9fTKOcFZpG8ks1BMLt7P3Y1o2jsUP5QdaQf11ljrO7r36RUu-iJrpHu8CXjt51Nq2g5Y3Sq9OdFsB6SleXpLTgvhhrp0O98aIUmz1_SazrsEPAnC8YzbNuoDOFkiklseZr-oYeA4QF3Rp3JdNtCH21DHOyiDmht0HMgNCaUYE3k7X-8nqBEhKrfxOMUg',
-      vacancyRate: '0.0%',
-      annualYield: '8.5%',
-      totalValue: '$68M',
-      stoPrice: '$100.00',
-      fundingPercentage: 45,
-      investors: 890,
-    },
-    {
-      id: 4,
-      name: '성수 레드브릭 레인',
-      location: '서울, 대한민국',
-      type: '상가',
-      typeColor: 'text-orange-400 border-orange-400/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB1QRowud8kr-F3SmLua9cFzIUUTSMNiKJ4F6wtursITYzcg8YGEdIKbGcDXkctCntYpjVkS4SxLU8x_vaJbr_Q9tNc35UX9jUyNn1brxlGuSLKVLwYXHcht2nDGC8zGwNAv8GiU6VYQuWD8_WGHy8TZR_i6sR3XhAkW2CxyxKhTuYyI-vzaixIFm1h7pMzi_ntd0lDoCni386Q5wKdMxzmyKSjqwxJSlA5sklhmEFG7VyYXxa02jCVHu8uS0Oj7yd5FcAOK20aH2U',
-      vacancyRate: '5.0%',
-      annualYield: '5.9%',
-      totalValue: '$8.5M',
-      stoPrice: '$10.00',
-      fundingPercentage: 20,
-      investors: 450,
-    },
-    {
-      id: 5,
-      name: '여의도 테크 타워',
-      location: '서울, 대한민국',
-      type: '상업용',
-      typeColor: 'text-[#1ABCF7] border-[#1ABCF7]/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIaLY_SdQrVhDGAxBxkH_LMcld34Bi82LR3CYAFf-clDDxYJYkX9Bbra0v8znvbatyzdVCQUIKPocbMen3CMNUGv3FC_DxhG2OfB4oQC8_Gxx8pJvemVWC2Nfj0mA2ukuHA_-UMM7H3ZIZ_P8lw1-dS97bF1Ft3HXwNv6FNEmTMmq3U2oy2bpNE3XDAAF2-j8gIljfkRoiLNB_5EEEP53rBlP39w823oUECH55H9kT8DYcTH-mx0mVXIp0ET1nX2ZNCvJjrFxb_ZE',
-      vacancyRate: '1.2%',
-      annualYield: '7.1%',
-      totalValue: '$120M',
-      stoPrice: '$75.00',
-      fundingPercentage: 98,
-      investors: 5600,
-    },
-    {
-      id: 6,
-      name: '부산 그랜드 오션 뷰',
-      location: '부산, 대한민국',
-      type: '숙박시설',
-      typeColor: 'text-pink-400 border-pink-400/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7uExUQYspcffVb24n559iFGquVjyALBvs_lTBC_4KphNVjLqFwREGisvtvN1IK3un7wrWTm9Z1BZBwJ3KEBpSGCGAo3bHdI-Rz5zDqg82OrSBr7eqFTql-lc6JuhBDzeLjtciHmYXrGBxQEyhDR-nNP4H3JC4kZyE_zGl7-UXqGqkSmSENtdPYR5dCFfSry-SoKwBtmrVb8yThmQP82BbRKUZ6tyLEXvkkuxXvUB1UgjwI49i1KrZDIxt56yA3PdzAXPS5BdcCfc',
-      vacancyRate: '계절성',
-      annualYield: '9.4%',
-      totalValue: '$32M',
-      stoPrice: '$100.00',
-      fundingPercentage: 12,
-      investors: 205,
-    },
-    {
-      id: 7,
-      name: '판교 테크노밸리 A동',
-      location: '경기, 대한민국',
-      type: '상업용',
-      typeColor: 'text-[#1ABCF7] border-[#1ABCF7]/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvW63qZV6K-N-4Usv64ZtwjFMH42E6IHDxXU3O2JMKatuPXGHcZwz-7mu07QQilkcWrw5b8wxuZnMjfBF5HUvhWxSHxhm84a_Oa_lvY-0b1dEtTV4LYJB2z4qyU52GYnnuJPJLbNhJxrUSiBo0iRV4i2dKTW7swhWBbgba6HVQFshKgVQZdGV2KlxoewkCXglSlRAXuDcz4pKppdrjPvvaIP9qgD29s-LkM_LHMGZNrIkRdIqqBCUYXyfsH_V-h_PDmgpN6O1gbx4',
-      vacancyRate: '3.1%',
-      annualYield: '7.5%',
-      totalValue: '$85M',
-      stoPrice: '$60.00',
-      fundingPercentage: 65,
-      investors: 2800,
-    },
-    {
-      id: 8,
-      name: '제주 힐링 리조트',
-      location: '제주, 대한민국',
-      type: '숙박시설',
-      typeColor: 'text-pink-400 border-pink-400/30',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7uExUQYspcffVb24n559iFGquVjyALBvs_lTBC_4KphNVjLqFwREGisvtvN1IK3un7wrWTm9Z1BZBwJ3KEBpSGCGAo3bHdI-Rz5zDqg82OrSBr7eqFTql-lc6JuhBDzeLjtciHmYXrGBxQEyhDR-nNP4H3JC4kZyE_zGl7-UXqGqkSmSENtdPYR5dCFfSry-SoKwBtmrVb8yThmQP82BbRKUZ6tyLEXvkkuxXvUB1UgjwI49i1KrZDIxt56yA3PdzAXPS5BdcCfc',
-      vacancyRate: '계절성',
-      annualYield: '8.2%',
-      totalValue: '$28M',
-      stoPrice: '$80.00',
-      fundingPercentage: 55,
-      investors: 680,
-    },
-  ]
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const data = await getProperties()
+        // FUNDING 상태인 부동산만 필터링
+        const fundingProperties = data.filter(prop => prop.status === 'FUNDING')
+        const transformedProperties: Property[] = fundingProperties.map((prop) => ({
+          id: prop.id,
+          name: prop.name,
+          location: prop.address.split(' ').slice(0, 2).join(' '),
+          locationDetail: prop.address,
+          type: getBuildingTypeLabel(prop.buildingType),
+          typeColor: getBuildingTypeColor(prop.buildingType),
+          image: prop.coverImageUrl,
+          occupancyRate: prop.occupancyRate,
+          monthlyRent: prop.totalMonthlyRent,
+          totalValue: prop.totalValuation,
+          stoPrice: prop.pricePerToken,
+          fundingPercentage: 75,
+          investors: 1000,
+          description: prop.description,
+          highlights: [
+            `주요 임차인: ${prop.majorTenants}`,
+            `전용면적: ${prop.exclusiveAreaSqm}㎡`,
+            `주차 공간: ${prop.parkingSpaces}면`
+          ],
+          dividendCycle: '매월',
+          nextDividend: '15일 후'
+        }))
+        setProperties(transformedProperties)
+      } catch (error) {
+        console.error('부동산 데이터 로드 실패:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProperties()
+  }, [])
 
   const handleLoadMore = () => {
     setVisibleCount((prevCount) => prevCount + 6)
+  }
+
+  const handlePropertyClick = (property: Property) => {
+    setSelectedProperty(property)
+    setIsPanelOpen(true)
+  }
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false)
+    setTimeout(() => setSelectedProperty(null), 300)
+  }
+
+  const handlePurchaseClick = (property: Property) => {
+    setPurchaseProperty(property)
+    setIsPurchasePanelOpen(true)
+  }
+
+  const handleClosePurchasePanel = () => {
+    setIsPurchasePanelOpen(false)
+    setTimeout(() => setPurchaseProperty(null), 300)
+  }
+
+  const handleDetailPanelPurchase = () => {
+    if (selectedProperty) {
+      // Detail panel 닫기
+      setIsPanelOpen(false)
+      // Purchase panel 열기
+      setPurchaseProperty(selectedProperty)
+      setIsPurchasePanelOpen(true)
+      // Detail panel 상태 초기화
+      setTimeout(() => setSelectedProperty(null), 300)
+    }
   }
 
   const visibleProperties = properties.slice(0, visibleCount)
@@ -135,7 +121,7 @@ export default function Marketplace() {
       <Topbar isConnected={true} />
 
       <section className="relative flex flex-col items-center justify-center gap-8 overflow-hidden px-4 text-center" style={{ marginTop: '120px' }}>
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-surface-dark via-background-dark to-background-dark opacity-60"></div>
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-surface-dark via-background-dark to-background-dark opacity-60"></div>
 
         <div className="flex max-w-3xl flex-col gap-4">
           <h1 className="text-4xl font-black leading-tight tracking-tighter text-white md:text-6xl">
@@ -161,12 +147,23 @@ export default function Marketplace() {
               전체 보기 ({properties.length})
             </a>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {visibleProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
-            ))}
-          </div>
-          {hasMore && (
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1ABCF7]"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {visibleProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  {...property}
+                  onClick={() => handlePropertyClick(property)}
+                  onPurchaseClick={() => handlePurchaseClick(property)}
+                />
+              ))}
+            </div>
+          )}
+          {!loading && hasMore && (
             <div className="mt-12 flex justify-center">
               <button
                 onClick={handleLoadMore}
@@ -179,6 +176,21 @@ export default function Marketplace() {
           )}
         </div>
       </section>
+
+      {/* Property Detail Panel */}
+      <PropertyDetailPanel
+        isOpen={isPanelOpen}
+        onClose={handleClosePanel}
+        property={selectedProperty}
+        onPurchaseClick={handleDetailPanelPurchase}
+      />
+
+      {/* STO Purchase Panel */}
+      <STOPurchasePanel
+        isOpen={isPurchasePanelOpen}
+        onClose={handleClosePurchasePanel}
+        property={purchaseProperty}
+      />
     </div>
   )
 }

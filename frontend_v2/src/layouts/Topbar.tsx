@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { BrowserProvider } from 'ethers'
 import copyIcon from '../assets/copy.svg'
@@ -10,6 +10,7 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onConnectWallet, isConnected, walletAddress: externalWalletAddress }: TopbarProps) {
+  const location = useLocation()
   const [internalWalletAddress, setInternalWalletAddress] = useState<string>('')
 
   useEffect(() => {
@@ -56,25 +57,25 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
       <nav className="hidden items-center gap-8 md:flex">
         <Link
           to="/marketplace"
-          className="text-sm font-medium text-white transition-colors hover:text-primary"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/marketplace' ? 'font-bold' : 'font-medium'}`}
         >
           마켓플레이스
         </Link>
         <Link
           to="/trade"
-          className="text-sm font-medium text-white transition-colors hover:text-primary"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/trade' ? 'font-bold' : 'font-medium'}`}
         >
           거래
         </Link>
         <Link
           to="/dao"
-          className="text-sm font-medium text-white transition-colors hover:text-primary"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/dao' ? 'font-bold' : 'font-medium'}`}
         >
           DAO
         </Link>
         <Link
           to="/portfolio"
-          className="text-sm font-medium text-white transition-colors hover:text-primary"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/portfolio' ? 'font-bold' : 'font-medium'}`}
         >
           포트폴리오
         </Link>
