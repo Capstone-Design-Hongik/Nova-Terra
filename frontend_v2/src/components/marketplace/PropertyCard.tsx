@@ -15,7 +15,10 @@ interface PropertyCardProps {
   totalValue: number
   stoPrice: number
   fundingPercentage: number
-  investors: number
+  totalSupply: string
+  maxSupply: string
+  remainingSupply: string
+  symbol: string 
   onClick?: () => void
   onPurchaseClick?: () => void
 }
@@ -31,7 +34,10 @@ export default function PropertyCard({
   totalValue,
   stoPrice,
   fundingPercentage,
-  investors,
+  totalSupply,
+  maxSupply,
+  remainingSupply,
+  symbol,
   onClick,
   onPurchaseClick,
 }: PropertyCardProps) {
@@ -54,6 +60,18 @@ export default function PropertyCard({
       onClick()
     }
   }
+
+  const calculateFundingPercentage = (totalSupply: string, maxSupply: string): number => {
+    const total = Number(totalSupply)
+    const max = Number(maxSupply)
+
+    if (max === 0) return 0
+
+    return (total / max) * 100
+  }
+  const actualFundingPercentage = totalSupply && maxSupply
+      ? calculateFundingPercentage(totalSupply, maxSupply)
+      : fundingPercentage  // fallback to mock data
 
   return (
     <div
@@ -101,22 +119,22 @@ export default function PropertyCard({
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">월 임대료</p>
-            <p className="font-medium text-[#1ABCF7]">KRWT {(monthlyRent / 10000).toFixed(0)}만</p>
+            <p className="font-medium text-[#1ABCF7]">{(monthlyRent / 10000).toFixed(0)}만 KRWT</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">총 가치</p>
-            <p className="font-medium text-white">KRWT {(totalValue / 100000000).toFixed(1)}억</p>
+            <p className="font-medium text-white">{(totalValue / 100000000).toFixed(1)}억 KRWT</p>
           </div>
           <div className="bg-gray-800 p-3">
-            <p className="text-xs text-gray-400">STO 가격</p>
-            <p className="font-medium text-white">KRWT {stoPrice.toFixed(0)}</p>
+            <p className="text-xs text-gray-400">토큰당 가격</p>
+            <p className="font-medium text-white">{stoPrice.toFixed(0)} KRWT</p>
           </div>
         </div>
 
         <div className="mt-auto">
           <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-            <span>{fundingPercentage}% 펀딩됨</span>
-            <span>{investors.toLocaleString()} 투자자</span>
+            <span>{actualFundingPercentage.toFixed(1)}% 펀딩됨</span>
+            <span>잔여 {remainingSupply ? Number(remainingSupply).toLocaleString() : '0'} {symbol}  </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
             <div
@@ -128,7 +146,7 @@ export default function PropertyCard({
             onClick={handleBuyClick}
             className="cursor-pointer mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#1ABCF7] py-2.5 text-sm font-bold text-black transition-colors hover:bg-white hover:text-black"
           >
-            STO 구매
+            {symbol} 구매
           </button>
         </div>
       </div>
