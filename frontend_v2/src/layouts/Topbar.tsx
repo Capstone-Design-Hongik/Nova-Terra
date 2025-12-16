@@ -68,8 +68,8 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
           거래
         </Link>
         <Link
-          to="/dao"
-          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/dao' ? 'font-bold' : 'font-medium'}`}
+          to="/governance"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/governance' ? 'font-bold' : 'font-medium'}`}
         >
           DAO
         </Link>
