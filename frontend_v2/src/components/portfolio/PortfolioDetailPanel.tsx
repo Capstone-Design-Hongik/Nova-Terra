@@ -2,7 +2,7 @@ interface PortfolioDetailPanelProps {
   isOpen: boolean
   onClose: () => void
   asset: {
-    id: number
+    id: string
     name: string
     location: string
     image?: string
@@ -162,7 +162,7 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b border-gray-700">
                   <span className="text-gray-400">자산 ID</span>
-                  <span className="text-white font-medium">#{asset.id.toString().padStart(6, '0')}</span>
+                  <span className="text-white font-medium">#{asset.id}</span>
                 </div>
                 <div className="flex justify-between py-3 border-b border-gray-700">
                   <span className="text-gray-400">운영 상태</span>

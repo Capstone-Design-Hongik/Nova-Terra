@@ -9,7 +9,7 @@ interface ClaimHistoryPanelProps {
   isOpen: boolean
   onClose: () => void
   asset: {
-    id: number
+    id: string
     name: string
     image?: string
     unclaimedRewards: number

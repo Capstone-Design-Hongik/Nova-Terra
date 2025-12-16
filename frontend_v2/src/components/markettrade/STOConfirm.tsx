@@ -7,7 +7,7 @@ interface STOConfirmProps {
 }
 
 export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, onConfirm }: STOConfirmProps) {
-  const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
+  const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
   const gasFee = 1500
   const total = subtotal + gasFee

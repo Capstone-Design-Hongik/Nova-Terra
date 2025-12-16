@@ -1,5 +1,5 @@
 interface PortfolioAssetCardProps {
-  id: number
+  id: string
   name: string
   location: string
   image?: string
@@ -7,7 +7,7 @@ interface PortfolioAssetCardProps {
   holdingAmount: number
   currentValue: number
   unclaimedRewards: number
-  onClaim: (id: number) => void
+  onClaim: (id: string) => void
   onClick?: () => void
 }
 

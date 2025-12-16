@@ -21,6 +21,7 @@ export interface PropertyResponse {
   totalMonthlyRent: number
   totalValuation: number
   totalTokens: number
+  pricePerToken: number
   expenseRate: number
   feeRate: number
   status: 'FUNDING' | 'ACTIVE' | 'COMPLETED'
@@ -86,4 +87,25 @@ export const getBuildingTypeColor = (buildingType: PropertyResponse['buildingTyp
     FACTORY_WAREHOUSE: 'text-purple-400 border-purple-400/30',
   }
   return colorMap[buildingType]
+}
+
+export interface PortfolioResponse {
+  userId: string
+  properties: PropertyResponse[]
+}
+
+export interface PortfolioApiResponse {
+  code: number
+  message: string
+  data: PortfolioResponse
+}
+
+export const getPortfolio = async (userId: string): Promise<PropertyResponse[]> => {
+  try {
+    const response = await instance.get<PortfolioApiResponse>(`/api/v1/portfolio/${userId}`)
+    return response.data.data.properties
+  } catch (error) {
+    console.error('포트폴리오 조회 실패:', error)
+    throw error
+  }
 }

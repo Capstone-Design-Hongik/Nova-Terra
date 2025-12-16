@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { BrowserProvider } from 'ethers'
 import Topbar from '../layouts/Topbar'
 import PortfolioAssetCard from '../components/portfolio/PortfolioAssetCard'
 import PortfolioDetailPanel from '../components/portfolio/PortfolioDetailPanel'
 import ClaimHistoryPanel from '../components/portfolio/ClaimHistoryPanel'
+import { getPortfolio, type PropertyResponse } from '../apis/properties'
 
 interface Asset {
-  id: number
+  id: string
   name: string
   location: string
   image?: string
@@ -13,6 +15,7 @@ interface Asset {
   holdingAmount: number
   currentValue: number
   unclaimedRewards: number
+  propertyData: PropertyResponse
 }
 
 export default function Portfolio() {
@@ -20,44 +23,62 @@ export default function Portfolio() {
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [claimAsset, setClaimAsset] = useState<Asset | null>(null)
   const [isClaimPanelOpen, setIsClaimPanelOpen] = useState(false)
+  const [assets, setAssets] = useState<Asset[]>([])
+  const [loading, setLoading] = useState(true)
+  const [walletAddress, setWalletAddress] = useState<string>('')
 
-  const assets: Asset[] = [
-    {
-      id: 1,
-      name: '강남 파이낸스 허브 타워 A',
-      location: '대한민국 서울, 테헤란로 152',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvW63qZV6K-N-4Usv64ZtwjFMH42E6IHDxXU3O2JMKatuPXGHcZwz-7mu07QQilkcWrw5b8wxuZnMjfBF5HUvhWxSHxhm84a_Oa_lvY-0b1dEtTV4LYJB2z4qyU52GYnnuJPJLbNhJxrUSiBo0iRV4i2dKTW7swhWBbgba6HVQFshKgVQZdGV2KlxoewkCXglSlRAXuDcz4pKppdrjPvvaIP9qgD29s-LkM_LHMGZNrIkRdIqqBCUYXyfsH_V-h_PDmgpN6O1gbx4',
-      status: 'active' as const,
-      holdingAmount: 50,
-      currentValue: 3250000,
-      unclaimedRewards: 125000,
-    },
-    {
-      id: 2,
-      name: '성수 브릭 아트 센터',
-      location: '대한민국 서울, 성수이로 24',
-      status: 'active' as const,
-      holdingAmount: 120,
-      currentValue: 8400000,
-      unclaimedRewards: 120000,
-    },
-    {
-      id: 3,
-      name: '판교 테크밸리 연구소 B동',
-      location: '대한민국 성남, 판교역로 14',
-      status: 'preparing' as const,
-      holdingAmount: 200,
-      currentValue: 12000000,
-      unclaimedRewards: 0,
-    },
-  ]
+  useEffect(() => {
+    const getWalletAddress = async () => {
+      try {
+        if (typeof window.ethereum !== 'undefined') {
+          const provider = new BrowserProvider(window.ethereum)
+          const accounts = await provider.listAccounts()
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0].address)
+          }
+        }
+      } catch (error) {
+        console.error('지갑 주소 가져오기 실패:', error)
+      }
+    }
+
+    getWalletAddress()
+  }, [])
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      if (!walletAddress) return
+
+      try {
+        const properties = await getPortfolio(walletAddress)
+        const transformedAssets: Asset[] = properties.map((prop) => ({
+          id: prop.id,
+          name: prop.name,
+          location: prop.address.split(' ').slice(0, 2).join(' '),
+          image: prop.coverImageUrl,
+          status: prop.status === 'ACTIVE' ? 'active' : 'preparing',
+          holdingAmount: 50, // TODO: API에서 보유 수량 정보 추가 필요
+          currentValue: prop.pricePerToken * 50, // TODO: 실제 보유 수량으로 계산
+          unclaimedRewards: 125000, // TODO: API에서 미수령 수익 정보 추가 필요
+          propertyData: prop,
+        }))
+        setAssets(transformedAssets)
+      } catch (error) {
+        console.error('포트폴리오 데이터 로드 실패:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPortfolio()
+  }, [walletAddress])
 
   const totalAssetValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0)
   const totalUnclaimedRewards = assets.reduce((sum, asset) => sum + asset.unclaimedRewards, 0)
   const cumulativeRewards = 8340500
   const averageYield = 6.8
 
-  const handleClaim = (id: number) => {
+  const handleClaim = (id: string) => {
     const asset = assets.find(a => a.id === id)
     if (asset) {
       setClaimAsset(asset)
@@ -188,16 +209,30 @@ export default function Portfolio() {
             <span className="rounded-full bg-gray-700 px-2 py-0.5 text-xs text-gray-400">{assets.length}</span>
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {assets.map((asset) => (
-              <PortfolioAssetCard
-                key={asset.id}
-                {...asset}
-                onClaim={handleClaim}
-                onClick={() => handleAssetClick(asset)}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1ABCF7]"></div>
+            </div>
+          ) : assets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <svg className="w-16 h-16 text-gray-600 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <p className="text-gray-400 text-lg mb-2">보유한 자산이 없습니다</p>
+              <p className="text-gray-500 text-sm">마켓플레이스에서 부동산 STO를 구매해보세요</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {assets.map((asset) => (
+                <PortfolioAssetCard
+                  key={asset.id}
+                  {...asset}
+                  onClaim={handleClaim}
+                  onClick={() => handleAssetClick(asset)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -10,7 +10,7 @@ interface STOPurchaseProps {
 export default function STOPurchase({ stoPrice, maxAvailable = 4500, onNext }: STOPurchaseProps) {
   const [quantity, setQuantity] = useState(0)
 
-  const pricePerToken = parseFloat(stoPrice.replace('$', '')) * 1300
+  const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
   const gasFee = 1500
   const total = subtotal + gasFee

@@ -54,7 +54,7 @@ export default function Marketplace() {
           occupancyRate: prop.occupancyRate,
           monthlyRent: prop.totalMonthlyRent,
           totalValue: prop.totalValuation,
-          stoPrice: prop.totalValuation / prop.totalTokens,
+          stoPrice: prop.pricePerToken,
           fundingPercentage: 75,
           investors: 1000,
           description: prop.description,
