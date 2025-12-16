@@ -26,7 +26,4 @@ toss:
 # Application Settings
 app:
   cors:
-    allowed-origins: http://localhost:3000
-  swagger:
-    server-url: http://localhost:8080
-    description: Local Development Server
+    allowed-origins: http://localhost:3000,http://localhost:8080
