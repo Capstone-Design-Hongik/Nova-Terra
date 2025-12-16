@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import Topbar from '../layouts/Topbar'
 import SearchBar from '../components/marketplace/SearchBar'
-import FilterBar from '../components/FilterBar'
+import FilterBar from '../components/marketplace/FilterBar'
 import PropertyCard from '../components/marketplace/PropertyCard'
 import PropertyDetailPanel from '../components/marketplace/PropertyDetailPanel'
+import STOPurchasePanel from '../components/marketplace/STOPurchasePanel'
 import arrowdownIcon from '../assets/arrowdown.svg'
 import { getProperties, getBuildingTypeLabel, getBuildingTypeColor } from '../apis/properties'
 
@@ -31,6 +32,8 @@ export default function Marketplace() {
   const [visibleCount, setVisibleCount] = useState(6)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [purchaseProperty, setPurchaseProperty] = useState<Property | null>(null)
+  const [isPurchasePanelOpen, setIsPurchasePanelOpen] = useState(false)
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -38,7 +41,9 @@ export default function Marketplace() {
     const fetchProperties = async () => {
       try {
         const data = await getProperties()
-        const transformedProperties: Property[] = data.map((prop) => ({
+        // FUNDING 상태인 부동산만 필터링
+        const fundingProperties = data.filter(prop => prop.status === 'FUNDING')
+        const transformedProperties: Property[] = fundingProperties.map((prop) => ({
           id: prop.id,
           name: prop.name,
           location: prop.address.split(' ').slice(0, 2).join(' '),
@@ -86,6 +91,28 @@ export default function Marketplace() {
     setTimeout(() => setSelectedProperty(null), 300)
   }
 
+  const handlePurchaseClick = (property: Property) => {
+    setPurchaseProperty(property)
+    setIsPurchasePanelOpen(true)
+  }
+
+  const handleClosePurchasePanel = () => {
+    setIsPurchasePanelOpen(false)
+    setTimeout(() => setPurchaseProperty(null), 300)
+  }
+
+  const handleDetailPanelPurchase = () => {
+    if (selectedProperty) {
+      // Detail panel 닫기
+      setIsPanelOpen(false)
+      // Purchase panel 열기
+      setPurchaseProperty(selectedProperty)
+      setIsPurchasePanelOpen(true)
+      // Detail panel 상태 초기화
+      setTimeout(() => setSelectedProperty(null), 300)
+    }
+  }
+
   const visibleProperties = properties.slice(0, visibleCount)
   const hasMore = visibleCount < properties.length
 
@@ -127,7 +154,12 @@ export default function Marketplace() {
           ) : (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {visibleProperties.map((property) => (
-                <PropertyCard key={property.id} {...property} onClick={() => handlePropertyClick(property)} />
+                <PropertyCard
+                  key={property.id}
+                  {...property}
+                  onClick={() => handlePropertyClick(property)}
+                  onPurchaseClick={() => handlePurchaseClick(property)}
+                />
               ))}
             </div>
           )}
@@ -150,6 +182,14 @@ export default function Marketplace() {
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         property={selectedProperty}
+        onPurchaseClick={handleDetailPanelPurchase}
+      />
+
+      {/* STO Purchase Panel */}
+      <STOPurchasePanel
+        isOpen={isPurchasePanelOpen}
+        onClose={handleClosePurchasePanel}
+        property={purchaseProperty}
       />
     </div>
   )

@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import emptyHeartIcon from '../assets/emptyheart.svg'
-import heartIcon from '../assets/heart.svg'
-import locationIcon from '../assets/location.svg'
+import emptyHeartIcon from '../../assets/emptyheart.svg'
+import heartIcon from '../../assets/heart.svg'
+import locationIcon from '../../assets/location.svg'
 
 interface PropertyCardProps {
   id: string
@@ -18,10 +17,10 @@ interface PropertyCardProps {
   fundingPercentage: number
   investors: number
   onClick?: () => void
+  onPurchaseClick?: () => void
 }
 
 export default function PropertyCard({
-  id,
   name,
   location,
   type,
@@ -34,8 +33,8 @@ export default function PropertyCard({
   fundingPercentage,
   investors,
   onClick,
+  onPurchaseClick,
 }: PropertyCardProps) {
-  const navigate = useNavigate()
   const [isFavorite, setIsFavorite] = useState(false)
 
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -45,7 +44,9 @@ export default function PropertyCard({
 
   const handleBuyClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    navigate(`/trade/${id}`)
+    if (onPurchaseClick) {
+      onPurchaseClick()
+    }
   }
 
   const handleCardClick = () => {

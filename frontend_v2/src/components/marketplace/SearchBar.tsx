@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import searchIcon from '../assets/search.svg'
+import searchIcon from '../../assets/search.svg'
 
 export default function SearchBar() {
   const [searchQuery, setSearchQuery] = useState('')

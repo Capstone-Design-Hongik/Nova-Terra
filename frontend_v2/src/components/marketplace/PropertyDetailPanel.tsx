@@ -23,9 +23,10 @@ interface PropertyDetailPanelProps {
     dividendCycle: string
     nextDividend: string
   } | null
+  onPurchaseClick?: () => void
 }
 
-export default function PropertyDetailPanel({ isOpen, onClose, property }: PropertyDetailPanelProps) {
+export default function PropertyDetailPanel({ isOpen, onClose, property, onPurchaseClick }: PropertyDetailPanelProps) {
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -42,7 +43,11 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
   if (!property) return null
 
   const handleBuyClick = () => {
-    navigate(`/trade/${property.id}`)
+    if (onPurchaseClick) {
+      onPurchaseClick()
+    } else {
+      navigate(`/trade/${property.id}`)
+    }
   }
 
   return (

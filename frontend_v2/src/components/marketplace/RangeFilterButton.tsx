@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import arrowdownIcon from '../assets/arrowdown.svg'
+import arrowdownIcon from '../../assets/arrowdown.svg'
 
 interface RangeFilterButtonProps {
   label: string

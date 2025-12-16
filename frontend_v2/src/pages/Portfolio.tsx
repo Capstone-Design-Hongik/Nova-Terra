@@ -57,11 +57,6 @@ export default function Portfolio() {
   const cumulativeRewards = 8340500
   const averageYield = 6.8
 
-  const handleClaimAll = () => {
-    alert(`총 ₩${totalUnclaimedRewards.toLocaleString()}를 클레임합니다!`)
-    // TODO: 실제 클레임 로직 구현
-  }
-
   const handleClaim = (id: number) => {
     const asset = assets.find(a => a.id === id)
     if (asset) {
@@ -168,12 +163,6 @@ export default function Portfolio() {
                 <span className="flex h-2 w-2 rounded-full bg-[#1ABCF7] shadow-[0_0_5px_#1ABCF7] animate-pulse"></span>
               </div>
               <div className="text-2xl font-bold text-white mb-1">₩{totalUnclaimedRewards.toLocaleString()}</div>
-              <button
-                onClick={handleClaimAll}
-                className="cursor-pointer mt-2 w-full rounded-lg bg-[#1ABCF7] py-2 text-xs font-bold text-black transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-              >
-                모두 클레임 하기
-              </button>
             </div>
 
             {/* Average Yield */}

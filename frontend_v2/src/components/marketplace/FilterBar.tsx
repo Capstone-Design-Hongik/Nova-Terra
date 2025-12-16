@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import FilterButton from './FilterButton'
-import RangeFilterButton from './marketplace/RangeFilterButton'
-import sortingIcon from '../assets/sorting.svg'
+import RangeFilterButton from './RangeFilterButton'
+import sortingIcon from '../../assets/sorting.svg'
 
 export default function FilterBar() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
