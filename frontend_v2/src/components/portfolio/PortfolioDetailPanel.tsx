@@ -99,11 +99,11 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">현재 평가액</p>
-                <p className="text-2xl font-bold text-[#1ABCF7]">₩{asset.currentValue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-[#1ABCF7]">KRWT {asset.currentValue.toLocaleString()}</p>
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">투자 금액</p>
-                <p className="text-2xl font-bold text-white">₩{initialInvestment.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-white">KRWT {initialInvestment.toLocaleString()}</p>
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">수익률</p>
@@ -120,7 +120,7 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
                 <div>
                   <p className="text-sm text-gray-400 mb-1">미수령 수익금</p>
                   <p className="text-3xl font-bold text-[#1ABCF7] drop-shadow-[0_0_10px_rgba(26,188,247,0.5)]">
-                    ₩{asset.unclaimedRewards.toLocaleString()}
+                    KRWT {asset.unclaimedRewards.toLocaleString()}
                   </p>
                 </div>
                 <span className="flex h-3 w-3 rounded-full bg-[#1ABCF7] shadow-[0_0_8px_#1ABCF7] animate-pulse mt-2"></span>
@@ -129,7 +129,7 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <p className="text-xs text-gray-400 mb-1">누적 수익</p>
-                  <p className="text-lg font-bold text-white">₩{cumulativeRewards.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-white">KRWT {cumulativeRewards.toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">다음 배당일</p>
@@ -199,14 +199,14 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
                     <p className="text-white font-medium">임대 수익 수령</p>
                     <p className="text-xs text-gray-400 mt-1">2023.10.01</p>
                   </div>
-                  <span className="text-green-400 font-medium">+₩85,000</span>
+                  <span className="text-green-400 font-medium">+KRWT 85,000</span>
                 </div>
                 <div className="flex justify-between items-center py-3">
                   <div>
                     <p className="text-white font-medium">임대 수익 수령</p>
                     <p className="text-xs text-gray-400 mt-1">2023.11.01</p>
                   </div>
-                  <span className="text-green-400 font-medium">+₩85,000</span>
+                  <span className="text-green-400 font-medium">+KRWT 85,000</span>
                 </div>
               </div>
             </div>

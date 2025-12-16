@@ -129,7 +129,7 @@ export default function PropertyDetail({
 
           {/* STO Purchase */}
           {step === 1 && (
-            <STOPurchase stoPrice={stoPrice} propertyName={name} onNext={handleNext} />
+            <STOPurchase stoPrice={stoPrice} propertyName={name} propertyLocation={location} onNext={handleNext} />
           )}
           {step === 2 && (
             <STOConfirm

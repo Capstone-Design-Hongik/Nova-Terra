@@ -96,12 +96,12 @@ export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: C
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
               <p className="text-sm text-gray-400 mb-2">총 수령한 수익</p>
-              <p className="text-2xl font-bold text-white">₩{totalClaimed.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-white">KRWT {totalClaimed.toLocaleString()}</p>
             </div>
             <div className="bg-linear-to-br from-gray-800 to-[#1ABCF7]/5 border border-[#1ABCF7]/30 rounded-xl p-5">
               <p className="text-sm text-gray-400 mb-2">미수령 수익</p>
               <p className="text-2xl font-bold text-[#1ABCF7] drop-shadow-[0_0_10px_rgba(26,188,247,0.5)]">
-                ₩{totalUnclaimed.toLocaleString()}
+                KRWT {totalUnclaimed.toLocaleString()}
               </p>
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: C
                         )}
                       </div>
                       <div className="flex items-center gap-4">
-                        <p className="text-2xl font-bold text-white">₩{record.amount.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-white">KRWT {record.amount.toLocaleString()}</p>
                         {record.status === 'claimed' && record.claimedDate && (
                           <span className="text-xs text-gray-400">수령일: {record.claimedDate}</span>
                         )}

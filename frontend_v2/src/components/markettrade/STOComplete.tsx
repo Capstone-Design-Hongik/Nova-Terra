@@ -77,7 +77,7 @@ export default function STOComplete({
             <div className="h-px bg-gray-600 w-full border-dashed border-t border-gray-600/50"></div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-400">총 결제 금액</span>
-              <span className="font-bold text-xl text-white">₩{totalAmount.toLocaleString()}</span>
+              <span className="font-bold text-xl text-white">KRWT {totalAmount.toLocaleString()}</span>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 gap-2">
               <span className="text-sm text-gray-400">Transaction ID</span>

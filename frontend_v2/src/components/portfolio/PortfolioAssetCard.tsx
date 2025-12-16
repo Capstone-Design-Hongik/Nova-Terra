@@ -87,7 +87,7 @@ export default function PortfolioAssetCard({
           </div>
           <div className="text-right">
             <p className="text-[10px] text-gray-400 mb-0.5">현재 평가 가치</p>
-            <p className="text-sm font-bold text-white">₩{currentValue.toLocaleString()}</p>
+            <p className="text-sm font-bold text-white">KRWT {currentValue.toLocaleString()}</p>
           </div>
         </div>
 
@@ -99,7 +99,7 @@ export default function PortfolioAssetCard({
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-gray-400">미수령 수익금</span>
             <span className={`text-sm font-bold ${isActive ? 'text-[#1ABCF7] drop-shadow-[0_0_5px_rgba(26,188,247,0.5)]' : 'text-gray-400'}`}>
-              ₩{unclaimedRewards.toLocaleString()}
+              KRWT {unclaimedRewards.toLocaleString()}
             </span>
           </div>
           {isActive ? (
