@@ -5,17 +5,17 @@ interface PropertyDetailPanelProps {
   isOpen: boolean
   onClose: () => void
   property: {
-    id: number
+    id: string
     name: string
     location: string
     locationDetail: string
     type: string
     typeColor: string
     image: string
-    vacancyRate: string
-    annualYield: string
-    totalValue: string
-    stoPrice: string
+    occupancyRate: number
+    monthlyRent: number
+    totalValue: number
+    stoPrice: number
     fundingPercentage: number
     investors: number
     description: string
@@ -118,7 +118,7 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
               <div>
                 <p className="text-sm text-gray-400 mb-1">현재 STO 가격</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-[#1ABCF7]">{property.stoPrice}</span>
+                  <span className="text-3xl font-bold text-[#1ABCF7]">₩{property.stoPrice.toFixed(0)}</span>
                   <span className="text-sm text-green-400 font-medium flex items-center bg-green-400/10 px-1.5 rounded">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -128,8 +128,8 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-400 mb-1">예상 배당 수익률 (APY)</p>
-                <span className="text-2xl font-bold text-white">{property.annualYield}</span>
+                <p className="text-sm text-gray-400 mb-1">월 임대료</p>
+                <span className="text-2xl font-bold text-white">₩{(property.monthlyRent / 10000).toFixed(0)}만</span>
               </div>
             </div>
 
@@ -150,14 +150,14 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-black p-4 border border-gray-600 group hover:border-[#1ABCF7]/50 transition-colors">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gray-400">공실률</span>
+                  <span className="text-xs font-medium text-gray-400">임대율</span>
                   <svg className="w-4.5 h-4.5 text-[#A020F0]" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
                     <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
                   </svg>
                 </div>
-                <p className="text-xl font-bold text-white">{property.vacancyRate}</p>
-                <p className="text-[11px] text-gray-400 mt-1">시장 평균 대비 매우 낮음</p>
+                <p className="text-xl font-bold text-white">{(property.occupancyRate * 100).toFixed(1)}%</p>
+                <p className="text-[11px] text-gray-400 mt-1">시장 평균 대비 매우 높음</p>
               </div>
 
               <div className="rounded-xl bg-black p-4 border border-gray-600 group hover:border-[#1ABCF7]/50 transition-colors">
@@ -168,7 +168,7 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <p className="text-xl font-bold text-white">{property.totalValue}</p>
+                <p className="text-xl font-bold text-white">₩{(property.totalValue / 100000000).toFixed(1)}억</p>
                 <p className="text-[11px] text-gray-400 mt-1">최근 감정평가액 기준</p>
               </div>
 
@@ -198,7 +198,7 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
             {/* Investment Points */}
             <div>
               <h4 className="font-bold text-white text-lg mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-gradient-to-b from-[#1ABCF7] to-[#A020F0] rounded-full"></span>
+                <span className="w-1 h-5 bg-linear-to-b from-[#1ABCF7] to-[#A020F0] rounded-full"></span>
                 투자 매력 포인트
               </h4>
               <ul className="space-y-3">
@@ -249,16 +249,11 @@ export default function PropertyDetailPanel({ isOpen, onClose, property }: Prope
           <div className="flex gap-3">
             <button
               onClick={handleBuyClick}
-              className="flex-1 rounded-xl bg-linear-to-r from-[#1ABCF7] to-[#0090bf] py-3.5 text-center font-bold text-black text-lg shadow-lg hover:shadow-[#1ABCF7]/25 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+              className="cursor-pointer flex-1 rounded-xl bg-linear-to-r from-[#1ABCF7] to-[#0090bf] py-3.5 text-center font-bold text-black text-lg shadow-lg hover:shadow-[#1ABCF7]/25 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <span>STO 구매하기</span>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <button className="aspect-square rounded-xl border border-gray-600 bg-black flex items-center justify-center text-gray-400 hover:text-[#A020F0] hover:border-[#A020F0] transition-colors">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
               </svg>
             </button>
           </div>

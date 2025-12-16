@@ -8,6 +8,7 @@ interface PortfolioAssetCardProps {
   currentValue: number
   unclaimedRewards: number
   onClaim: (id: number) => void
+  onClick?: () => void
 }
 
 export default function PortfolioAssetCard({
@@ -20,14 +21,29 @@ export default function PortfolioAssetCard({
   currentValue,
   unclaimedRewards,
   onClaim,
+  onClick,
 }: PortfolioAssetCardProps) {
   const isActive = status === 'active'
   const statusColor = isActive ? 'text-[#1ABCF7] border-[#1ABCF7]/30' : 'text-gray-400 border-gray-600'
   const statusText = isActive ? '운영중' : '준비중'
   const hoverColor = isActive ? 'hover:border-[#1ABCF7]/50 hover:shadow-[0_0_20px_rgba(26,188,247,0.1)]' : 'hover:border-gray-600/80'
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
+  const handleClaimClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onClaim(id)
+  }
+
   return (
-    <div className={`group flex flex-col overflow-hidden rounded-2xl border border-gray-600 bg-gray-800 transition-all hover:-translate-y-1 ${hoverColor}`}>
+    <div
+      onClick={handleCardClick}
+      className={`cursor-pointer group flex flex-col overflow-hidden rounded-2xl border border-gray-600 bg-gray-800 transition-all hover:-translate-y-1 ${hoverColor}`}
+    >
       {/* Property Image */}
       <div className="relative aspect-video w-full bg-gray-900 overflow-hidden">
         <div className={`absolute left-3 top-3 z-10 rounded-full bg-black/70 px-3 py-1 text-[10px] font-bold backdrop-blur-md border ${statusColor}`}>
@@ -88,7 +104,7 @@ export default function PortfolioAssetCard({
           </div>
           {isActive ? (
             <button
-              onClick={() => onClaim(id)}
+              onClick={handleClaimClick}
               className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-[#1ABCF7] py-2.5 text-sm font-bold text-black shadow-[0_0_10px_rgba(26,188,247,0.3)] transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

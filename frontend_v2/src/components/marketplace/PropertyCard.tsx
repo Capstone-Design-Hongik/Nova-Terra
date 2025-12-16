@@ -5,16 +5,16 @@ import heartIcon from '../assets/heart.svg'
 import locationIcon from '../assets/location.svg'
 
 interface PropertyCardProps {
-  id: number
+  id: string
   name: string
   location: string
   type: string
   typeColor: string
   image: string
-  vacancyRate: string
-  annualYield: string
-  totalValue: string
-  stoPrice: string
+  occupancyRate: number
+  monthlyRent: number
+  totalValue: number
+  stoPrice: number
   fundingPercentage: number
   investors: number
   onClick?: () => void
@@ -27,8 +27,8 @@ export default function PropertyCard({
   type,
   typeColor,
   image,
-  vacancyRate,
-  annualYield,
+  occupancyRate,
+  monthlyRent,
   totalValue,
   stoPrice,
   fundingPercentage,
@@ -95,20 +95,20 @@ export default function PropertyCard({
 
         <div className="grid grid-cols-2 gap-px bg-gray-600/50 rounded-lg overflow-hidden mb-5">
           <div className="bg-gray-800 p-3">
-            <p className="text-xs text-gray-400">공실률</p>
-            <p className="font-medium text-white">{vacancyRate}</p>
+            <p className="text-xs text-gray-400">임대율</p>
+            <p className="font-medium text-white">{(occupancyRate * 100).toFixed(1)}%</p>
           </div>
           <div className="bg-gray-800 p-3">
-            <p className="text-xs text-gray-400">연 수익률</p>
-            <p className="font-medium text-[#1ABCF7]">{annualYield}</p>
+            <p className="text-xs text-gray-400">월 임대료</p>
+            <p className="font-medium text-[#1ABCF7]">₩{(monthlyRent / 10000).toFixed(0)}만</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">총 가치</p>
-            <p className="font-medium text-white">{totalValue}</p>
+            <p className="font-medium text-white">₩{(totalValue / 100000000).toFixed(1)}억</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">STO 가격</p>
-            <p className="font-medium text-white">{stoPrice}</p>
+            <p className="font-medium text-white">₩{stoPrice.toFixed(0)}</p>
           </div>
         </div>
 

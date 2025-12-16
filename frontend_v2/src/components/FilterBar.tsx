@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import FilterButton from './FilterButton'
-import RangeFilterButton from './RangeFilterButton'
+import RangeFilterButton from './marketplace/RangeFilterButton'
 import sortingIcon from '../assets/sorting.svg'
 
 export default function FilterBar() {

@@ -1,8 +1,27 @@
+import { useState } from 'react'
 import Topbar from '../layouts/Topbar'
-import PortfolioAssetCard from '../components/PortfolioAssetCard'
+import PortfolioAssetCard from '../components/portfolio/PortfolioAssetCard'
+import PortfolioDetailPanel from '../components/portfolio/PortfolioDetailPanel'
+import ClaimHistoryPanel from '../components/portfolio/ClaimHistoryPanel'
+
+interface Asset {
+  id: number
+  name: string
+  location: string
+  image?: string
+  status: 'active' | 'preparing'
+  holdingAmount: number
+  currentValue: number
+  unclaimedRewards: number
+}
 
 export default function Portfolio() {
-  const assets = [
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [claimAsset, setClaimAsset] = useState<Asset | null>(null)
+  const [isClaimPanelOpen, setIsClaimPanelOpen] = useState(false)
+
+  const assets: Asset[] = [
     {
       id: 1,
       name: '강남 파이낸스 허브 타워 A',
@@ -46,8 +65,40 @@ export default function Portfolio() {
   const handleClaim = (id: number) => {
     const asset = assets.find(a => a.id === id)
     if (asset) {
-      alert(`${asset.name}의 ₩${asset.unclaimedRewards.toLocaleString()}를 클레임합니다!`)
-      // TODO: 실제 클레임 로직 구현
+      setClaimAsset(asset)
+      setIsClaimPanelOpen(true)
+    }
+  }
+
+  const handleAssetClick = (asset: Asset) => {
+    setSelectedAsset(asset)
+    setIsPanelOpen(true)
+  }
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false)
+    setTimeout(() => setSelectedAsset(null), 300)
+  }
+
+  const handleCloseClaimPanel = () => {
+    setIsClaimPanelOpen(false)
+    setTimeout(() => setClaimAsset(null), 300)
+  }
+
+  const handleClaimMonth = (month: string, amount: number) => {
+    alert(`${month} 수익 ₩${amount.toLocaleString()}를 클레임합니다!`)
+    // TODO: 실제 클레임 로직 구현
+  }
+
+  const handleDetailPanelClaim = () => {
+    if (selectedAsset) {
+      // Detail panel 닫기
+      setIsPanelOpen(false)
+      // Claim panel 열기
+      setClaimAsset(selectedAsset)
+      setIsClaimPanelOpen(true)
+      // Detail panel 상태 초기화
+      setTimeout(() => setSelectedAsset(null), 300)
     }
   }
 
@@ -119,7 +170,7 @@ export default function Portfolio() {
               <div className="text-2xl font-bold text-white mb-1">₩{totalUnclaimedRewards.toLocaleString()}</div>
               <button
                 onClick={handleClaimAll}
-                className="mt-2 w-full rounded-lg bg-[#1ABCF7] py-2 text-xs font-bold text-black transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                className="cursor-pointer mt-2 w-full rounded-lg bg-[#1ABCF7] py-2 text-xs font-bold text-black transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
               >
                 모두 클레임 하기
               </button>
@@ -154,11 +205,28 @@ export default function Portfolio() {
                 key={asset.id}
                 {...asset}
                 onClaim={handleClaim}
+                onClick={() => handleAssetClick(asset)}
               />
             ))}
           </div>
         </div>
       </section>
+
+      {/* Portfolio Detail Panel */}
+      <PortfolioDetailPanel
+        isOpen={isPanelOpen}
+        onClose={handleClosePanel}
+        asset={selectedAsset}
+        onClaimClick={handleDetailPanelClaim}
+      />
+
+      {/* Claim History Panel */}
+      <ClaimHistoryPanel
+        isOpen={isClaimPanelOpen}
+        onClose={handleCloseClaimPanel}
+        asset={claimAsset}
+        onClaim={handleClaimMonth}
+      />
     </div>
   )
 }

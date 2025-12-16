@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import STOPurchase from './STOPurchase'
-import STOConfirm from './STOConfirm'
-import STOComplete from './STOComplete'
+import STOPurchase from '../markettrade/STOPurchase'
+import STOConfirm from '../markettrade/STOConfirm'
+import STOComplete from '../markettrade/STOComplete'
 
 interface PropertyDetailProps {
   name: string
