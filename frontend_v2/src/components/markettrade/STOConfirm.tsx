@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react'
+import { getWalletAddress } from '../../apis/blockchain/provider'
+
 interface STOConfirmProps {
   stoPrice: string
   propertyName: string
@@ -7,11 +10,31 @@ interface STOConfirmProps {
 }
 
 export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, onConfirm }: STOConfirmProps) {
+  const [walletAddress, setWalletAddress] = useState<string>('')
+
   const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
   const gasFee = 1500
   const total = subtotal + gasFee
   const balance = 5200000
+
+  useEffect(() => {
+    const fetchWalletAddress = async () => {
+      try {
+        const address = await getWalletAddress()
+        setWalletAddress(address)
+      } catch (error) {
+        console.error('지갑 주소 가져오기 실패:', error)
+      }
+    }
+
+    fetchWalletAddress()
+  }, [])
+
+  const formatAddress = (address: string) => {
+    if (!address) return '연결되지 않음'
+    return `${address.slice(0, 8)}...${address.slice(-4)}`
+  }
 
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-xl p-6">
@@ -19,7 +42,7 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
         <h2 className="text-2xl font-bold text-white">구매 내용 확인</h2>
         <div className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5 text-xs text-gray-400 border border-gray-600">
           <span className="w-2 h-2 rounded-full bg-[#1ABCF7] animate-pulse shadow-[0_0_8px_#1ABCF7]"></span>
-          KRW 스테이블 네트워크
+          GIWA Sepolia Tesnet 네트워크
         </div>
       </div>
 
@@ -106,7 +129,7 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
               </div>
               <div>
                 <p className="font-bold text-white text-sm">KRW Stable Coin</p>
-                <p className="text-xs text-gray-400">Connected Wallet: 0x4F...82a9</p>
+                <p className="text-xs text-gray-400">Connected Wallet: {formatAddress(walletAddress)}</p>
               </div>
             </div>
             <svg className="w-6 h-6 text-[#1ABCF7]" fill="currentColor" viewBox="0 0 20 20">

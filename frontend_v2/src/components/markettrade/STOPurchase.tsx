@@ -5,10 +5,11 @@ interface STOPurchaseProps {
   propertyName: string
   propertyLocation?: string
   maxAvailable?: number
+  symbol: string
   onNext: (quantity: number) => void
 }
 
-export default function STOPurchase({ stoPrice, propertyName, propertyLocation, maxAvailable = 4500, onNext }: STOPurchaseProps) {
+export default function STOPurchase({ stoPrice, propertyName, propertyLocation, maxAvailable = 4500, symbol, onNext }: STOPurchaseProps) {
   const [quantity, setQuantity] = useState(0)
 
   const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
@@ -27,10 +28,10 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-xl p-6">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-white">STO 토큰 구매</h2>
+        <h2 className="text-2xl font-bold text-white">{symbol} 토큰 구매</h2>
         <div className="flex items-center gap-2 rounded-full bg-black px-3 py-1.5 text-xs text-gray-400 border border-gray-600">
           <span className="w-2 h-2 rounded-full bg-[#1ABCF7] animate-pulse shadow-[0_0_8px_#1ABCF7]"></span>
-          KRW 스테이블 네트워크
+          GIWA Sepolia Tesnet 네트워크
         </div>
       </div>
 
@@ -93,8 +94,8 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-400 mb-0.5">1 STO 토큰 가격</p>
-                <p className="text-2xl font-bold text-white">KRWT {pricePerToken.toLocaleString()}</p>
+                <p className="text-xs text-gray-400 mb-0.5">1 {symbol} 토큰 가격</p>
+                <p className="text-2xl font-bold text-white">{pricePerToken.toLocaleString()} KRWT</p>
               </div>
             </div>
             <div className="text-right">
@@ -111,7 +112,7 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
         {/* Quantity Input */}
         <div>
           <label className="block text-sm font-medium text-gray-400 mb-2">
-            구매 수량 (STO)
+            구매 수량 ({symbol})
           </label>
           <div className="relative group">
             <input
@@ -132,12 +133,12 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
               }}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-right">
-              <span className="block text-sm font-bold text-white">STO</span>
-              <span className="block text-xs text-gray-400">~KRWT {subtotal.toLocaleString()}</span>
+              <span className="block text-sm font-bold text-white">{symbol}</span>
+              <span className="block text-xs text-gray-400">~{subtotal.toLocaleString()} KRWT</span>
             </div>
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
-            <span>구매 가능: {maxAvailable.toLocaleString()} STO</span>
+            <span>구매 가능: {maxAvailable.toLocaleString()} {symbol}</span>
             <button
               onClick={handleMaxClick}
               className="text-[#1ABCF7] hover:text-white transition-colors"
@@ -150,8 +151,8 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
         {/* Price Summary */}
         <div className="rounded-xl bg-black/50 p-4 border border-gray-600 space-y-3 backdrop-blur-sm">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">소계 ({quantity} STO x KRWT {pricePerToken.toLocaleString()})</span>
-            <span className="text-white font-medium">KRWT {subtotal.toLocaleString()}</span>
+            <span className="text-gray-400">소계 ({quantity} {symbol} x {pricePerToken.toLocaleString()} KRWT)</span>
+            <span className="text-white font-medium">{subtotal.toLocaleString()} KRWT</span>
           </div>
           <div className="flex justify-between text-sm">
             <div className="flex items-center gap-1 text-gray-400">
@@ -160,15 +161,15 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
               </svg>
             </div>
-            <span className="text-white font-medium">~KRWT {gasFee.toLocaleString()} (KRW Stable)</span>
+            <span className="text-white font-medium">~ {gasFee.toLocaleString()}KRWT</span>
           </div>
           <div className="border-t border-gray-600 pt-3 mt-3 flex justify-between items-center">
             <span className="text-base font-bold text-white">총 예상 비용</span>
             <div className="text-right">
               <span className="block text-xl font-bold text-[#1ABCF7] drop-shadow-[0_0_8px_rgba(26,188,247,0.3)]">
-                KRWT {total.toLocaleString()}
+                {total.toLocaleString()} KRWT
               </span>
-              <span className="block text-xs text-gray-400">KRW Coin 결제</span>
+              <span className="block text-xs text-gray-400">KRWT 결제</span>
             </div>
           </div>
         </div>
@@ -183,7 +184,7 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
               : 'cursor-pointer bg-[#1ABCF7] text-black shadow-[0_0_20px_rgba(26,188,247,0.4)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] hover:-translate-y-0.5'
           }`}
         >
-          {quantity === 0 ? '수량을 입력해주세요' : '구매 진행하기 (KRW)'}
+          {quantity === 0 ? '수량을 입력해주세요' : '구매 진행하기'}
         </button>
 
         <p className="text-center text-xs text-gray-400 mt-4">

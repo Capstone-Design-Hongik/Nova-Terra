@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import STOPurchase from '../markettrade/STOPurchase'
 import STOConfirm from '../markettrade/STOConfirm'
 import STOComplete from '../markettrade/STOComplete'
+import { buyPropertyToken } from '../../apis/blockchain/contracts/propertyToken'
 
 interface STOPurchasePanelProps {
   isOpen: boolean
@@ -13,13 +14,14 @@ interface STOPurchasePanelProps {
     location?: string
     stoPrice: number
   } | null
+  symbol: string
 }
 
-export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurchasePanelProps) {
+export default function STOPurchasePanel({ isOpen, onClose, property, symbol }: STOPurchasePanelProps) {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [quantity, setQuantity] = useState(10)
-  const [transactionId] = useState('0x7f3a...9c2b1e4')
+  const [transactionId, setTransactionId] = useState('0x7f3a...9c2b1e4')
 
   if (!property) return null
 
@@ -32,8 +34,30 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
     setStep(1)
   }
 
-  const handleConfirm = () => {
-    setStep(3)
+  const handleConfirm = async () => {
+    try {
+      // 1. 로딩 상태 표시 (선택사항)
+      // setIsLoading(true)
+
+      // 2. buy 함수 호출
+      const txHash = await buyPropertyToken(
+        property.id,  // 컨트랙트 주소 필요
+        quantity                    // 구매 수량
+      )
+
+      // 3. 트랜잭션 ID 저장
+      setTransactionId(txHash)
+
+      // 4. 완료 단계로 이동
+      setStep(3)
+
+    } catch (error) {
+      console.error('구매 실패:', error)
+      // 에러 처리 (alert, toast 등)
+      alert('구매 중 오류가 발생했습니다: ' + (error as Error).message)
+    } finally {
+      // setIsLoading(false)
+    }
   }
 
   const handleViewPortfolio = () => {
@@ -54,7 +78,7 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
     setTimeout(() => setStep(1), 300)
   }
 
-  const stoPrice = `KRWT ${property.stoPrice.toFixed(0)}`
+  const stoPrice = `${property.stoPrice.toFixed(0)} KRWT`
   const pricePerToken = property.stoPrice
   const subtotal = quantity * pricePerToken
   const gasFee = 1500
@@ -91,7 +115,7 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
         <div className="px-8 py-12">
           {/* STO Purchase Steps */}
           {step === 1 && (
-            <STOPurchase stoPrice={stoPrice} propertyName={property.name} propertyLocation={property.location} onNext={handleNext} />
+            <STOPurchase stoPrice={stoPrice} propertyName={property.name} propertyLocation={property.location} symbol={symbol} onNext={handleNext} />
           )}
           {step === 2 && (
             <STOConfirm
@@ -110,6 +134,7 @@ export default function STOPurchasePanel({ isOpen, onClose, property }: STOPurch
               transactionId={transactionId}
               onViewPortfolio={handleViewPortfolio}
               onExploreMore={handleExploreMore}
+              symbol={symbol}
             />
           )}
         </div>
