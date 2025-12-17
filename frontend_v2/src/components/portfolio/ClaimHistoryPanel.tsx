@@ -24,14 +24,6 @@ export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: C
   const claimRecords: ClaimRecord[] = [
     { month: '2024년 1월', amount: 85000, status: 'claimed', claimedDate: '2024.02.01' },
     { month: '2024년 2월', amount: 85000, status: 'claimed', claimedDate: '2024.03.01' },
-    { month: '2024년 3월', amount: 85000, status: 'claimed', claimedDate: '2024.04.01' },
-    { month: '2024년 4월', amount: 90000, status: 'claimed', claimedDate: '2024.05.01' },
-    { month: '2024년 5월', amount: 90000, status: 'claimed', claimedDate: '2024.06.01' },
-    { month: '2024년 6월', amount: 95000, status: 'claimed', claimedDate: '2024.07.01' },
-    { month: '2024년 7월', amount: 95000, status: 'claimed', claimedDate: '2024.08.01' },
-    { month: '2024년 8월', amount: 100000, status: 'claimed', claimedDate: '2024.09.01' },
-    { month: '2024년 9월', amount: 105000, status: 'claimed', claimedDate: '2024.10.01' },
-    { month: '2024년 10월', amount: 110000, status: 'claimed', claimedDate: '2024.11.01' },
     { month: '2024년 11월', amount: 120000, status: 'unclaimed' },
     { month: '2024년 12월', amount: 125000, status: 'unclaimed' },
   ]
@@ -170,7 +162,6 @@ export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: C
               <div className="text-sm text-gray-300">
                 <p className="font-medium mb-1">안내</p>
                 <ul className="space-y-1 text-gray-400">
-                  <li>• 매월 1일에 전월 임대 수익이 발생합니다.</li>
                   <li>• 클레임은 발생 후 언제든지 가능합니다.</li>
                   <li>• 클레임 시 가스비가 발생할 수 있습니다.</li>
                 </ul>
