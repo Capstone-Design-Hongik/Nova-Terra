@@ -5,6 +5,7 @@ import GovernanceProposalPanel from '../components/governance/GovernanceProposal
 import VotingPowerCard from '../components/governance/VotingPowerCard'
 import DelegationCard from '../components/governance/DelegationCard'
 import VotingPowerPanel from '../components/governance/VotingPowerPanel'
+import DelegationPanel from '../components/governance/DelegationPanel'
 
 interface Property {
   id: string
@@ -42,6 +43,7 @@ export default function Governance() {
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<PropertyInfo | null>(null)
   const [isVotingPowerPanelOpen, setIsVotingPowerPanelOpen] = useState(false)
+  const [isDelegationPanelOpen, setIsDelegationPanelOpen] = useState(false)
 
   const properties: Property[] = [
     {
@@ -178,7 +180,7 @@ export default function Governance() {
             onClick={() => setIsVotingPowerPanelOpen(true)}
             isActive={isVotingPowerPanelOpen}
           />
-          <DelegationCard />
+          <DelegationCard onClick={() => setIsDelegationPanelOpen(true)} />
         </div>
 
         {/* Filter and Search Bar */}
@@ -268,6 +270,12 @@ export default function Governance() {
       <VotingPowerPanel
         isOpen={isVotingPowerPanelOpen}
         onClose={() => setIsVotingPowerPanelOpen(false)}
+      />
+
+      {/* Delegation Panel */}
+      <DelegationPanel
+        isOpen={isDelegationPanelOpen}
+        onClose={() => setIsDelegationPanelOpen(false)}
       />
     </div>
   )
