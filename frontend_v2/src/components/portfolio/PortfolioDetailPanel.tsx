@@ -99,11 +99,11 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">현재 평가액</p>
-                <p className="text-2xl font-bold text-[#1ABCF7]">KRWT {asset.currentValue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-[#1ABCF7]">{asset.currentValue.toLocaleString()} KRWT</p>
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">투자 금액</p>
-                <p className="text-2xl font-bold text-white">KRWT {initialInvestment.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-white">{initialInvestment.toLocaleString()} KRWT</p>
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">수익률</p>
@@ -176,9 +176,9 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
                 </div>
                 <div className="flex justify-between py-3">
                   <span className="text-gray-400">블록체인 네트워크</span>
-                  <span className="text-white font-medium">Ethereum Mainnet</span>
+                  <span className="text-white font-medium">GIWA Sepolia Testnet</span>
                 </div>
-              </div>
+              </div>  
             </div>
           </div>
 

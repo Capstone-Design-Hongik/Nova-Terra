@@ -133,8 +133,8 @@ export default function PropertyCard({
 
         <div className="mt-auto">
           <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+            <span>잔여 {remainingSupply ? Number(remainingSupply).toLocaleString() : '0'} {symbol} </span>
             <span>{actualFundingPercentage.toFixed(1)}% 펀딩됨</span>
-            <span>잔여 {remainingSupply ? Number(remainingSupply).toLocaleString() : '0'} {symbol}  </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
             <div

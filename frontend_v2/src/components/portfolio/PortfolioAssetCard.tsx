@@ -87,7 +87,7 @@ export default function PortfolioAssetCard({
           </div>
           <div className="text-right">
             <p className="text-[10px] text-gray-400 mb-0.5">현재 평가 가치</p>
-            <p className="text-sm font-bold text-white">KRWT {currentValue.toLocaleString()}</p>
+            <p className="text-sm font-bold text-white">{currentValue.toLocaleString()} KRWT</p>
           </div>
         </div>
 

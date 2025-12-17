@@ -6,6 +6,7 @@ import { getOnchainIdInfo, getClaim, hasClaim, isValidClaim } from '../apis/bloc
 import { getDividendDistributorBasicInfo, getDividendInfo, getDividendIds, getClaimableDividend, getTotalClaimable, getDividendDistributorFullInfo } from '../apis/blockchain/contracts/dividendDistributor'
 import { getGovernanceTokenBasicInfo, getVotingPower, getPastVotingPower, getGovernanceTokenFullInfo } from '../apis/blockchain/contracts/governanceToken'
 import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals, getActiveProposals, getGovernanceFullInfo } from '../apis/blockchain/contracts/governance'
+import { getIdentityRegistryBasicInfo, getIdentityAddress, isRegistered, isVerified, getIdentityInfo, getAllRegisteredWallets, getAllRegisteredIdentities, getMyIdentityInfo, getIdentityRegistryFullInfo } from '../apis/blockchain/contracts/identityRegistry'
 
   export default function BlockchainTest() {
     const [contractAddress, setContractAddress] = useState('')
@@ -42,6 +43,15 @@ import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals
     const [governanceResult, setGovernanceResult] = useState<any>(null)
     const [governanceError, setGovernanceError] = useState('')
     const [governanceLoading, setGovernanceLoading] = useState(false)
+
+    // IdentityRegistry 입력
+    const [identityRegistryAddress, setIdentityRegistryAddress] = useState('')
+    const [walletToCheck, setWalletToCheck] = useState('')
+
+    // IdentityRegistry 결과
+    const [identityResult, setIdentityResult] = useState<any>(null)
+    const [identityError, setIdentityError] = useState('')
+    const [identityLoading, setIdentityLoading] = useState(false)
 
     // -1. 네트워크 전환 (Giwa Sepolia로 강제 전환)
     const handleSwitchNetwork = async () => {
@@ -838,6 +848,208 @@ import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals
       }
     }
 
+    // ============================================
+    //    IdentityRegistry 테스트 함수들
+    // ============================================
+
+    // 24. IdentityRegistry 기본 정보 테스트
+    const testIdentityRegistryBasicInfo = async () => {
+      if (!identityRegistryAddress) {
+        alert('IdentityRegistry 컨트랙트 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const info = await getIdentityRegistryBasicInfo(identityRegistryAddress)
+        setIdentityResult(info)
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 25. ONCHAINID 주소 조회
+    const testGetIdentityAddress = async () => {
+      if (!identityRegistryAddress || !walletToCheck) {
+        alert('IdentityRegistry 주소와 조회할 지갑 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const identityAddr = await getIdentityAddress(identityRegistryAddress, walletToCheck)
+        setIdentityResult({ wallet: walletToCheck, identityAddress: identityAddr })
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 26. 등록 여부 확인
+    const testIsRegistered = async () => {
+      if (!identityRegistryAddress || !walletToCheck) {
+        alert('IdentityRegistry 주소와 조회할 지갑 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const registered = await isRegistered(identityRegistryAddress, walletToCheck)
+        setIdentityResult({ wallet: walletToCheck, isRegistered: registered })
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 27. 검증 여부 확인
+    const testIsVerified = async () => {
+      if (!identityRegistryAddress || !walletToCheck) {
+        alert('IdentityRegistry 주소와 조회할 지갑 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const verified = await isVerified(identityRegistryAddress, walletToCheck)
+        setIdentityResult({ wallet: walletToCheck, isVerified: verified })
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 28. 지갑 정보 조회
+    const testGetIdentityInfo = async () => {
+      if (!identityRegistryAddress || !walletToCheck) {
+        alert('IdentityRegistry 주소와 조회할 지갑 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const info = await getIdentityInfo(identityRegistryAddress, walletToCheck)
+        setIdentityResult(info)
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 29. 등록된 지갑 목록
+    const testGetAllRegisteredWallets = async () => {
+      if (!identityRegistryAddress) {
+        alert('IdentityRegistry 컨트랙트 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const wallets = await getAllRegisteredWallets(identityRegistryAddress)
+        setIdentityResult({ wallets, count: wallets.length })
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 30. 등록된 지갑 상세 정보
+    const testGetAllRegisteredIdentities = async () => {
+      if (!identityRegistryAddress) {
+        alert('IdentityRegistry 컨트랙트 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const identities = await getAllRegisteredIdentities(identityRegistryAddress)
+        setIdentityResult({ identities, count: identities.length })
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 31. 내 정보 (지갑 필요)
+    const testGetMyIdentityInfo = async () => {
+      if (!identityRegistryAddress) {
+        alert('IdentityRegistry 컨트랙트 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const info = await getMyIdentityInfo(identityRegistryAddress)
+        setIdentityResult(info)
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
+    // 32. 전체 정보 (지갑 필요)
+    const testIdentityRegistryFullInfo = async () => {
+      if (!identityRegistryAddress) {
+        alert('IdentityRegistry 컨트랙트 주소를 입력하세요')
+        return
+      }
+
+      setIdentityLoading(true)
+      setIdentityError('')
+      setIdentityResult(null)
+
+      try {
+        const info = await getIdentityRegistryFullInfo(identityRegistryAddress)
+        setIdentityResult(info)
+      } catch (err: any) {
+        console.error('❌ 에러:', err)
+        setIdentityError(err.message)
+      } finally {
+        setIdentityLoading(false)
+      }
+    }
+
     return (
       <div className="min-h-screen bg-black text-white p-8">
         <div className="max-w-4xl mx-auto">
@@ -1370,6 +1582,125 @@ import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals
             )}
           </div>
 
+          {/* IdentityRegistry 테스트 섹션 */}
+          <div className="mt-12 border-t border-gray-600 pt-8">
+            <h2 className="text-2xl font-bold mb-6">🔐 IdentityRegistry 테스트</h2>
+
+            {/* IdentityRegistry 컨트랙트 주소 입력 */}
+            <div className="mb-6">
+              <label className="block font-semibold mb-2">
+                IdentityRegistry 컨트랙트 주소:
+              </label>
+              <input
+                type="text"
+                value={identityRegistryAddress}
+                onChange={(e) => setIdentityRegistryAddress(e.target.value)}
+                placeholder="0x..."
+                className="w-full p-3 bg-gray-700 text-white rounded border border-gray-600 focus:border-[#1ABCF7] focus:outline-none"
+              />
+            </div>
+
+            {/* 조회할 지갑 주소 입력 */}
+            <div className="mb-6">
+              <label className="block font-semibold mb-2">
+                조회할 지갑 주소 (선택사항):
+              </label>
+              <input
+                type="text"
+                value={walletToCheck}
+                onChange={(e) => setWalletToCheck(e.target.value)}
+                placeholder="0x... (비워두면 내 지갑 사용)"
+                className="w-full p-3 bg-gray-700 text-white rounded border border-gray-600 focus:border-[#1ABCF7] focus:outline-none"
+              />
+            </div>
+
+            {/* IdentityRegistry 테스트 버튼들 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <button
+                onClick={testIdentityRegistryBasicInfo}
+                className="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣4️⃣ 기본 정보
+              </button>
+              <button
+                onClick={testGetIdentityAddress}
+                className="cursor-pointer bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣5️⃣ ONCHAINID 주소
+              </button>
+              <button
+                onClick={testIsRegistered}
+                className="cursor-pointer bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣6️⃣ 등록 여부
+              </button>
+              <button
+                onClick={testIsVerified}
+                className="cursor-pointer bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣7️⃣ 검증 여부
+              </button>
+              <button
+                onClick={testGetIdentityInfo}
+                className="cursor-pointer bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣8️⃣ 지갑 정보
+              </button>
+              <button
+                onClick={testGetAllRegisteredWallets}
+                className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                2️⃣9️⃣ 등록 지갑 목록
+              </button>
+              <button
+                onClick={testGetAllRegisteredIdentities}
+                className="cursor-pointer bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                3️⃣0️⃣ 등록 지갑 상세
+              </button>
+              <button
+                onClick={testGetMyIdentityInfo}
+                className="cursor-pointer bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                3️⃣1️⃣ 내 정보 (지갑)
+              </button>
+              <button
+                onClick={testIdentityRegistryFullInfo}
+                className="cursor-pointer bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                3️⃣2️⃣ 전체 정보 (지갑)
+              </button>
+            </div>
+
+            {/* Loading */}
+            {identityLoading && (
+              <div className="bg-yellow-900 border border-yellow-600 rounded p-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400"></div>
+                  <span>IdentityRegistry 테스트 중... (F12 → Console 탭 확인)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {identityError && (
+              <div className="bg-red-900 border border-red-600 rounded p-4 mb-4">
+                <h3 className="font-bold mb-2">❌ IdentityRegistry 에러 발생</h3>
+                <pre className="text-sm overflow-auto">{identityError}</pre>
+              </div>
+            )}
+
+            {/* Result */}
+            {identityResult && (
+              <div className="bg-gray-800 border border-gray-600 rounded p-4 mb-4">
+                <h3 className="font-bold mb-2 text-green-400">✅ IdentityRegistry 성공! (F12 → Console에서도 확인)</h3>
+                <pre className="text-sm overflow-auto bg-black p-4 rounded">
+                  {JSON.stringify(identityResult, null, 2)}
+                </pre>
+              </div>
+            )}
+          </div>
+
           {/* 안내 */}
           <div className="mt-8 bg-gray-800 border border-gray-600
   rounded p-6">
@@ -1436,6 +1767,23 @@ import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals
               </ol>
             </div>
 
+            <div className="border-t border-gray-600 pt-4 mt-4">
+              <h4 className="font-semibold text-white mb-2">🔐 IdentityRegistry 테스트:</h4>
+              <ol className="list-decimal list-inside space-y-2 text-sm">
+                <li>IdentityRegistry 컨트랙트 주소 입력</li>
+                <li>"2️⃣4️⃣ 기본 정보" 버튼 클릭 → Owner, Registry 주소, 등록 개수 확인</li>
+                <li>"2️⃣9️⃣ 등록 지갑 목록" 버튼 클릭 → 모든 등록된 지갑 주소 확인</li>
+                <li>"3️⃣0️⃣ 등록 지갑 상세" 버튼 클릭 → 등록된 지갑들의 상세 정보 (등록/검증 여부 포함)</li>
+                <li>조회할 지갑 주소 입력 후:</li>
+                <li>"2️⃣5️⃣ ONCHAINID 주소" 버튼 클릭 → 해당 지갑의 ONCHAINID 컨트랙트 주소</li>
+                <li>"2️⃣6️⃣ 등록 여부" 버튼 클릭 → 해당 지갑 등록 여부 확인</li>
+                <li>"2️⃣7️⃣ 검증 여부" 버튼 클릭 → 해당 지갑 검증 여부 (모든 claim 유효성)</li>
+                <li>"2️⃣8️⃣ 지갑 정보" 버튼 클릭 → 지갑 전체 정보 (등록/검증/ONCHAINID)</li>
+                <li>"3️⃣1️⃣ 내 정보" 버튼 클릭 → 내 지갑 정보 (지갑 필요)</li>
+                <li>"3️⃣2️⃣ 전체 정보" 버튼 클릭 → 기본 정보 + 내 정보 (지갑 필요)</li>
+              </ol>
+            </div>
+
             <div className="mt-4 pt-4 border-t border-gray-600">
               <p className="text-xs text-gray-400">
                 💡 Tip: chainId가 43113 (Avalanche)가 아닌 91342 (Giwa Sepolia)여야 합니다!
@@ -1444,6 +1792,8 @@ import { getGovernanceBasicInfo, getProposalInfo, checkHasVoted, getAllProposals
                 <br/>
                 <br/>
                 📌 ONCHAINID는 투자자별 신원 증명 컨트랙트입니다. KYC, AML 등의 Claim을 저장하고 검증합니다.
+                <br/>
+                📌 IdentityRegistry는 지갑 주소 ↔ ONCHAINID 연결 컨트랙트입니다. 투자자의 신원을 매핑하고 검증 상태를 관리합니다.
                 <br/>
                 📌 DividendDistributor는 임대수익 배당 컨트랙트입니다. PropertyToken 스냅샷 기반으로 배당금을 분배합니다.
                 <br/>

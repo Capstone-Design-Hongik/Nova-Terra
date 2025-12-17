@@ -3,6 +3,7 @@ interface STOCompleteProps {
   quantity: number
   totalAmount: number
   transactionId: string
+  symbol: string
   onViewPortfolio: () => void
   onExploreMore: () => void
 }
@@ -12,6 +13,7 @@ export default function STOComplete({
   quantity,
   totalAmount,
   transactionId,
+  symbol,
   onViewPortfolio,
   onExploreMore,
 }: STOCompleteProps) {
@@ -72,19 +74,25 @@ export default function STOComplete({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-400">구매 수량</span>
-              <span className="font-bold text-[#1ABCF7]">{quantity} STO</span>
+              <span className="font-bold text-[#1ABCF7]">{quantity} {symbol}</span>
             </div>
             <div className="h-px bg-gray-600 w-full border-dashed border-t border-gray-600/50"></div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-400">총 결제 금액</span>
-              <span className="font-bold text-xl text-white">KRWT {totalAmount.toLocaleString()}</span>
+              <span className="font-bold text-xl text-white">{totalAmount.toLocaleString()} KRWT</span>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 gap-2">
               <span className="text-sm text-gray-400">Transaction ID</span>
               <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-1.5 border border-gray-600">
-                <span className="font-mono text-xs text-[#1ABCF7]/80 truncate max-w-37.5 sm:max-w-50">
+                <a
+                  href={`https://sepolia-explorer.giwa.io/tx/${transactionId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs text-[#1ABCF7]/80 hover:text-[#1ABCF7] truncate max-w-37.5 sm:max-w-50 transition-colors cursor-pointer"
+                  title="Explorer에서 보기"
+                >
                   {transactionId}
-                </span>
+                </a>
                 <button
                   onClick={handleCopyTxId}
                   className="text-gray-400 hover:text-white transition-colors"
@@ -119,7 +127,9 @@ export default function STOComplete({
         <div className="mt-6">
           <a
             className="text-xs text-gray-400 hover:text-[#1ABCF7] transition-colors flex items-center justify-center gap-1 group"
-            href="#"
+            href={`https://sepolia-explorer.giwa.io/tx/${transactionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             블록체인에서 거래 내역 확인하기
             <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="currentColor" viewBox="0 0 20 20">
