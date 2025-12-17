@@ -90,12 +90,12 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
               onClick={handleCopyAddress}
               className="cursor-pointer flex flex-row items-center justify-center gap-2.5 rounded-full bg-[#1ABCF7] py-3 pr-5 pl-7 text-sm font-bold text-black transition-transform hover:scale-105 active:scale-95"
             >
-              <img src={copyIcon} alt="copy" className="w-4 h-4" />
+              <img src={copyIcon} alt="copy" className="cursor-pointer w-4 h-4" />
               {formatAddress(walletAddress)}
             </button>
             <button
               onClick={() => setIsIDModalOpen(true)}
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border-2 border-[#1ABCF7] text-white transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+              className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border-2 border-[#1ABCF7] text-white transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
               title="온체인 신분증 보기"
             >
               <svg
