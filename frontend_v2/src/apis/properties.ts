@@ -114,3 +114,59 @@ export const getPortfolio = async (userId: string): Promise<HoldingResponse[]> =
     throw error
   }
 }
+
+// Governance Proposals
+export type ProposalStatus = 'PENDING' | 'ACTIVE' | 'PASSED' | 'FAILED' | 'CANCELLED'
+
+export interface ProposalResponse {
+  id: string
+  title: string
+  description: string
+  propertyId: string
+  propertyName: string
+  proposerName: string
+  startAt: number
+  endTime: number
+  choices: string[]
+  status: ProposalStatus
+}
+
+export interface ProposalsApiResponse {
+  code: number
+  message: string
+  data: ProposalResponse[]
+}
+
+export const getProposalsByProperty = async (propertyId: string): Promise<ProposalResponse[]> => {
+  try {
+    const response = await instance.get<ProposalsApiResponse>('/api/v1/governance/proposals', {
+      params: { propertyId }
+    })
+    return response.data.data
+  } catch (error) {
+    console.error('제안 목록 조회 실패:', error)
+    throw error
+  }
+}
+
+export const getProposalStatusLabel = (status: ProposalStatus): string => {
+  const statusMap: Record<ProposalStatus, string> = {
+    PENDING: '유예 기간',
+    ACTIVE: '진행 중',
+    PASSED: '통과됨',
+    FAILED: '부결됨',
+    CANCELLED: '취소됨',
+  }
+  return statusMap[status]
+}
+
+export const mapProposalStatusToUI = (status: ProposalStatus): 'active' | 'passed' | 'rejected' | 'executed' => {
+  const statusMap: Record<ProposalStatus, 'active' | 'passed' | 'rejected' | 'executed'> = {
+    PENDING: 'active',
+    ACTIVE: 'active',
+    PASSED: 'passed',
+    FAILED: 'rejected',
+    CANCELLED: 'rejected',
+  }
+  return statusMap[status]
+}

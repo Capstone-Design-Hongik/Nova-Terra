@@ -49,7 +49,7 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
   }
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white bg-background-dark/95 px-6 py-4 backdrop-blur-md lg:px-10">
+    <header className="sticky top-0 z-100 flex items-center justify-between border-b border-white bg-background-dark/95 px-6 py-4 backdrop-blur-md lg:px-10">
       <div className="flex items-center gap-4">
         <h2 className="text-xl font-bold leading-tight tracking-tight text-white">
           NovaTerra
@@ -70,8 +70,8 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
           거래
         </Link>
         <Link
-          to="/dao"
-          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/dao' ? 'font-bold' : 'font-medium'}`}
+          to="/governance"
+          className={`text-sm text-white transition-colors hover:text-primary ${location.pathname === '/governance' ? 'font-bold' : 'font-medium'}`}
         >
           DAO
         </Link>
