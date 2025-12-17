@@ -89,9 +89,14 @@ export const getBuildingTypeColor = (buildingType: PropertyResponse['buildingTyp
   return colorMap[buildingType]
 }
 
+export interface HoldingResponse {
+  property: PropertyResponse
+  amount: number
+}
+
 export interface PortfolioResponse {
   userId: string
-  holdings: PropertyResponse[]
+  holdings: HoldingResponse[]
 }
 
 export interface PortfolioApiResponse {
@@ -100,7 +105,7 @@ export interface PortfolioApiResponse {
   data: PortfolioResponse
 }
 
-export const getPortfolio = async (userId: string): Promise<PropertyResponse[]> => {
+export const getPortfolio = async (userId: string): Promise<HoldingResponse[]> => {
   try {
     const response = await instance.get<PortfolioApiResponse>(`/api/v1/portfolio/${userId}`)
     return response.data.data.holdings

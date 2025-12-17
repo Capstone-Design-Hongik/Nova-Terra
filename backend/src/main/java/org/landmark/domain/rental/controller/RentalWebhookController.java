@@ -46,4 +46,19 @@ public class RentalWebhookController {
 
         return ApiResponse.ok(200, "Webhook 처리 완료");
     }
+
+    @Operation(summary = "[테스트용] 임대 수익 입금 완료 처리", description = "개발/테스트 환경에서 임대 수익 입금 완료를 직접 시뮬레이션합니다.")
+    @PostMapping("/complete")
+    public ApiResponse<Void> completeRentalIncome(@RequestBody org.landmark.domain.rental.dto.RentalIncomeCompleteRequest request) {
+        log.info("임대 수익 입금 완료 시뮬레이션 - accountNumberOrOrderId: {}, amount: {}",
+                request.accountNumberOrOrderId(), request.amount());
+
+        rentalIncomeService.completeRentalIncome(
+                request.accountNumberOrOrderId(),
+                "test_payment_key",
+                request.amount()
+        );
+
+        return ApiResponse.ok(200, "임대 수익 입금 완료 처리 성공");
+    }
 }

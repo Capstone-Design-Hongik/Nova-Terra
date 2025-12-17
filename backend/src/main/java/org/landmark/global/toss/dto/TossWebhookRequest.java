@@ -9,7 +9,14 @@ public record TossWebhookRequest(
             String orderId,
             String paymentKey,
             String status,
-            Long totalAmount
+            Long totalAmount,
+            VirtualAccountInfo virtualAccount
+    ) {
+    }
+
+    public record VirtualAccountInfo(
+            String accountNumber,
+            String bankCode
     ) {
     }
 }

@@ -27,6 +27,9 @@ public class UserHolding {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @Column(name = "amount", nullable = false)
+    private Long amount;  // 보유 토큰 수량
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Long createdAt;
 
@@ -36,8 +39,9 @@ public class UserHolding {
     }
 
     @Builder
-    public UserHolding(User user, Property property) {
+    public UserHolding(User user, Property property, Long amount) {
         this.user = user;
         this.property = property;
+        this.amount = amount;
     }
 }
