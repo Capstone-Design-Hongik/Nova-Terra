@@ -31,8 +31,7 @@ public class RentalIncomeService {
     private final PropertyVirtualAccountRepository propertyVirtualAccountRepository;
     private final PropertyRepository propertyRepository;
     private final TossPaymentsClient tossPaymentsClient;
-    // TODO: BlockchainWalletService로 교체 필요 (블록체인 팀 스펙 확정 후)
-    // private final BlockchainWalletService blockchainWalletService;
+    private final org.landmark.domain.blockchain.service.BlockchainWalletService blockchainWalletService;
 
     /* Property별 임대 수익 전용 가상계좌 발급 */
     @Transactional
@@ -115,26 +114,31 @@ public class RentalIncomeService {
         rentalIncome.completeDeposit(paymentKey);
         rentalIncomeRepository.save(rentalIncome);
 
-        // TODO: 블록체인 팀과 배당 분배 스펙 확정 후 구현
-        // 현재는 SecurityToken 컨트랙트의 배당 분배 방식이 네이티브 코인 기반이므로
-        // KRWT 기반으로 변경되면 아래 로직으로 구현 예정:
-        // try {
-        //     String txHash = blockchainWalletService.sendKrwtToStoContract(
-        //         Long.parseLong(virtualAccount.getPropertyId()),
-        //         rentalIncome.getKrwtAmount()
-        //     );
-        //     rentalIncome.completeDistribution(txHash);
-        //     log.info("임대 수익 분배 완료 - rentalIncomeId: {}, txHash: {}", rentalIncome.getId(), txHash);
-        // } catch (Exception e) {
-        //     log.error("임대 수익 분배 실패 - rentalIncomeId: {}", rentalIncome.getId(), e);
-        //     rentalIncome.failDistribution();
-        //     throw e;
-        // }
+        // 블록체인 배당 분배
+        log.info("블록체인 배당 분배 시작 - propertyId: {}, amount: {}", virtualAccount.getPropertyId(), amount);
+        try {
+            // PropertyToken 컨트랙트 주소 = Property의 ID (sto_token_address)
+            String propertyTokenAddress = virtualAccount.getPropertyId();
 
-        // 임시: 블록체인 연동 전까지는 분배 완료 처리
-        rentalIncome.completeDistribution("PENDING_BLOCKCHAIN_INTEGRATION");
-        log.warn("블록체인 연동 대기 중 - rentalIncomeId: {}, krwtAmount: {}",
-                rentalIncome.getId(), rentalIncome.getKrwtAmount());
+            // 1. Snapshot 생성
+            java.math.BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
+            log.info("Snapshot 생성 완료 - snapshotId: {}", snapshotId);
+
+            // 2. 배당 생성 (Long -> BigInteger)
+            java.math.BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
+
+            String txHash = blockchainWalletService.createDividend(snapshotId, krwtAmount);
+
+            rentalIncome.completeDistribution(txHash);
+            log.info("임대 수익 분배 완료 - rentalIncomeId: {}, txHash: {}, snapshotId: {}, krwtAmount: {}",
+                    rentalIncome.getId(), txHash, snapshotId, krwtAmount);
+
+        } catch (Exception e) {
+            log.error("임대 수익 분배 실패 - rentalIncomeId: {}, propertyId: {}",
+                    rentalIncome.getId(), virtualAccount.getPropertyId(), e);
+            rentalIncome.failDistribution();
+            throw new BusinessException(ErrorCode.RENTAL_INCOME_DISTRIBUTION_FAILED);
+        }
     }
 
     /* Property별 임대 수익 내역 조회 */

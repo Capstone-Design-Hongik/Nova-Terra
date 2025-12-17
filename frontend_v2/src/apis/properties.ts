@@ -89,9 +89,14 @@ export const getBuildingTypeColor = (buildingType: PropertyResponse['buildingTyp
   return colorMap[buildingType]
 }
 
+export interface HoldingResponse {
+  property: PropertyResponse
+  amount: number
+}
+
 export interface PortfolioResponse {
   userId: string
-  properties: PropertyResponse[]
+  holdings: HoldingResponse[]
 }
 
 export interface PortfolioApiResponse {
@@ -100,10 +105,10 @@ export interface PortfolioApiResponse {
   data: PortfolioResponse
 }
 
-export const getPortfolio = async (userId: string): Promise<PropertyResponse[]> => {
+export const getPortfolio = async (userId: string): Promise<HoldingResponse[]> => {
   try {
     const response = await instance.get<PortfolioApiResponse>(`/api/v1/portfolio/${userId}`)
-    return response.data.data.properties
+    return response.data.data.holdings
   } catch (error) {
     console.error('포트폴리오 조회 실패:', error)
     throw error
