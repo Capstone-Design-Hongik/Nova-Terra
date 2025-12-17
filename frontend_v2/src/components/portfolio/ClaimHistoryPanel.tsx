@@ -4,7 +4,6 @@ import {
   getDividendIds,
   getDividendInfo,
   isClaimedDividend,
-  getClaimableDividend,
   claimDividend
 } from '../../apis/blockchain/contracts/dividendDistributor'
 
@@ -31,8 +30,6 @@ interface ClaimHistoryPanelProps {
 }
 
 export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: ClaimHistoryPanelProps) {
-  if (!asset) return null
-
   const [claimRecords, setClaimRecords] = useState<ClaimRecord[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
@@ -120,6 +117,8 @@ export default function ClaimHistoryPanel({ isOpen, onClose, asset, onClaim }: C
       }
     }
 
+
+  if (!asset) return null
 
   return (
     <>

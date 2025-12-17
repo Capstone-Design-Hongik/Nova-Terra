@@ -15,6 +15,7 @@ interface Asset {
   holdingAmount: number
   currentValue: number
   unclaimedRewards: number
+  symbol: string
   propertyData: PropertyResponse
 }
 
@@ -60,6 +61,7 @@ export default function Portfolio() {
           holdingAmount: holding.amount,
           currentValue: holding.property.pricePerToken * holding.amount,
           unclaimedRewards: 125000, //API에서 미수령 수익 정보 추가 필요
+          symbol: 'NPT', // TODO: API에서 symbol 추가 필요
           propertyData: holding.property,
         }))
         setAssets(transformedAssets)
