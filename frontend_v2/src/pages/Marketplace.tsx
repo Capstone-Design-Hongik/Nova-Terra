@@ -8,6 +8,7 @@ import STOPurchasePanel from '../components/marketplace/STOPurchasePanel'
 import arrowdownIcon from '../assets/arrowdown.svg'
 import { getProperties, getBuildingTypeLabel, getBuildingTypeColor } from '../apis/properties'
 import { getPropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
+import type { PropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
 
 interface Property {
   id: string
@@ -22,6 +23,7 @@ interface Property {
   totalValue: number
   stoPrice: number
   fundingPercentage: number
+  investors: number
   description: string
   highlights: string[]
   dividendCycle: string
@@ -38,21 +40,47 @@ export default function Marketplace() {
   const [loading, setLoading] = useState(true)
   const [blockchainData, setBlockchainData] = useState<Record<string, PropertyBasicInfo>>({})
 
-  // 블록체인데이터 읽기
+  // 블록체인데이터 읽기 (배치 처리로 rate limit 회피)
   useEffect(() => {
     const fetchBlockchainData = async () => {
-      // properties 배열을 순회하면서
-      for (const property of properties) {
-        if (property.id) {  // address = 컨트랙트 주소
-          try {
-            const data = await getPropertyBasicInfo(property.id)
-            setBlockchainData(prev => ({
-              ...prev,
-              [property.id]: data  // property.id를 key로 저장
-            }))
-          } catch (error) {
-            console.error(`블록체인 데이터 로드 실패 (${property.id}):`, error)
+      const BATCH_SIZE = 3  // 한 번에 3개씩 처리
+      const DELAY_MS = 500   // 배치 간 500ms 대기
+
+      const newBlockchainData: Record<string, PropertyBasicInfo> = {}
+
+      // 배치로 나눠서 처리
+      for (let i = 0; i < properties.length; i += BATCH_SIZE) {
+        const batch = properties.slice(i, i + BATCH_SIZE)
+
+        // 배치 내에서는 병렬 처리
+        const promises = batch.map(async (property) => {
+          if (property.id) {
+            try {
+              const data = await getPropertyBasicInfo(property.id)
+              return { id: property.id, data }
+            } catch (error) {
+              console.error(`블록체인 데이터 로드 실패 (${property.id}):`, error)
+              return null
+            }
           }
+          return null
+        })
+
+        const results = await Promise.all(promises)
+
+        // 성공한 것들만 저장
+        results.forEach(result => {
+          if (result && result.data) {
+            newBlockchainData[result.id] = result.data
+          }
+        })
+
+        // 중간 결과를 실시간으로 업데이트 (사용자가 빠르게 볼 수 있도록)
+        setBlockchainData({ ...newBlockchainData })
+
+        // 마지막 배치가 아니면 대기
+        if (i + BATCH_SIZE < properties.length) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_MS))
         }
       }
     }
