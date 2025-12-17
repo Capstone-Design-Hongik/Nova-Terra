@@ -2,6 +2,10 @@ import { useState } from 'react'
 import Topbar from '../layouts/Topbar'
 import GovernancePropertyCard from '../components/governance/GovernancePropertyCard'
 import GovernanceProposalPanel from '../components/governance/GovernanceProposalPanel'
+import VotingPowerCard from '../components/governance/VotingPowerCard'
+import DelegationCard from '../components/governance/DelegationCard'
+import ParticipationCard from '../components/governance/ParticipationCard'
+import VotingPowerPanel from '../components/governance/VotingPowerPanel'
 
 interface Property {
   id: string
@@ -38,8 +42,8 @@ export default function Governance() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [selectedProperty, setSelectedProperty] = useState<PropertyInfo | null>(null)
+  const [isVotingPowerPanelOpen, setIsVotingPowerPanelOpen] = useState(false)
 
-  // Mock data based on code7.html
   const properties: Property[] = [
     {
       id: '1',
@@ -124,7 +128,7 @@ export default function Governance() {
   const filteredProperties = properties.filter((property) => {
     const matchesCategory = selectedCategory === '전체 자산' || property.category.includes(selectedCategory.split(' ')[0])
     const matchesSearch = property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         property.location.toLowerCase().includes(searchQuery.toLowerCase())
+                        property.location.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
@@ -156,7 +160,7 @@ export default function Governance() {
     <div className="min-h-screen bg-black">
       <Topbar isConnected={true} />
 
-      <main className="w-full px-4 md:px-10 py-8 mx-auto max-w-[1400px]">
+      <main className="w-full px-4 md:px-10 py-8 mx-auto max-w-350">
         {/* Header */}
         <div className="flex flex-wrap justify-between items-end gap-6 mb-8">
           <div className="flex flex-col gap-2 max-w-2xl">
@@ -181,96 +185,12 @@ export default function Governance() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {/* Voting Power */}
-          <div className="flex flex-col justify-between rounded-xl p-6 border border-gray-600 bg-gray-800 shadow-lg relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <svg className="w-16 h-16 text-[#1ABCF7]" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" />
-              </svg>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">나의 투표권</p>
-                <svg className="w-5 h-5 text-[#1ABCF7]" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-3xl font-bold leading-tight text-white mb-1">
-                12,450 <span className="text-lg text-gray-400 font-normal">NVT</span>
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-green-400 font-medium">+2.1%</span>
-                <span className="text-gray-400">풀 지분</span>
-              </div>
-            </div>
-            <div className="mt-6 pt-4 border-t border-gray-600">
-              <div className="flex justify-between text-xs mb-1 text-gray-400">
-                <span>락업 기간</span>
-                <span>145일 남음</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-900 rounded-full overflow-hidden">
-                <div className="h-full bg-[#1ABCF7] w-[65%] rounded-full shadow-[0_0_10px_rgba(26,188,247,0.5)]"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Delegation Status */}
-          <div className="flex flex-col justify-between rounded-xl p-6 border border-gray-600 bg-gray-800 shadow-lg">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">위임 상태</p>
-                <span className="px-2 py-0.5 rounded text-xs font-bold bg-green-500/20 text-green-400 uppercase border border-green-500/30">
-                  Active
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-900 border border-gray-600 bg-cover bg-center"></div>
-                <div>
-                  <p className="font-bold text-lg text-white">에이전트 스미스</p>
-                  <p className="text-gray-400 text-sm">부동산 전문가 (Lv 5)</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 flex gap-3">
-              <button className="flex-1 py-2 px-3 rounded-lg border border-gray-600 text-white text-sm font-medium hover:bg-gray-900 hover:text-white transition-colors">
-                변경
-              </button>
-              <button className="flex-1 py-2 px-3 rounded-lg border border-transparent bg-gray-900 text-white text-sm font-medium hover:bg-black/40 hover:text-white transition-colors">
-                내역
-              </button>
-            </div>
-          </div>
-
-          {/* Participation Rate */}
-          <div className="flex flex-col justify-between rounded-xl p-6 border border-gray-600 bg-gray-800 shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">참여율</p>
-              <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
-            </div>
-            <div className="flex items-end gap-2 mb-2">
-              <p className="text-3xl font-bold leading-tight text-white">85%</p>
-              <p className="text-green-400 text-sm font-medium mb-1.5 flex items-center">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
-                </svg>
-                +5% vs avg
-              </p>
-            </div>
-            <p className="text-gray-400 text-sm mb-4">이번 분기에 20개의 제안 중 17개에 투표하셨습니다.</p>
-            <div className="flex gap-1 h-8 items-end">
-              <div className="flex-1 bg-gray-900 h-[40%] rounded-sm"></div>
-              <div className="flex-1 bg-gray-900 h-[60%] rounded-sm"></div>
-              <div className="flex-1 bg-purple-500 h-[80%] rounded-sm relative group cursor-pointer shadow-[0_0_10px_rgba(160,32,240,0.5)]">
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap border border-gray-600">
-                  현재
-                </div>
-              </div>
-              <div className="flex-1 bg-gray-900 h-[50%] rounded-sm"></div>
-              <div className="flex-1 bg-gray-900 h-[70%] rounded-sm"></div>
-            </div>
-          </div>
+          <VotingPowerCard
+            onClick={() => setIsVotingPowerPanelOpen(true)}
+            isActive={isVotingPowerPanelOpen}
+          />
+          <DelegationCard />
+          <ParticipationCard />
         </div>
 
         {/* Filter and Search Bar */}
@@ -354,6 +274,12 @@ export default function Governance() {
         isOpen={isPanelOpen}
         onClose={handleClosePanel}
         property={selectedProperty}
+      />
+
+      {/* Voting Power Panel */}
+      <VotingPowerPanel
+        isOpen={isVotingPowerPanelOpen}
+        onClose={() => setIsVotingPowerPanelOpen(false)}
       />
     </div>
   )

@@ -66,7 +66,7 @@ export default function GovernancePropertyCard({
   const renderProposalSection = () => {
     if (proposalStatus === 'none') {
       return (
-        <div className="bg-gray-900 rounded-lg p-3 mb-4 border border-gray-600 flex items-center justify-center h-[66px]">
+        <div className="bg-gray-900 rounded-lg p-3 mb-4 border border-gray-600 flex items-center justify-center h-16.5">
           <span className="text-sm text-gray-400 flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -237,7 +237,7 @@ export default function GovernancePropertyCard({
             </svg>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-800 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-gray-800 via-transparent to-transparent"></div>
 
         {/* Status Badge */}
         {renderBadge()}

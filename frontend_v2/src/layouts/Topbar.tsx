@@ -49,7 +49,7 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
   }
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white bg-background-dark/95 px-6 py-4 backdrop-blur-md lg:px-10">
+    <header className="sticky top-0 z-100 flex items-center justify-between border-b border-white bg-background-dark/95 px-6 py-4 backdrop-blur-md lg:px-10">
       <div className="flex items-center gap-4">
         <h2 className="text-xl font-bold leading-tight tracking-tight text-white">
           NovaTerra

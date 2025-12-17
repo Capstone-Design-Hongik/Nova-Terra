@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import ProposalCard from './ProposalCard'
 
 interface Proposal {
@@ -39,51 +39,49 @@ export default function GovernanceProposalPanel({
   property,
 }: GovernanceProposalPanelProps) {
   const [selectedFilter, setSelectedFilter] = useState('전체')
-  const [proposals, setProposals] = useState<Proposal[]>([])
 
-  useEffect(() => {
-    if (isOpen && property) {
-      // Mock proposals data
-      const mockProposals: Proposal[] = [
-        {
-          id: '1',
-          proposalNumber: '#1024',
-          title: '에너지 효율을 위한 로비 HVAC 시스템 교체',
-          description:
-            '메인 로비 에어컨 장치를 새로운 친환경 모델로 업그레이드하는 제안. 예상 비용은 $50,000이며 연간 에너지 비용 15% 절감 예상.',
-          status: 'active',
-          deadline: '12시간 30분 후 종료',
-          voteFor: 75,
-          voteAgainst: 25,
-          voterCount: 42,
-        },
-        {
-          id: '2',
-          proposalNumber: '#1023',
-          title: '3분기 배당 분배 전략',
-          description:
-            '토큰 보유자에게 임대 수익 3.5% 즉시 분배 또는 1.5% 건물 유지보수 기금 재투자 중 선택에 대한 투표.',
-          status: 'active',
-          deadline: '2일 4시간 후 종료',
-          voteFor: 45,
-          voteAgainst: 55,
-          voterCount: 12,
-        },
-        {
-          id: '3',
-          proposalNumber: '#1022',
-          title: '주차장 확장 1단계',
-          description:
-            '지하 주차 시설을 50대 추가 차량 수용을 위해 확장하기 위한 초기 조사 및 건축 설계도 승인.',
-          status: 'executed',
-          deadline: '10월 12일 통과됨',
-          voteFor: 88,
-          voteAgainst: 12,
-          voterCount: 0,
-        },
-      ]
-      setProposals(mockProposals)
-    }
+  const proposals = useMemo<Proposal[]>(() => {
+    if (!isOpen || !property) return []
+
+    // Mock proposals data
+    return [
+      {
+        id: '1',
+        proposalNumber: '#1024',
+        title: '에너지 효율을 위한 로비 HVAC 시스템 교체',
+        description:
+          '메인 로비 에어컨 장치를 새로운 친환경 모델로 업그레이드하는 제안. 예상 비용은 $50,000이며 연간 에너지 비용 15% 절감 예상.',
+        status: 'active',
+        deadline: '12시간 30분 후 종료',
+        voteFor: 75,
+        voteAgainst: 25,
+        voterCount: 42,
+      },
+      {
+        id: '2',
+        proposalNumber: '#1023',
+        title: '3분기 배당 분배 전략',
+        description:
+          '토큰 보유자에게 임대 수익 3.5% 즉시 분배 또는 1.5% 건물 유지보수 기금 재투자 중 선택에 대한 투표.',
+        status: 'active',
+        deadline: '2일 4시간 후 종료',
+        voteFor: 45,
+        voteAgainst: 55,
+        voterCount: 12,
+      },
+      {
+        id: '3',
+        proposalNumber: '#1022',
+        title: '주차장 확장 1단계',
+        description:
+          '지하 주차 시설을 50대 추가 차량 수용을 위해 확장하기 위한 초기 조사 및 건축 설계도 승인.',
+        status: 'executed',
+        deadline: '10월 12일 통과됨',
+        voteFor: 88,
+        voteAgainst: 12,
+        voterCount: 0,
+      },
+    ]
   }, [isOpen, property])
 
   const filters = ['전체', '진행 중', '통과됨', '거부됨']
@@ -151,16 +149,16 @@ export default function GovernanceProposalPanel({
           </div>
 
           {/* Property Header */}
-          <div className="relative w-full h-[280px] rounded-xl overflow-hidden group border border-gray-700 mb-6">
+          <div className="relative w-full h-70 rounded-xl overflow-hidden group border border-gray-700 mb-6">
             {property.image ? (
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                 style={{ backgroundImage: `url(${property.image})` }}
               ></div>
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"></div>
+              <div className="absolute inset-0 bg-linear-to-br from-gray-800 to-gray-900"></div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent"></div>
             <div className="absolute bottom-0 left-0 p-6 w-full flex flex-col justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -182,24 +180,6 @@ export default function GovernanceProposalPanel({
                   </svg>
                   {property.location}
                 </p>
-              </div>
-              <div className="flex gap-3">
-                <button className="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                  </svg>{' '}
-                  공유
-                </button>
-                <button className="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>{' '}
-                  상세 보기
-                </button>
               </div>
             </div>
           </div>
