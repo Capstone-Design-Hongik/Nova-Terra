@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getTotalClaimable, claimAllDividends } from '../../apis/blockchain/contracts/dividendDistributor'
+import { getTotalClaimable } from '../../apis/blockchain/contracts/dividendDistributor'
 import { getUserBalance } from '../../apis/blockchain/contracts/propertyToken'
 import { getPropertyInfo } from  '../../apis/blockchain/contracts/tokenFactory'
 
@@ -29,12 +29,6 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
     unclaimedRewards: asset?.unclaimedRewards || 0,
     isLoading: false,
   })
-
-  if (!asset) return null
-
-  const isActive = asset.status === 'active'
-  const statusColor = isActive ? 'text-[#1ABCF7] border-[#1ABCF7]/30' : 'text-gray-400 border-gray-600'
-  const statusText = isActive ? '운영중' : '준비중'
 
   // 블록체인 데이터 로드
   useEffect(() => {
@@ -68,38 +62,43 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
   }, [asset, isOpen])
 
 
-  // 클레임 함수
-  const handleClaimClick = async () => {
-    if (!asset) return
+  // 클레임 함수 (현재 미사용 - 나중에 사용할 수 있음)
+  // const handleClaimClick = async () => {
+  //   if (!asset) return
 
-    try {
-      setBlockchainData(prev => ({ ...prev, isLoading: true }))
+  //   try {
+  //     setBlockchainData(prev => ({ ...prev, isLoading: true }))
 
-      // 1. 먼저 dividendAddress 가져오기
-      const propertyInfo = await getPropertyInfo(asset.id)
+  //     // 1. 먼저 dividendAddress 가져오기
+  //     const propertyInfo = await getPropertyInfo(asset.id)
 
-      // 2. 모든 배당금 청구
-      const txHashes = await claimAllDividends(propertyInfo.dividendAddress)
+  //     // 2. 모든 배당금 청구
+  //     const txHashes = await claimAllDividends(propertyInfo.dividendAddress)
 
-      console.log('청구 완료! 트랜잭션:', txHashes)
-      alert(`배당금 청구가 완료되었습니다!\n트랜잭션: ${txHashes.join(', ')}`)
+  //     console.log('청구 완료! 트랜잭션:', txHashes)
+  //     alert(`배당금 청구가 완료되었습니다!\n트랜잭션: ${txHashes.join(', ')}`)
 
-      // 3. 데이터 새로고침
-      const unclaimedRewards = await getTotalClaimable(propertyInfo.dividendAddress)
-      setBlockchainData(prev => ({
-        ...prev,
-        unclaimedRewards: Number(unclaimedRewards),
-        isLoading: false,
-      }))
+  //     // 3. 데이터 새로고침
+  //     const unclaimedRewards = await getTotalClaimable(propertyInfo.dividendAddress)
+  //     setBlockchainData(prev => ({
+  //       ...prev,
+  //       unclaimedRewards: Number(unclaimedRewards),
+  //       isLoading: false,
+  //     }))
 
-      onClaimClick?.()
-    } catch (error) {
-      console.error('클레임 실패:', error)
-      alert('배당금 청구에 실패했습니다: ' + (error as Error).message)
-      setBlockchainData(prev => ({ ...prev, isLoading: false }))
-    }
-  }
+  //     onClaimClick?.()
+  //   } catch (error) {
+  //     console.error('클레임 실패:', error)
+  //     alert('배당금 청구에 실패했습니다: ' + (error as Error).message)
+  //     setBlockchainData(prev => ({ ...prev, isLoading: false }))
+  //   }
+  // }
 
+  if (!asset) return null
+
+  const isActive = asset.status === 'active'
+  const statusColor = isActive ? 'text-[#1ABCF7] border-[#1ABCF7]/30' : 'text-gray-400 border-gray-600'
+  const statusText = isActive ? '운영중' : '준비중'
 
   return (
     <>
