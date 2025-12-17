@@ -137,7 +137,7 @@ export default function DelegationPanel({ isOpen, onClose }: DelegationPanelProp
           </div>
 
           {/* Summary Card */}
-          <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/30 rounded-xl p-6 mb-8">
+          <div className="bg-linear-to-br from-purple-500/10 to-transparent border border-purple-500/30 rounded-xl p-6 mb-8">
             <div className="flex items-center justify-between mb-2">
               <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">현재 위임된 투표권</p>
               <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-500/20 text-purple-400 uppercase border border-purple-500/30">
@@ -180,7 +180,7 @@ export default function DelegationPanel({ isOpen, onClose }: DelegationPanelProp
                       </div>
                     </div>
                   </div>
-                  <button className="px-4 py-2 bg-[#1ABCF7] hover:bg-[#1ABCF7]/90 text-black font-bold text-sm rounded-lg transition-all shadow-lg flex-shrink-0">
+                  <button className="px-4 py-2 bg-[#1ABCF7] hover:bg-[#1ABCF7]/90 text-black font-bold text-sm rounded-lg transition-all shadow-lg shrink-0">
                     위임하기
                   </button>
                 </div>

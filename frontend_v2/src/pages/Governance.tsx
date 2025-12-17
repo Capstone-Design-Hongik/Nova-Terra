@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { BrowserProvider } from 'ethers'
 import Topbar from '../layouts/Topbar'
 import GovernancePropertyCard from '../components/governance/GovernancePropertyCard'
 import GovernanceProposalPanel from '../components/governance/GovernanceProposalPanel'
@@ -6,6 +7,7 @@ import VotingPowerCard from '../components/governance/VotingPowerCard'
 import DelegationCard from '../components/governance/DelegationCard'
 import VotingPowerPanel from '../components/governance/VotingPowerPanel'
 import DelegationPanel from '../components/governance/DelegationPanel'
+import { getPortfolio, getBuildingTypeLabel, type HoldingResponse } from '../apis/properties'
 
 interface Property {
   id: string
@@ -14,8 +16,8 @@ interface Property {
   image?: string
   category: string
   tier: string
-  assetValue: string
-  myStake: string
+  totalValuation: number
+  amount: number
   proposalStatus: 'active' | 'urgent' | 'scheduled' | 'completed' | 'none'
   proposalTitle?: string
   proposalDetail?: string
@@ -44,85 +46,78 @@ export default function Governance() {
   const [selectedProperty, setSelectedProperty] = useState<PropertyInfo | null>(null)
   const [isVotingPowerPanelOpen, setIsVotingPowerPanelOpen] = useState(false)
   const [isDelegationPanelOpen, setIsDelegationPanelOpen] = useState(false)
+  const [properties, setProperties] = useState<Property[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [walletAddress, setWalletAddress] = useState<string>('')
 
-  const properties: Property[] = [
-    {
-      id: '1',
-      name: 'Gangnam Tower B',
-      location: 'Gangnam-gu, Seoul',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC8rm4evMFoHKbpqQi0RJGbOBcwB_W2Qz8bUsplE83jLT3rz04Cojj5ajIwVEfU7IyPlqQojbqcvnqf_0ggdcHOe45OEZAD1aWbQczDPc6bhsI1AF6fTZKbiz33QhvUs-tSpEW2khR0G1QJH-AeinZzQzeyHKnFABu3X_6E_hXhcYzOaI1GlU0cV_e9th1kZ7X9Jc6OMrJO6oOcbR_QhB5pP6t5iYoit5apGx9jUBunH6iopAVaQNh3Rv8pN7DlNIx-_Cc0xVl9-nY',
-      category: '오피스',
-      tier: 'Tier A',
-      assetValue: '₩450.2B',
-      myStake: '0.05%',
-      proposalStatus: 'active',
-      proposalTitle: 'Lobby Renovation Budget Approval',
-      voterCount: 12,
-    },
-    {
-      id: '2',
-      name: 'Yeouido Office A',
-      location: 'Yeouido-dong, Seoul',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaNJVm9Eq2KhglrBGi6r7O-fT2foooh0MKmN5AhUAlAl_AYZt4Hm9_lzrc75meEposKvQJeBGtIWBAaJ6vJ8_qzw64sTX0Bt09nbxBzFlYXwcg3y11LV9dL0ur11MxV-OoEsShuo-37L7PJgMsfqmC4QPDMVO3y5JXxmrMRmNfYSoDG5zTf9bDq-UAkocipQoNhoP-bnK5hyKwXSrTni_FF6bWGD-REIKIQOQQFq8CxeuEGRPBBb3dlICNYbX_uMBWXjM2zvGWE1o',
-      category: '복합 용도',
-      tier: 'Tier S',
-      assetValue: '₩820.0B',
-      myStake: '0.01%',
-      proposalStatus: 'urgent',
-      proposalTitle: '자산 매각: 15% 프리미엄 제안',
-      proposalDeadline: '4시간 12분 후 종료',
-      voterCount: 89,
-    },
-    {
-      id: '3',
-      name: 'Pangyo Tech Site C',
-      location: 'Pangyo, Gyeonggi',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCerICwrF9VZVEOU7ZPjr8AIbaXRddFZa6MXZ16I13i_bzVyQT6cGs8YRE4uI0r87Zhm0buAGSOmgGZmw5gPCZEJ3SftUdw9POryrQWno2d1tBSJmB6Lbsi2-bAJeNm0W40YvyfAkTYfwL5W-UMegstJixJtWfwaIWPofsaqiZfJyO-4DwTqbzu0_NMwcW9vCxuo_z9GqcqdePPlN9xVipYr8mwk5EqTtXbUR2kYdvK2Dxroru5nxvsFBn61QIkQAMDKArDDKdtNNg',
-      category: '연구',
-      tier: 'Tier B+',
-      assetValue: '₩120.5B',
-      myStake: '0.12%',
-      proposalStatus: 'scheduled',
-      proposalTitle: 'Solar Panel Installation',
-      proposalDeadline: '10월 24일 시작',
-    },
-    {
-      id: '4',
-      name: 'Busan Logistics Hub',
-      location: 'Busan Port District',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSXkFT46o-WUj4k7mjr4_dTlyJQ2X9Qx3-FPEs5_owU1h9kF9BS9FE4otkWlNkdqEk_gV0izQOLz4YY6aMeFkQt55lxmWhtL4BrTVQV5bL2vk8QRWU584kXuFhK8NPlr9H1Fj0eLwVgoZZXQqMRVdB8hru-EV0X6uWMGMTR3FkoaJaZuAh3QQWaLqozOV0YDwq0DatbpX-6U871bedvZhuGwKWIuKG5tAenQzByrx3derQbs67G36v468cr2Vpo0F63PszuOhPtrY',
-      category: '물류',
-      tier: 'Tier B',
-      assetValue: '₩88.4B',
-      myStake: '0.08%',
-      proposalStatus: 'none',
-    },
-    {
-      id: '5',
-      name: 'Seongsu Retail Block',
-      location: 'Seongsu-dong, Seoul',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEqqXmPxa38_ILxWbV2bKdliudUkrFTPNB2C17KBk9eat5jlhZuLxCpgePLNa2cwojV-aB1HDRl3Tmrg9Y8GU3Xg3z5LWjvS3FQzf776zJ7nAwtxLodtlA8xhgCZ_YGsaqGpf_OPU4ZnfYOExVG9E12vgE3JPKqpAVT6100qHjcjKglKzpuKoVct35Nocyrete048lXJJN_B1EhpteBXyEfANSI8HKUPJ1ZEraVdLQnZTs4fXjPxCt8wG6gUJfhID38LL6VQONI1M',
-      category: '소매',
-      tier: 'Tier A-',
-      assetValue: '₩62.0B',
-      myStake: '0.02%',
-      proposalStatus: 'completed',
-      proposalTitle: '보안 업체 갱신',
-      proposalDeadline: '5일 전',
-      voterCount: 4,
-    },
-    {
-      id: '6',
-      name: 'Hannam Heights',
-      location: 'Hannam-dong, Seoul',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD-ORDjFk11SNP3PtWGx2kQplm5tVIrXXI7qJBcneJwC8yjQMDJhyZXDt9k30OO6i7JeRoSewwvfJR5C3zcHpH2GWscVoEX2R9NOM0juEYC1WCDeR-6J6dxO3r6OCYeExZwvFjg1vUUMntNk0NzJ3teypQ0vu3CcvDPwnkH0Sd2DJ5wWJwttger40TzhKy9USPhU0uW6_S35fiHaBCriYJTWjU3BcAdv0qK3hGEVTe2E70uanyMKwPCtj6_w5OguKbB8gg-jjp-mpg',
-      category: '주거용',
-      tier: 'Tier S+',
-      assetValue: '₩210.5B',
-      myStake: '--',
-      proposalStatus: 'none',
-    },
-  ]
+  // Helper function to convert API data to Property format
+  const convertToProperty = (holding: HoldingResponse): Property => {
+    const { property, amount } = holding
+
+    // Determine tier based on total valuation
+    const getTier = (valuation: number): string => {
+      if (valuation >= 800000000000) return 'Tier S+'
+      if (valuation >= 500000000000) return 'Tier S'
+      if (valuation >= 200000000000) return 'Tier A'
+      if (valuation >= 100000000000) return 'Tier A-'
+      if (valuation >= 80000000000) return 'Tier B+'
+      return 'Tier B'
+    }
+
+    return {
+      id: property.id,
+      name: property.name,
+      location: property.address,
+      image: property.coverImageUrl,
+      category: getBuildingTypeLabel(property.buildingType),
+      tier: getTier(property.totalValuation),
+      totalValuation: property.totalValuation,
+      amount: amount,
+      proposalStatus: 'none', // TODO: Add proposal status from API when available
+    }
+  }
+
+  // Get wallet address
+  useEffect(() => {
+    const getWalletAddress = async () => {
+      try {
+        if (typeof window.ethereum !== 'undefined') {
+          const provider = new BrowserProvider(window.ethereum)
+          const accounts = await provider.listAccounts()
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0].address)
+          }
+        }
+      } catch (error) {
+        console.error('지갑 주소 가져오기 실패:', error)
+      }
+    }
+
+    getWalletAddress()
+  }, [])
+
+  // Fetch portfolio data
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      if (!walletAddress) return
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        const holdings = await getPortfolio(walletAddress)
+        const convertedProperties = holdings.map(convertToProperty)
+        setProperties(convertedProperties)
+      } catch (err) {
+        console.error('Failed to fetch portfolio:', err)
+        setError('포트폴리오를 불러오는데 실패했습니다.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPortfolio()
+  }, [walletAddress])
 
   const categories = ['전체 자산', '상업 오피스', '소매 및 복합', '물류']
 
@@ -225,16 +220,56 @@ export default function Governance() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-[#1ABCF7] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-400">포트폴리오를 불러오는 중...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 max-w-md">
+              <div className="flex items-center gap-3 mb-2">
+                <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <h3 className="text-red-400 font-bold">오류 발생</h3>
+              </div>
+              <p className="text-gray-300">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && filteredProperties.length === 0 && (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <h3 className="text-gray-400 text-lg font-bold mb-2">보유한 부동산이 없습니다</h3>
+              <p className="text-gray-500 text-sm">부동산을 구매하여 거버넌스에 참여해보세요.</p>
+            </div>
+          </div>
+        )}
+
         {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <GovernancePropertyCard
-              key={property.id}
-              {...property}
-              onClick={() => handlePropertyClick(property)}
-            />
-          ))}
-        </div>
+        {!isLoading && !error && filteredProperties.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredProperties.map((property) => (
+              <GovernancePropertyCard
+                key={property.id}
+                {...property}
+                onClick={() => handlePropertyClick(property)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         <div className="flex justify-center mt-12">

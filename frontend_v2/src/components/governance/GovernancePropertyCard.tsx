@@ -4,9 +4,8 @@ interface GovernancePropertyCardProps {
   location: string
   image?: string
   category: string
-  tier: string
-  assetValue: string
-  myStake: string
+  totalValuation: number
+  amount: number
   proposalStatus: 'active' | 'urgent' | 'scheduled' | 'completed' | 'none'
   proposalTitle?: string
   proposalDetail?: string
@@ -20,9 +19,8 @@ export default function GovernancePropertyCard({
   location,
   image,
   category,
-  tier,
-  assetValue,
-  myStake,
+  totalValuation,
+  amount,
   proposalStatus,
   proposalTitle,
   proposalDeadline,
@@ -42,12 +40,6 @@ export default function GovernancePropertyCard({
     return colors[cat] || 'bg-gray-500 text-white'
   }
 
-  // Tier color mapping
-  const getTierColor = (tierValue: string) => {
-    if (tierValue.includes('S')) return 'text-purple-400'
-    if (tierValue.includes('A')) return 'text-[#1ABCF7]'
-    return 'text-white'
-  }
 
   // Status-based styling
   const getHoverColor = () => {
@@ -67,11 +59,11 @@ export default function GovernancePropertyCard({
     if (proposalStatus === 'none') {
       return (
         <div className="bg-gray-900 rounded-lg p-3 mb-4 border border-gray-600 flex items-center justify-center h-16.5">
-          <span className="text-sm text-gray-400 flex items-center gap-1">
+          <span className="text-sm text-white flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            진행 중인 안건 없음
+            진행 중인 안건 : 1건
           </span>
         </div>
       )
@@ -260,7 +252,6 @@ export default function GovernancePropertyCard({
             </svg>
             {location}
           </div>
-          <span className={`font-mono text-sm font-semibold ${getTierColor(tier)}`}>{tier}</span>
         </div>
 
         {/* Proposal Section */}
@@ -270,11 +261,11 @@ export default function GovernancePropertyCard({
         <div className="grid grid-cols-2 gap-4 mb-5 pb-5 border-b border-gray-600">
           <div>
             <p className="text-xs text-gray-400 mb-1">자산 가치</p>
-            <p className="font-bold text-white">{assetValue}</p>
+            <p className="font-bold text-white">{totalValuation.toLocaleString()} KRWT</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-1">내 지분</p>
-            <p className="font-bold text-white">{myStake}</p>
+            <p className="text-xs text-gray-400 mb-1">보유 토큰수</p>
+            <p className="font-bold text-white">{amount > 0 ? amount.toLocaleString() : '--'}</p>
           </div>
         </div>
 

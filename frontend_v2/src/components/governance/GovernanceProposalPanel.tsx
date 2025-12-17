@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProposalCard from './ProposalCard'
+import { getProposalsByProperty, mapProposalStatusToUI } from '../../apis/properties'
 
 interface Proposal {
   id: string
@@ -22,9 +23,6 @@ interface PropertyInfo {
   status: string
   apr: string
   tokenPrice: string
-  totalVoters: string
-  governanceScore: string
-  myVotingPower: string
 }
 
 interface GovernanceProposalPanelProps {
@@ -39,49 +37,72 @@ export default function GovernanceProposalPanel({
   property,
 }: GovernanceProposalPanelProps) {
   const [selectedFilter, setSelectedFilter] = useState('전체')
+  const [proposals, setProposals] = useState<Proposal[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const proposals = useMemo<Proposal[]>(() => {
-    if (!isOpen || !property) return []
+  const myVotingPower = '2,450' // 내 투표권수 하드코딩
+  const totalVoters = '5,500' //총 투표권수 하드코딩
 
-    // Mock proposals data
-    return [
-      {
-        id: '1',
-        proposalNumber: '#1024',
-        title: '에너지 효율을 위한 로비 HVAC 시스템 교체',
-        description:
-          '메인 로비 에어컨 장치를 새로운 친환경 모델로 업그레이드하는 제안. 예상 비용은 $50,000이며 연간 에너지 비용 15% 절감 예상.',
-        status: 'active',
-        deadline: '12시간 30분 후 종료',
-        voteFor: 75,
-        voteAgainst: 25,
-        voterCount: 42,
-      },
-      {
-        id: '2',
-        proposalNumber: '#1023',
-        title: '3분기 배당 분배 전략',
-        description:
-          '토큰 보유자에게 임대 수익 3.5% 즉시 분배 또는 1.5% 건물 유지보수 기금 재투자 중 선택에 대한 투표.',
-        status: 'active',
-        deadline: '2일 4시간 후 종료',
-        voteFor: 45,
-        voteAgainst: 55,
-        voterCount: 12,
-      },
-      {
-        id: '3',
-        proposalNumber: '#1022',
-        title: '주차장 확장 1단계',
-        description:
-          '지하 주차 시설을 50대 추가 차량 수용을 위해 확장하기 위한 초기 조사 및 건축 설계도 승인.',
-        status: 'executed',
-        deadline: '10월 12일 통과됨',
-        voteFor: 88,
-        voteAgainst: 12,
-        voterCount: 0,
-      },
-    ]
+  // Helper function to format deadline
+  const formatDeadline = (endTime: number, status: string): string | undefined => {
+    if (status !== 'ACTIVE' && status !== 'PENDING') {
+      return undefined
+    }
+
+    const now = Date.now()
+    const diff = endTime - now
+
+    if (diff <= 0) return undefined
+
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const days = Math.floor(hours / 24)
+    const remainingHours = hours % 24
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+
+    if (days > 0) {
+      return `${days}일 ${remainingHours}시간 후 종료`
+    }
+    return `${hours}시간 ${minutes}분 후 종료`
+  }
+
+  // Fetch proposals when panel opens or property changes
+  useEffect(() => {
+    const fetchProposals = async () => {
+      if (!isOpen || !property) {
+        setProposals([])
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        const proposalsData = await getProposalsByProperty(property.id)
+
+        // Transform API data to UI format
+        const transformedProposals: Proposal[] = proposalsData.map((proposal, index) => ({
+          id: proposal.id,
+          proposalNumber: `#${proposalsData.length - index}`,
+          title: proposal.title,
+          description: proposal.description,
+          status: mapProposalStatusToUI(proposal.status),
+          deadline: formatDeadline(proposal.endTime, proposal.status),
+          // Hardcoded vote counts: 30% for, 70% against
+          voteFor: 30,
+          voteAgainst: 70,
+          voterCount: 0,
+        }))
+
+        setProposals(transformedProposals)
+      } catch (err) {
+        console.error('제안 목록 조회 실패:', err)
+        setError('제안 목록을 불러오는데 실패했습니다.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProposals()
   }, [isOpen, property])
 
   const filters = ['전체', '진행 중', '통과됨', '거부됨']
@@ -186,23 +207,19 @@ export default function GovernanceProposalPanel({
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
-              <p className="text-gray-400 text-sm font-medium">스테이킹 연 수익률</p>
-              <p className="text-white text-2xl font-bold">{property.apr}</p>
+            <div className="col-span-2 md:col-span-2 flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
+              <p className="text-gray-400 text-sm font-medium">총 투표권 수</p>
+              <p className="text-white text-2xl font-bold">{totalVoters}</p>
             </div>
-            <div className="flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
-              <p className="text-gray-400 text-sm font-medium">토큰 가격</p>
-              <p className="text-white text-2xl font-bold">{property.tokenPrice}</p>
-            </div>
-            <div className="flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
-              <p className="text-gray-400 text-sm font-medium">총 투표자 수</p>
-              <p className="text-white text-2xl font-bold">{property.totalVoters}</p>
-            </div>
-            <div className="flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
-              <p className="text-gray-400 text-sm font-medium">거버넌스 점수</p>
-              <div className="flex items-center gap-2">
-                <span className="text-white text-2xl font-bold">{property.governanceScore}</span>
-                <span className="text-gray-400 text-sm">/100</span>
+
+            {/* My Voting Power - 2x width */}
+            <div className="col-span-2 md:col-span-2 flex flex-col gap-1 rounded-lg p-5 bg-gray-800 border border-gray-600 shadow-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-gray-400 text-sm font-medium">나의 투표권</p>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="text-white text-2xl font-bold">{myVotingPower}</p>
+                <span className="text-sm font-normal text-gray-400">DAO</span>
               </div>
             </div>
           </div>
@@ -244,16 +261,51 @@ export default function GovernanceProposalPanel({
 
             {/* Proposals List */}
             <div className="flex flex-col gap-4">
-              {filteredProposals.map((proposal) => (
-                <ProposalCard
-                  key={proposal.id}
-                  {...proposal}
-                  onVoteClick={() => console.log('Vote clicked for proposal:', proposal.id)}
-                />
-              ))}
-              <button className="w-full py-4 text-gray-400 hover:text-white text-sm font-medium border border-dashed border-gray-600 rounded-xl hover:bg-white/5 transition-colors">
-                더 많은 안건 불러오기
-              </button>
+              {/* Loading State */}
+              {isLoading && (
+                <div className="flex justify-center items-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-[#1ABCF7] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-400 text-sm">제안 목록을 불러오는 중...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && !isLoading && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-red-400 font-medium">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!isLoading && !error && filteredProposals.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <svg className="w-16 h-16 text-gray-600 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-gray-400 text-lg mb-1">제안이 없습니다</p>
+                  <p className="text-gray-500 text-sm">아직 생성된 제안이 없습니다.</p>
+                </div>
+              )}
+
+              {/* Proposals */}
+              {!isLoading && !error && filteredProposals.length > 0 && (
+                <>
+                  {filteredProposals.map((proposal) => (
+                    <ProposalCard
+                      key={proposal.id}
+                      {...proposal}
+                      onVoteClick={() => console.log('Vote clicked for proposal:', proposal.id)}
+                    />
+                  ))}
+                </>
+              )}
             </div>
           </div>
 
@@ -270,44 +322,6 @@ export default function GovernanceProposalPanel({
               </svg>{' '}
               제안 생성
             </button>
-
-            {/* My Voting Power */}
-            <div className="bg-gray-800 border border-gray-600 rounded-xl p-6 shadow-lg">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#1ABCF7]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" />
-                </svg>
-                나의 투표권
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">총 투표력</p>
-                  <p className="text-3xl font-bold text-white">
-                    {property.myVotingPower}{' '}
-                    <span className="text-sm font-normal text-gray-400">NPT-A</span>
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-600">
-                  <div>
-                    <p className="text-gray-400 text-xs mb-1">보유</p>
-                    <p className="text-white font-medium">{property.myVotingPower}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-xs mb-1">위임</p>
-                    <p className="text-white font-medium">0</p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 pt-4 border-t border-gray-600">
-                <a className="text-[#1ABCF7] text-sm font-medium hover:text-cyan-400 flex items-center gap-1 transition-colors">
-                  위임 관리
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
 
             {/* Governance Rules */}
             <div className="bg-gray-800 border border-gray-600 rounded-xl p-6 shadow-lg">

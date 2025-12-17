@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import VoteConfirmModal from './VoteConfirmModal'
+
 interface ProposalCardProps {
   id: string
   proposalNumber: string
@@ -7,7 +10,6 @@ interface ProposalCardProps {
   deadline?: string
   voteFor: number
   voteAgainst: number
-  voterCount: number
   onVoteClick?: () => void
 }
 
@@ -19,9 +21,32 @@ export default function ProposalCard({
   deadline,
   voteFor,
   voteAgainst,
-  voterCount,
   onVoteClick,
 }: ProposalCardProps) {
+  const [showVoteButtons, setShowVoteButtons] = useState(false)
+  const [showVoteModal, setShowVoteModal] = useState(false)
+  const [voteType, setVoteType] = useState<'for' | 'against' | null>(null)
+  const [hasVoted, setHasVoted] = useState(false)
+  const [myVote, setMyVote] = useState<'for' | 'against' | null>(null)
+
+  const handleVoteClick = (type: 'for' | 'against') => {
+    setVoteType(type)
+    setShowVoteModal(true)
+  }
+
+  const handleConfirmVote = () => {
+    console.log(`${voteType === 'for' ? '찬성' : '반대'} 투표 확정`)
+    setMyVote(voteType)
+    setHasVoted(true)
+    onVoteClick?.()
+    setShowVoteModal(false)
+    setShowVoteButtons(false)
+  }
+
+  const handleCancelVote = () => {
+    setShowVoteModal(false)
+    setVoteType(null)
+  }
   const getStatusBadge = () => {
     switch (status) {
       case 'active':
@@ -64,14 +89,6 @@ export default function ProposalCard({
     }
   }
 
-  const getVoteButtonColor = () => {
-    if (voteFor > voteAgainst) {
-      return 'bg-[#1ABCF7] hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(26,188,247,0.3)] hover:shadow-[0_0_20px_rgba(26,188,247,0.5)]'
-    } else {
-      return 'bg-purple-500 hover:bg-purple-600 text-white shadow-[0_0_15px_rgba(160,32,240,0.3)] hover:shadow-[0_0_20px_rgba(160,32,240,0.5)]'
-    }
-  }
-
   const totalVotes = voteFor + voteAgainst
   const forPercentage = totalVotes > 0 ? (voteFor / totalVotes) * 100 : 0
   const againstPercentage = totalVotes > 0 ? (voteAgainst / totalVotes) * 100 : 0
@@ -80,11 +97,21 @@ export default function ProposalCard({
   const isCompleted = status === 'executed' || status === 'passed' || status === 'rejected'
 
   return (
-    <div
-      className={`bg-gray-800 border border-gray-600 rounded-xl p-6 transition-all group shadow-lg ${
-        isCompleted ? 'opacity-75 hover:opacity-100' : ''
-      } ${getHoverColor()}`}
-    >
+    <>
+      <VoteConfirmModal
+        isOpen={showVoteModal}
+        voteType={voteType}
+        proposalNumber={proposalNumber}
+        proposalTitle={title}
+        onConfirm={handleConfirmVote}
+        onCancel={handleCancelVote}
+      />
+
+      <div
+        className={`bg-gray-800 border border-gray-600 rounded-xl p-6 transition-all group shadow-lg ${
+          isCompleted ? 'opacity-75 hover:opacity-100' : ''
+        } ${getHoverColor()}`}
+      >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
@@ -94,11 +121,7 @@ export default function ProposalCard({
         {deadline && (
           <div
             className={`flex items-center gap-2 text-sm font-medium ${
-              isActive
-                ? voteFor > voteAgainst
-                  ? 'text-[#1ABCF7]'
-                  : 'text-purple-400'
-                : 'text-gray-400'
+              isActive ? 'text-[#1ABCF7]' : 'text-gray-400'
             }`}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -124,11 +147,7 @@ export default function ProposalCard({
       {/* Title & Description */}
       <h3
         className={`text-xl font-bold text-white mb-2 transition-colors ${
-          isActive
-            ? voteFor > voteAgainst
-              ? 'group-hover:text-[#1ABCF7]'
-              : 'group-hover:text-purple-400'
-            : ''
+          isActive ? 'group-hover:text-[#1ABCF7]' : ''
         }`}
       >
         {title}
@@ -141,22 +160,17 @@ export default function ProposalCard({
       {!isCompleted && (
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-2">
-            <span
-              className={`font-medium ${voteFor > voteAgainst ? 'text-[#1ABCF7]' : 'text-purple-400'}`}
-            >
+            <span className="font-medium text-[#1ABCF7]">
               찬성: {forPercentage.toFixed(0)}%
             </span>
             <span className="text-gray-400">반대: {againstPercentage.toFixed(0)}%</span>
           </div>
           <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden flex">
             <div
-              className={`h-full ${voteFor > voteAgainst ? 'bg-[#1ABCF7]' : 'bg-purple-500'}`}
+              className="h-full bg-[#1ABCF7]"
               style={{
                 width: `${forPercentage}%`,
-                boxShadow:
-                  voteFor > voteAgainst
-                    ? '0 0 10px rgba(26, 188, 247, 0.5)'
-                    : '0 0 10px rgba(160, 32, 240, 0.5)',
+                boxShadow: '0 0 10px rgba(26, 188, 247, 0.5)',
               }}
             ></div>
             <div className="h-full bg-red-500/70" style={{ width: `${againstPercentage}%` }}></div>
@@ -197,24 +211,44 @@ export default function ProposalCard({
           </>
         ) : (
           <>
-            <div className="flex -space-x-2">
-              {/* Placeholder voter avatars */}
-              <div className="w-8 h-8 rounded-full border-2 border-gray-800 bg-gray-700"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-gray-800 bg-gray-700"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-gray-800 bg-gray-700"></div>
-              <div className="w-8 h-8 rounded-full border-2 border-gray-800 bg-gray-900 flex items-center justify-center text-xs text-gray-400">
-                +{voterCount}
+            {hasVoted ? (
+              <div className="flex items-center gap-2 mx-auto">
+                <div className={`flex items-center gap-2 px-6 py-2 rounded-lg ${myVote === 'for' ? 'bg-[#1ABCF7]/20 border border-[#1ABCF7]/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+                  <svg className={`w-5 h-5 ${myVote === 'for' ? 'text-[#1ABCF7]' : 'text-red-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className={`text-sm font-bold ${myVote === 'for' ? 'text-[#1ABCF7]' : 'text-red-400'}`}>
+                    {myVote === 'for' ? '찬성' : '반대'} 투표 완료
+                  </span>
+                </div>
               </div>
-            </div>
-            <button
-              onClick={onVoteClick}
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${getVoteButtonColor()}`}
-            >
-              지금 투표하기
-            </button>
+            ) : !showVoteButtons ? (
+              <button
+                onClick={() => setShowVoteButtons(true)}
+                className="cursor-pointer px-6 py-2 mx-auto rounded-lg text-sm font-bold transition-all bg-[#1ABCF7] hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(26,188,247,0.3)] hover:shadow-[0_0_20px_rgba(26,188,247,0.5)]"
+              >
+                지금 투표하기
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 mx-auto">
+                <button
+                  onClick={() => handleVoteClick('for')}
+                  className="cursor-pointer px-6 py-2 rounded-lg text-sm font-bold transition-all bg-[#1ABCF7] hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(26,188,247,0.3)] hover:shadow-[0_0_20px_rgba(26,188,247,0.5)]"
+                >
+                  찬성하기
+                </button>
+                <button
+                  onClick={() => handleVoteClick('against')}
+                  className="cursor-pointer px-6 py-2 rounded-lg text-sm font-bold transition-all bg-red-500 hover:bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.5)]"
+                >
+                  반대하기
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }
