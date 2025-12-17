@@ -92,17 +92,17 @@ export default function PortfolioAssetCard({
         </div>
 
         {/* Claim Section */}
-        <div className={`mt-auto bg-black rounded-xl p-4 border border-gray-600 relative overflow-hidden ${!isActive ? 'opacity-70' : ''}`}>
-          {isActive && (
+        <div className={`mt-auto bg-black rounded-xl p-4 border border-gray-600 relative overflow-hidden ${unclaimedRewards <= 0 ? 'opacity-70' : ''}`}>
+          {unclaimedRewards > 0 && (
             <div className="absolute top-0 left-0 w-0.5 h-full bg-[#1ABCF7] shadow-[0_0_8px_#1ABCF7]"></div>
           )}
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-gray-400">미수령 수익금</span>
-            <span className={`text-sm font-bold ${isActive ? 'text-[#1ABCF7] drop-shadow-[0_0_5px_rgba(26,188,247,0.5)]' : 'text-gray-400'}`}>
+            <span className={`text-sm font-bold ${unclaimedRewards > 0 ? 'text-[#1ABCF7] drop-shadow-[0_0_5px_rgba(26,188,247,0.5)]' : 'text-gray-400'}`}>
               KRWT {unclaimedRewards.toLocaleString()}
             </span>
           </div>
-          {isActive ? (
+          {unclaimedRewards > 0 ? (
             <button
               onClick={handleClaimClick}
               className="cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-[#1ABCF7] py-2.5 text-sm font-bold text-black shadow-[0_0_10px_rgba(26,188,247,0.3)] transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
