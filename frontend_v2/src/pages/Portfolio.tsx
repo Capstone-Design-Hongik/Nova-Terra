@@ -50,17 +50,17 @@ export default function Portfolio() {
       if (!walletAddress) return
 
       try {
-        const properties = await getPortfolio(walletAddress)
-        const transformedAssets: Asset[] = properties.map((prop) => ({
-          id: prop.id,
-          name: prop.name,
-          location: prop.address.split(' ').slice(0, 2).join(' '),
-          image: prop.coverImageUrl,
-          status: prop.status === 'ACTIVE' ? 'active' : 'preparing',
-          holdingAmount: 50, // TODO: API에서 보유 수량 정보 추가 필요
-          currentValue: prop.pricePerToken * 50, // TODO: 실제 보유 수량으로 계산
+        const holdings = await getPortfolio(walletAddress)
+        const transformedAssets: Asset[] = holdings.map((holding) => ({
+          id: holding.property.id,
+          name: holding.property.name,
+          location: holding.property.address.split(' ').slice(0, 2).join(' '),
+          image: holding.property.coverImageUrl,
+          status: holding.property.status === 'ACTIVE' ? 'active' : 'preparing',
+          holdingAmount: holding.amount,
+          currentValue: holding.property.pricePerToken * holding.amount,
           unclaimedRewards: 125000, // TODO: API에서 미수령 수익 정보 추가 필요
-          propertyData: prop,
+          propertyData: holding.property,
         }))
         setAssets(transformedAssets)
       } catch (error) {
