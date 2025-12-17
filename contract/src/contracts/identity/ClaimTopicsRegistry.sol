@@ -29,7 +29,7 @@ contract ClaimTopicsRegistry is IClaimTopicsRegistry {
     //              TOPIC CONSTANTS
     // ============================================
     
-    // 표준 Topic 번호 (프로젝트에서 공통으로 사용)
+    // 표준 Topic 번호 (프로젝트에서 공통으로 사용-참고용^^)
     uint256 public constant TOPIC_KYC = 1;
     uint256 public constant TOPIC_ACCREDITED_INVESTOR = 2;
     uint256 public constant TOPIC_COUNTRY = 3;
@@ -57,16 +57,6 @@ contract ClaimTopicsRegistry is IClaimTopicsRegistry {
     
     constructor() {
         owner = msg.sender;
-
-        // 기본 topic 등록
-        _claimTopics.push(TOPIC_KYC);
-        _topicExists[TOPIC_KYC] = true;
-        
-        _claimTopics.push(TOPIC_ACCREDITED_INVESTOR);
-        _topicExists[TOPIC_ACCREDITED_INVESTOR] = true;
-        
-        _claimTopics.push(TOPIC_COUNTRY);
-        _topicExists[TOPIC_COUNTRY] = true;
     }
     
     // ============================================

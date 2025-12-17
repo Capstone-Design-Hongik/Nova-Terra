@@ -7,6 +7,7 @@ import PropertyDetailPanel from '../components/marketplace/PropertyDetailPanel'
 import STOPurchasePanel from '../components/marketplace/STOPurchasePanel'
 import arrowdownIcon from '../assets/arrowdown.svg'
 import { getProperties, getBuildingTypeLabel, getBuildingTypeColor } from '../apis/properties'
+import { getPropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
 
 interface Property {
   id: string
@@ -21,7 +22,6 @@ interface Property {
   totalValue: number
   stoPrice: number
   fundingPercentage: number
-  investors: number
   description: string
   highlights: string[]
   dividendCycle: string
@@ -36,6 +36,31 @@ export default function Marketplace() {
   const [isPurchasePanelOpen, setIsPurchasePanelOpen] = useState(false)
   const [properties, setProperties] = useState<Property[]>([])
   const [loading, setLoading] = useState(true)
+  const [blockchainData, setBlockchainData] = useState<Record<string, PropertyBasicInfo>>({})
+
+  // 블록체인데이터 읽기
+  useEffect(() => {
+    const fetchBlockchainData = async () => {
+      // properties 배열을 순회하면서
+      for (const property of properties) {
+        if (property.id) {  // address = 컨트랙트 주소
+          try {
+            const data = await getPropertyBasicInfo(property.id)
+            setBlockchainData(prev => ({
+              ...prev,
+              [property.id]: data  // property.id를 key로 저장
+            }))
+          } catch (error) {
+            console.error(`블록체인 데이터 로드 실패 (${property.id}):`, error)
+          }
+        }
+      }
+    }
+
+    if (properties.length > 0) {
+      fetchBlockchainData()
+    }
+  }, [properties])
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -156,6 +181,10 @@ export default function Marketplace() {
               {visibleProperties.map((property) => (
                 <PropertyCard
                   key={property.id}
+                  totalSupply={blockchainData[property.id]?.totalSupply}
+                  maxSupply={blockchainData[property.id]?.maxSupply}
+                  remainingSupply={blockchainData[property.id]?.remainingSupply || '0'}
+                  symbol={blockchainData[property.id]?.symbol || ''}
                   {...property}
                   onClick={() => handlePropertyClick(property)}
                   onPurchaseClick={() => handlePurchaseClick(property)}

@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { BrowserProvider } from 'ethers'
 import copyIcon from '../assets/copy.svg'
+import OnChainIDModal from '../components/OnChainIDModal'
 
 interface TopbarProps {
   onConnectWallet?: () => void
@@ -12,6 +13,7 @@ interface TopbarProps {
 export default function Topbar({ onConnectWallet, isConnected, walletAddress: externalWalletAddress }: TopbarProps) {
   const location = useLocation()
   const [internalWalletAddress, setInternalWalletAddress] = useState<string>('')
+  const [isIDModalOpen, setIsIDModalOpen] = useState(false)
 
   useEffect(() => {
     if (!externalWalletAddress) {
@@ -81,15 +83,43 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
         </Link>
       </nav>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative">
         {isConnected && walletAddress ? (
-          <button
-            onClick={handleCopyAddress}
-            className="cursor-pointer flex flex-row items-center justify-center gap-2.5 rounded-full bg-[#1ABCF7] py-3 pr-5 pl-7 text-sm font-bold text-black transition-transform hover:scale-105 active:scale-95"
-          >
-            <img src={copyIcon} alt="copy" className="w-4 h-4" />
-            {formatAddress(walletAddress)}
-          </button>
+          <>
+            <button
+              onClick={handleCopyAddress}
+              className="cursor-pointer flex flex-row items-center justify-center gap-2.5 rounded-full bg-[#1ABCF7] py-3 pr-5 pl-7 text-sm font-bold text-black transition-transform hover:scale-105 active:scale-95"
+            >
+              <img src={copyIcon} alt="copy" className="cursor-pointer w-4 h-4" />
+              {formatAddress(walletAddress)}
+            </button>
+            <button
+              onClick={() => setIsIDModalOpen(true)}
+              className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border-2 border-[#1ABCF7] text-white transition-all hover:bg-white/20 hover:scale-105 active:scale-95"
+              title="온체인 신분증 보기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </button>
+
+            <OnChainIDModal
+              isOpen={isIDModalOpen}
+              onClose={() => setIsIDModalOpen(false)}
+            />
+          </>
         ) : (
           <button
             onClick={onConnectWallet}

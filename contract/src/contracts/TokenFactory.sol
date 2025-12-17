@@ -16,16 +16,19 @@ contract TokenFactory {
     // ============================================
     
     address public owner;
-    
+
     // 공용 레지스트리
     address public identityRegistry;
-    
+
     // 결제 토큰 (KRWT)
     address public paymentToken;
-    
+
+    // Property ID 카운터 (1부터 시작)
+    uint256 public nextPropertyId = 1;
+
     // 부동산 정보
     struct PropertyInfo {
-        bytes32 propertyId;
+        uint256 propertyId;
         string name;
         string symbol;
         address tokenAddress;
@@ -38,22 +41,22 @@ contract TokenFactory {
         uint256 createdAt;
         bool active;
     }
-    
+
     // propertyId => PropertyInfo
-    mapping(bytes32 => PropertyInfo) public properties;
-    
+    mapping(uint256 => PropertyInfo) public properties;
+
     // 배포된 부동산 ID 목록
-    bytes32[] public propertyIds;
-    
+    uint256[] public propertyIds;
+
     // 토큰 주소 => propertyId
-    mapping(address => bytes32) public tokenToProperty;
+    mapping(address => uint256) public tokenToProperty;
     
     // ============================================
     //                  EVENTS
     // ============================================
     
     event PropertyTokenCreated(
-        bytes32 indexed propertyId,
+        uint256 indexed propertyId,
         string name,
         string symbol,
         address tokenAddress,
@@ -61,8 +64,8 @@ contract TokenFactory {
         uint256 maxSupply,
         uint256 tokenPrice
     );
-    
-    event PropertyDeactivated(bytes32 indexed propertyId);
+
+    event PropertyDeactivated(uint256 indexed propertyId);
     event PaymentTokenUpdated(address oldToken, address newToken);
     
     // ============================================
@@ -108,24 +111,25 @@ contract TokenFactory {
         uint256 totalValue,
         uint256 tokenPrice,
         address complianceAddress
-    ) external onlyOwner returns (address tokenAddress, bytes32 propertyId) {
+    ) external onlyOwner returns (address tokenAddress, uint256 propertyId) {
         require(complianceAddress != address(0), "TokenFactory: zero compliance");
         require(totalValue > 0, "TokenFactory: zero value");
         require(tokenPrice > 0, "TokenFactory: zero price");
-        
-        // Property ID 생성
-        propertyId = keccak256(abi.encodePacked(name, symbol, block.timestamp));
-        require(properties[propertyId].tokenAddress == address(0), "TokenFactory: exists");
-        
+
+        // Property ID 생성 (1부터 시작하는 순차 번호)
+        propertyId = nextPropertyId;
+        nextPropertyId++;
+
         // maxSupply 계산 (총 가치 / 토큰 가격)
         uint256 maxSupply = totalValue / tokenPrice;
         require(maxSupply > 0, "TokenFactory: zero supply");
-        
+
         // PropertyToken 배포
         PropertyToken token = new PropertyToken(
+            msg.sender,
             name,
             symbol,
-            propertyId,
+            bytes32(propertyId),
             maxSupply,
             identityRegistry,
             complianceAddress,
@@ -133,7 +137,7 @@ contract TokenFactory {
             tokenPrice
         );
         tokenAddress = address(token);
-        
+
         // 정보 저장
         properties[propertyId] = PropertyInfo({
             propertyId: propertyId,
@@ -149,15 +153,15 @@ contract TokenFactory {
             createdAt: block.timestamp,
             active: true
         });
-        
+
         propertyIds.push(propertyId);
         tokenToProperty[tokenAddress] = propertyId;
-        
+
         emit PropertyTokenCreated(
-            propertyId, 
-            name, 
-            symbol, 
-            tokenAddress, 
+            propertyId,
+            name,
+            symbol,
+            tokenAddress,
             complianceAddress,
             maxSupply,
             tokenPrice
@@ -171,38 +175,38 @@ contract TokenFactory {
     /**
      * @dev 배당 컨트랙트 주소 설정
      */
-    function setDividendContract(bytes32 propertyId, address dividendAddress) 
-        external onlyOwner 
+    function setDividendContract(uint256 propertyId, address dividendAddress)
+        external onlyOwner
     {
         require(properties[propertyId].tokenAddress != address(0), "TokenFactory: not found");
         properties[propertyId].dividendAddress = dividendAddress;
     }
-    
+
     /**
      * @dev 거버넌스 컨트랙트 주소 설정
      */
-    function setGovernanceContract(bytes32 propertyId, address governanceAddress) 
-        external onlyOwner 
+    function setGovernanceContract(uint256 propertyId, address governanceAddress)
+        external onlyOwner
     {
         require(properties[propertyId].tokenAddress != address(0), "TokenFactory: not found");
         properties[propertyId].governanceAddress = governanceAddress;
     }
-    
+
     /**
      * @dev 부동산 비활성화
      */
-    function deactivateProperty(bytes32 propertyId) external onlyOwner {
+    function deactivateProperty(uint256 propertyId) external onlyOwner {
         require(properties[propertyId].active, "TokenFactory: not active");
         properties[propertyId].active = false;
         emit PropertyDeactivated(propertyId);
     }
-    
+
     /**
      * @dev 부동산 가치 업데이트 (재평가)
      *      주의: maxSupply는 변경 안 됨 (이미 발행된 토큰 있으니까)
      */
-    function updatePropertyValue(bytes32 propertyId, uint256 newValue) 
-        external onlyOwner 
+    function updatePropertyValue(uint256 propertyId, uint256 newValue)
+        external onlyOwner
     {
         require(properties[propertyId].active, "TokenFactory: not active");
         properties[propertyId].totalValue = newValue;
@@ -212,23 +216,23 @@ contract TokenFactory {
     //              VIEW FUNCTIONS
     // ============================================
     
-    function getProperty(bytes32 propertyId) 
-        external view returns (PropertyInfo memory) 
+    function getProperty(uint256 propertyId)
+        external view returns (PropertyInfo memory)
     {
         return properties[propertyId];
     }
-    
-    function getAllPropertyIds() external view returns (bytes32[] memory) {
+
+    function getAllPropertyIds() external view returns (uint256[] memory) {
         return propertyIds;
     }
-    
-    function getActiveProperties() external view returns (bytes32[] memory) {
+
+    function getActiveProperties() external view returns (uint256[] memory) {
         uint256 count = 0;
         for (uint256 i = 0; i < propertyIds.length; i++) {
             if (properties[propertyIds[i]].active) count++;
         }
-        
-        bytes32[] memory activeIds = new bytes32[](count);
+
+        uint256[] memory activeIds = new uint256[](count);
         uint256 index = 0;
         for (uint256 i = 0; i < propertyIds.length; i++) {
             if (properties[propertyIds[i]].active) {
@@ -236,7 +240,7 @@ contract TokenFactory {
                 index++;
             }
         }
-        
+
         return activeIds;
     }
     

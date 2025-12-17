@@ -36,6 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-application.properties
-application-local.properties
-application-dev.properties
+application-local.yml
+application-dev.yml

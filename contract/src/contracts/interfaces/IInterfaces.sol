@@ -69,13 +69,15 @@ interface IClaimTopicsRegistry {
 // ============================================
 
 interface IModularCompliance {
-    function addModule(address module) external;
-    function removeModule(address module) external;
+    function registerToken(address token) external;
+    function addModuleForToken(address token, address module) external;
+    function removeModuleForToken(address token, address module) external;
     function canTransfer(address from, address to, uint256 amount) external view returns (bool);
     function transferred(address from, address to, uint256 amount) external;
     function created(address to, uint256 amount) external;
     function destroyed(address from, uint256 amount) external;
     function getModules() external view returns (address[] memory);
+    function getModulesForToken(address token) external view returns (address[] memory);
 }
 
 interface IComplianceModule {
@@ -104,4 +106,10 @@ interface IPropertyToken {
     function maxSupply() external view returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
+
+    // 스냅샷 함수 (배당 분배용)
+    function currentSnapshotId() external view returns (uint256);
+    function balanceOfAt(address account, uint256 snapshotId) external view returns (uint256);
+    function totalSupplyAt(uint256 snapshotId) external view returns (uint256);
 }
+

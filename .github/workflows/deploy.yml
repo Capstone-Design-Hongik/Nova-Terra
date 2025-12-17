@@ -1,0 +1,112 @@
+# 워크플로우 이름
+name: Spring Boot CI/CD with GitHub Actions
+
+# 언제 자동화 실행
+on:
+  push:
+    branches:
+      - main  # 'main' 브랜치에 push 될 때마다 실행
+  workflow_dispatch:  # 수동 실행 가능
+
+# 어떤 작업인지
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    # 세부 작업 순서
+    steps:
+      # (1) GitHub 레포지토리에 있는 우리 코드를 가상 서버로 가져오기
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # (2) JDK 21 설치하기
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # (3) gradlew 파일에 실행 권한 부여
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./backend/gradlew
+
+      # (4) Gradle로 빌드하기
+      - name: Build with Gradle
+        run: cd backend && ./gradlew clean build -x test
+
+      # (5) 빌드된 .jar 파일을 EC2 서버로 전송 (SCP)
+      - name: SCP JAR to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "backend/build/libs/*.jar"
+          target: "~/Nova-Terra/backend"
+          strip_components: 3
+
+      # (6) EC2 서버에 SSH로 접속해서 재배포 스크립트 실행
+      - name: SSH into EC2 and Restart Server
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/Nova-Terra/backend
+
+            # (A) 새 .jar 파일 이름 찾기
+            JAR_FILE_NAME=$(ls -t *.jar | grep -v -- '-plain.jar' | head -n 1)
+
+            # (B) 기존 Java 프로세스 찾기 (grep 제외)
+            PID=$(ps -ef | grep "java -Dspring.config.additional-location" | grep -v grep | awk '{print $2}')
+
+            # (C) 기존 프로세스가 있으면 종료
+            if [ -n "$PID" ]; then
+              echo "Stopping previous server (PID: $PID)"
+              kill -15 $PID || true
+              sleep 5
+
+              # 아직 살아있으면 강제 종료
+              if ps -p $PID > /dev/null; then
+                echo "Force killing process (PID: $PID)"
+                kill -9 $PID || true
+                sleep 2
+              fi
+            fi
+
+            # (D) 포트 확인 및 정리
+            PORT_PID=$(lsof -ti:8080 || true)
+            if [ -n "$PORT_PID" ]; then
+              echo "Killing process on port 8080 (PID: $PORT_PID)"
+              kill -9 $PORT_PID || true
+              sleep 2
+            fi
+
+            # (E) 이전 로그 백업 (선택사항)
+            if [ -f nohup.out ]; then
+              mv nohup.out "nohup.out.$(date +%Y%m%d_%H%M%S).bak"
+            fi
+
+            # (F) 새 서버 시작 (application-dev.yml 사용)
+            echo "Starting new server with $JAR_FILE_NAME"
+            nohup java -Dspring.config.additional-location="file:./application-dev.yml" -Dspring.profiles.active=dev -jar $JAR_FILE_NAME > nohup.out 2>&1 &
+
+            # (G) 시작 확인
+            sleep 10
+            NEW_PID=$(pgrep -f "$JAR_FILE_NAME")
+
+            if [ -n "$NEW_PID" ]; then
+              echo "✅ New server started successfully (PID: $NEW_PID)"
+              echo "==== Server Status ===="
+              ps aux | grep java | grep -v grep
+              echo "==== Recent Logs ===="
+              tail -n 20 nohup.out
+            else
+              echo "❌ Failed to start new server"
+              echo "==== Full Error Log ===="
+              cat nohup.out
+              exit 1
+            fi

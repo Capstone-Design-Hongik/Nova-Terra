@@ -1,13 +1,18 @@
 package org.landmark.domain.properties.service;
 
 import lombok.RequiredArgsConstructor;
+import org.landmark.global.exception.BusinessException;
+import org.landmark.global.exception.ErrorCode;
 import org.landmark.global.service.S3Service;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.dto.PropertyCreateRequest;
+import org.landmark.domain.properties.dto.PropertyResponse;
 import org.landmark.domain.properties.repository.PropertyRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +32,21 @@ public class PropertyServiceImpl implements PropertyService {
     propertyRepository.save(property);
 
     return property.getId();
+  }
+
+  @Transactional(readOnly = true)
+  public List<PropertyResponse> getAllProperties() {
+    return propertyRepository.findAll()
+            .stream()
+            .map(PropertyResponse::from)
+            .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public PropertyResponse getPropertyById(String propertyId) {
+    Property property = propertyRepository.findById(propertyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
+
+    return PropertyResponse.from(property);
   }
 }
