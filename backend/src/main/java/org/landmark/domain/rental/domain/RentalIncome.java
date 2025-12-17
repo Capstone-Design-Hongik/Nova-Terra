@@ -77,4 +77,9 @@ public class RentalIncome {
     public void failDistribution() {
         this.status = RentalIncomeStatus.FAILED;
     }
+
+    /* 블록체인 전송을 위한 KRWT 수량 */
+    public java.math.BigInteger getKrwtAmountAsBigInteger() {
+        return java.math.BigInteger.valueOf(this.krwtAmount);
+    }
 }

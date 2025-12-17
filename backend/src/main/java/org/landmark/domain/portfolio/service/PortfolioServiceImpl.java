@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.landmark.domain.portfolio.domain.UserHolding;
 import org.landmark.domain.portfolio.dto.PortfolioResponse;
+import org.landmark.domain.portfolio.dto.PropertyHoldingResponse;
 import org.landmark.domain.portfolio.repository.UserHoldingRepository;
-import org.landmark.domain.properties.dto.PropertyResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,11 +33,11 @@ public class PortfolioServiceImpl implements PortfolioService {
             return PortfolioResponse.of(userId, List.of());
         }
 
-        List<PropertyResponse> properties = holdings.stream()
-            .map(holding -> PropertyResponse.from(holding.getProperty()))
+        List<PropertyHoldingResponse> propertyHoldings = holdings.stream()
+            .map(PropertyHoldingResponse::from)
             .collect(Collectors.toList());
 
-        log.info("사용자 포트폴리오 조회 완료 - userId: {}, 보유 부동산 수: {}", userId, properties.size());
-        return PortfolioResponse.of(userId, properties);
+        log.info("사용자 포트폴리오 조회 완료 - userId: {}, 보유 부동산 수: {}", userId, propertyHoldings.size());
+        return PortfolioResponse.of(userId, propertyHoldings);
     }
 }
