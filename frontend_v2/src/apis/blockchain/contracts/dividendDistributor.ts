@@ -207,3 +207,87 @@ userAddress)
     throw error
   }
 }
+
+
+// ============================================
+//       배당금 청구 (트랜잭션)
+// ============================================
+/**
+ * 단일 배당금 청구
+ * @param contractAddress DividendDistributor 컨트랙트 주소
+ * @param dividendId 청구할 배당 ID
+ * @returns 트랜잭션 해시
+ */
+export const claimDividend = async (
+  contractAddress: string,
+  dividendId: number
+): Promise<string> => {
+  try {
+    // 1. provider 가져오기
+    const provider = await getProvider()
+
+    // 2. signer 가져오기 (트랜잭션 서명 필요)
+    const signer = await provider.getSigner()
+
+    // 3. 컨트랙트 인스턴스 생성 (signer 연결)
+    const contract = new Contract(contractAddress,
+DIVIDEND_DISTRIBUTOR_ABI, signer)
+
+    // 4. claimDividend 함수 호출
+    const tx = await contract.claimDividend(dividendId)
+
+    // 5. 트랜잭션 완료 대기
+    const receipt = await tx.wait()
+
+    // 6. 트랜잭션 해시 반환
+    return receipt.hash
+  } catch (error) {
+    console.error('배당금 청구 실패:', error)
+    throw error
+  }
+}
+
+/**
+ * 모든 미청구 배당금 한번에 청구
+ * @param contractAddress DividendDistributor 컨트랙트 주소
+ * @returns 트랜잭션 해시 배열
+ */
+export const claimAllDividends = async (
+  contractAddress: string
+): Promise<string[]> => {
+  try {
+    const contract = await getDividendDistributorContract(contractAddress)
+    const userAddress = await getWalletAddress()
+
+    // 1. 모든 배당 ID 조회
+    const dividendIds = await getDividendIds(contractAddress)
+
+    // 2. 청구 가능한 배당만 필터링
+    const claimableIds: number[] = []
+    for (const id of dividendIds) {
+      const claimable = await contract.getClaimableDividend(Number(id),
+userAddress)
+      const isClaimed = await contract.claimed(Number(id), userAddress)
+
+      if (claimable > 0 && !isClaimed) {
+        claimableIds.push(Number(id))
+      }
+    }
+
+    if (claimableIds.length === 0) {
+      throw new Error('청구 가능한 배당금이 없습니다')
+    }
+
+    // 3. 각 배당 청구
+    const txHashes: string[] = []
+    for (const dividendId of claimableIds) {
+      const txHash = await claimDividend(contractAddress, dividendId)
+      txHashes.push(txHash)
+    }
+
+    return txHashes
+  } catch (error) {
+    console.error('전체 배당금 청구 실패:', error)
+    throw error
+  }
+}

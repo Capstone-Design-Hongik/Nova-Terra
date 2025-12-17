@@ -1,3 +1,9 @@
+import { useState, useEffect } from 'react'
+import { getTotalClaimable, claimAllDividends } from '../../apis/blockchain/contracts/dividendDistributor'
+import { getUserBalance } from '../../apis/blockchain/contracts/propertyToken'
+import { getPropertyInfo } from  '../../apis/blockchain/contracts/tokenFactory'
+
+
 interface PortfolioDetailPanelProps {
   isOpen: boolean
   onClose: () => void
@@ -10,16 +16,90 @@ interface PortfolioDetailPanelProps {
     holdingAmount: number
     currentValue: number
     unclaimedRewards: number
+    // contractAddress: string  //이따 id로 바꿔 
+    symbol: string
   } | null
   onClaimClick?: () => void
 }
 
 export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimClick }: PortfolioDetailPanelProps) {
+  // 블록체인 데이터 상태 관리
+  const [blockchainData, setBlockchainData] = useState({
+    holdingAmount: asset?.holdingAmount || 0,
+    unclaimedRewards: asset?.unclaimedRewards || 0,
+    isLoading: false,
+  })
+
   if (!asset) return null
 
   const isActive = asset.status === 'active'
   const statusColor = isActive ? 'text-[#1ABCF7] border-[#1ABCF7]/30' : 'text-gray-400 border-gray-600'
   const statusText = isActive ? '운영중' : '준비중'
+
+  // 블록체인 데이터 로드
+  useEffect(() => {
+    const loadBlockchainData = async () => {
+      if (!asset || !isOpen) return
+
+      try {
+        setBlockchainData(prev => ({ ...prev, isLoading: true }))
+
+        // 1. TokenFactory에서 Property 정보 가져오기 (dividendAddress 얻기 위해)
+        const propertyInfo = await getPropertyInfo(asset.id)
+
+        // 2. 보유 수량 조회 (PropertyToken)
+        const balance = await getUserBalance(propertyInfo.tokenAddress)
+
+        // 3. 미청구 배당금 조회 (DividendDistributor)
+        const unclaimedRewards = await getTotalClaimable(propertyInfo.dividendAddress)
+
+        setBlockchainData({
+          holdingAmount: Number(balance),
+          unclaimedRewards: Number(unclaimedRewards),
+          isLoading: false,
+        })
+      } catch (error) {
+        console.error('블록체인 데이터 로드 실패:', error)
+        setBlockchainData(prev => ({ ...prev, isLoading: false }))
+      }
+    }
+
+    loadBlockchainData()
+  }, [asset, isOpen])
+
+
+  // 클레임 함수
+  const handleClaimClick = async () => {
+    if (!asset) return
+
+    try {
+      setBlockchainData(prev => ({ ...prev, isLoading: true }))
+
+      // 1. 먼저 dividendAddress 가져오기
+      const propertyInfo = await getPropertyInfo(asset.id)
+
+      // 2. 모든 배당금 청구
+      const txHashes = await claimAllDividends(propertyInfo.dividendAddress)
+
+      console.log('청구 완료! 트랜잭션:', txHashes)
+      alert(`배당금 청구가 완료되었습니다!\n트랜잭션: ${txHashes.join(', ')}`)
+
+      // 3. 데이터 새로고침
+      const unclaimedRewards = await getTotalClaimable(propertyInfo.dividendAddress)
+      setBlockchainData(prev => ({
+        ...prev,
+        unclaimedRewards: Number(unclaimedRewards),
+        isLoading: false,
+      }))
+
+      onClaimClick?.()
+    } catch (error) {
+      console.error('클레임 실패:', error)
+      alert('배당금 청구에 실패했습니다: ' + (error as Error).message)
+      setBlockchainData(prev => ({ ...prev, isLoading: false }))
+    }
+  }
+
 
   return (
     <>
@@ -88,7 +168,9 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">보유 수량</p>
-                <p className="text-2xl font-bold text-white">{asset.holdingAmount} STO</p>
+                <p className="text-2xl font-bold text-white">
+                  {blockchainData.isLoading ? '로딩중...' : blockchainData.holdingAmount} {asset.symbol}
+                </p>
               </div>
               <div className="bg-gray-800 border border-gray-600 rounded-xl p-5">
                 <p className="text-sm text-gray-400 mb-2">현재 평가액</p>
@@ -105,13 +187,13 @@ export default function PortfolioDetailPanel({ isOpen, onClose, asset, onClaimCl
                 <div>
                   <p className="text-sm text-gray-400 mb-1">미수령 수익금</p>
                   <p className="text-3xl font-bold text-[#1ABCF7] drop-shadow-[0_0_10px_rgba(26,188,247,0.5)]">
-                    KRWT {asset.unclaimedRewards.toLocaleString()}
+                    {blockchainData.isLoading ? '로딩중...' : `${blockchainData.unclaimedRewards.toLocaleString()} KRWT`}
                   </p>
                 </div>
                 <span className="flex h-3 w-3 rounded-full bg-[#1ABCF7] shadow-[0_0_8px_#1ABCF7] animate-pulse mt-2"></span>
               </div>
 
-              {asset.unclaimedRewards > 0 ? (
+              {blockchainData.unclaimedRewards > 0 && !blockchainData.isLoading ? (
                 <button
                   onClick={onClaimClick}
                   className="cursor-pointer w-full rounded-lg bg-[#1ABCF7] py-3 text-sm font-bold text-black transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
