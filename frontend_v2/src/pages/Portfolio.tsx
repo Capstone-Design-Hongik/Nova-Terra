@@ -59,7 +59,7 @@ export default function Portfolio() {
           status: holding.property.status === 'ACTIVE' ? 'active' : 'preparing',
           holdingAmount: holding.amount,
           currentValue: holding.property.pricePerToken * holding.amount,
-          unclaimedRewards: 125000, // TODO: API에서 미수령 수익 정보 추가 필요
+          unclaimedRewards: 125000, //API에서 미수령 수익 정보 추가 필요
           propertyData: holding.property,
         }))
         setAssets(transformedAssets)

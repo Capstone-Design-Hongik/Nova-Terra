@@ -1,18 +1,43 @@
+import { useState, useEffect } from 'react'
+import { getWalletAddress } from '../apis/blockchain/provider'
+
 interface OnChainIDModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
 export default function OnChainIDModal({ isOpen, onClose}: OnChainIDModalProps) {
-  if (!isOpen) return null
-
-  const address = "aaaaa" //onchain address 하드코딩
+  const [address, setAddress] = useState('')
   const active = 1  // 1이면 active 상태
+
+  // 지갑 주소 가져오기
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const walletAddress = await getWalletAddress()
+        setAddress(walletAddress)
+      } catch (error) {
+        console.error('지갑 주소 가져오기 실패:', error)
+      }
+    }
+
+    if (isOpen) {
+      fetchAddress()
+    }
+  }, [isOpen])
+
+  // 주소 축약 함수 (0x1234...Ef 형식)
+  const formatAddress = (addr: string) => {
+    if (!addr) return ''
+    return `${addr.slice(0, 6)}...${addr.slice(-2)}`
+  }
 
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(address)
     alert('주소가 복사되었습니다!')
   }
+
+  if (!isOpen) return null
 
   return (
     <>
@@ -51,9 +76,9 @@ export default function OnChainIDModal({ isOpen, onClose}: OnChainIDModalProps) 
         <div className="p-6">
           {/* 헤더 */}
           <div className="text-center mb-5">
-            <h2 className="text-xl font-bold text-black mb-2 tracking-tight">On-Chain Identity</h2>
+            <h2 className="text-xl font-bold text-black mb-2 tracking-tight">ONCHAIN ID</h2>
             <div className="inline-flex flex-col items-center justify-center">
-              <div className="text-[9px] uppercase tracking-[0.15em] text-black bg-black/5 px-2 py-0.5 rounded-t-md font-bold border border-black/10">Your On-Chain ID</div>
+              {/* <div className="text-[9px] uppercase tracking-[0.15em] text-black bg-black/5 px-2 py-0.5 rounded-t-md font-bold border border-black/10">{address}</div> */}
               <div className="relative px-4 py-2 bg-black border border-black rounded-lg shadow-md flex items-center gap-2">
                 <button
                   onClick={handleCopyAddress}
@@ -64,7 +89,7 @@ export default function OnChainIDModal({ isOpen, onClose}: OnChainIDModalProps) 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 </button>
-                <span className="font-mono text-sm text-white tracking-wider font-medium">{address}</span>
+                <span className="font-mono text-sm text-white tracking-wider font-medium">{formatAddress(address)}</span>
               </div>
             </div>
           </div>
