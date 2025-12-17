@@ -19,7 +19,7 @@ export default function PropertyVotingPowerItem({
     <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-600 bg-gray-800 hover:bg-gray-750 transition-colors">
       {/* Property Image */}
       <div
-        className="w-16 h-16 rounded-lg bg-cover bg-center border border-gray-600 flex-shrink-0"
+        className="w-16 h-16 rounded-lg bg-cover bg-center border border-gray-600 shrink-0"
         style={image ? { backgroundImage: `url(${image})` } : { background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}
       >
         {!image && (
@@ -35,7 +35,7 @@ export default function PropertyVotingPowerItem({
       <div className="flex-1 min-w-0">
         <h3 className="text-white font-bold text-base mb-1 truncate">{propertyName}</h3>
         <p className="text-gray-400 text-sm flex items-center gap-1 mb-2">
-          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
           </svg>
           <span className="truncate">{location}</span>
