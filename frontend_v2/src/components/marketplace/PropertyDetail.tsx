@@ -148,6 +148,7 @@ export default function PropertyDetail({
               quantity={quantity}
               totalAmount={totalAmount}
               transactionId={transactionId}
+              symbol={symbol}
               onViewPortfolio={handleViewPortfolio}
               onExploreMore={handleExploreMore}
             />
