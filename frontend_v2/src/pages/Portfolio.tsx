@@ -5,6 +5,8 @@ import PortfolioAssetCard from '../components/portfolio/PortfolioAssetCard'
 import PortfolioDetailPanel from '../components/portfolio/PortfolioDetailPanel'
 import ClaimHistoryPanel from '../components/portfolio/ClaimHistoryPanel'
 import { getPortfolio, type PropertyResponse } from '../apis/properties'
+import { getPropertyInfo } from '../apis/blockchain/contracts/tokenFactory'
+import { getTotalClaimable } from '../apis/blockchain/contracts/dividendDistributor'
 
 interface Asset {
   id: string
@@ -52,18 +54,39 @@ export default function Portfolio() {
 
       try {
         const holdings = await getPortfolio(walletAddress)
-        const transformedAssets: Asset[] = holdings.map((holding) => ({
-          id: holding.property.id,
-          name: holding.property.name,
-          location: holding.property.address.split(' ').slice(0, 2).join(' '),
-          image: holding.property.coverImageUrl,
-          status: holding.property.status === 'ACTIVE' ? 'active' : 'preparing',
-          holdingAmount: holding.amount,
-          currentValue: holding.property.pricePerToken * holding.amount,
-          unclaimedRewards: 125000, //API에서 미수령 수익 정보 추가 필요
-          symbol: 'NPT', // TODO: API에서 symbol 추가 필요
-          propertyData: holding.property,
-        }))
+
+        // 각 holding에 대해 블록체인 데이터 가져오기
+        const transformedAssets: Asset[] = await Promise.all(
+          holdings.map(async (holding) => {
+            let unclaimedRewards = 0
+
+            try {
+              // TokenFactory에서 dividendAddress 가져오기
+              const propertyInfo = await getPropertyInfo('3') // TODO: 실제 propertyId 사용해야 함
+
+              // DividendDistributor에서 미수령 배당금 조회
+              const totalClaimable = await getTotalClaimable(propertyInfo.dividendAddress)
+              unclaimedRewards = Number(totalClaimable)
+            } catch (error) {
+              console.error(`${holding.property.name} 미수령 수익 조회 실패:`, error)
+              unclaimedRewards = 0 // 실패하면 0으로 설정
+            }
+
+            return {
+              id: holding.property.id,
+              name: holding.property.name,
+              location: holding.property.address.split(' ').slice(0, 2).join(' '),
+              image: holding.property.coverImageUrl,
+              status: holding.property.status === 'ACTIVE' ? 'active' : 'preparing',
+              holdingAmount: holding.amount,
+              currentValue: holding.property.pricePerToken * holding.amount,
+              unclaimedRewards: unclaimedRewards, // 블록체인에서 가져온 실제 값
+              symbol: 'NPT', // TODO: API에서 symbol 추가 필요
+              propertyData: holding.property,
+            }
+          })
+        )
+
         setAssets(transformedAssets)
       } catch (error) {
         console.error('포트폴리오 데이터 로드 실패:', error)
@@ -155,7 +178,7 @@ export default function Portfolio() {
             </div>
 
             {/* Cumulative Rewards */}
-            <div className="relative overflow-hidden rounded-2xl border border-gray-600 bg-gray-800 p-6 group">
+            {/* <div className="relative overflow-hidden rounded-2xl border border-gray-600 bg-gray-800 p-6 group">
               <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-purple-500/10 blur-xl transition-all group-hover:bg-purple-500/20"></div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex w-10 h-10 items-center justify-center rounded-full bg-black border border-gray-600 text-purple-400">
@@ -169,10 +192,10 @@ export default function Portfolio() {
               <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
                 <span>최근 지급: 2023.10.01</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Claimable Rewards */}
-            <div className="relative overflow-hidden rounded-2xl border border-[#1ABCF7]/30 bg-linear-to-br from-gray-800 to-[#1ABCF7]/5 p-6 group shadow-[0_0_15px_rgba(26,188,247,0.1)]">
+            {/* <div className="relative overflow-hidden rounded-2xl border border-[#1ABCF7]/30 bg-linear-to-br from-gray-800 to-[#1ABCF7]/5 p-6 group shadow-[0_0_15px_rgba(26,188,247,0.1)]">
               <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-[#1ABCF7]/20 blur-xl"></div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -186,7 +209,7 @@ export default function Portfolio() {
                 <span className="flex h-2 w-2 rounded-full bg-[#1ABCF7] shadow-[0_0_5px_#1ABCF7] animate-pulse"></span>
               </div>
               <div className="text-2xl font-bold text-white mb-1">KRWT {totalUnclaimedRewards.toLocaleString()}</div>
-            </div>
+            </div> */}
 
             {/* Average Yield */}
             <div className="relative overflow-hidden rounded-2xl border border-gray-600 bg-gray-800 p-6 group">
