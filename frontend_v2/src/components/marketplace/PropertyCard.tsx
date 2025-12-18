@@ -115,7 +115,7 @@ export default function PropertyCard({
         <div className="grid grid-cols-2 gap-px bg-gray-600/50 rounded-lg overflow-hidden mb-5">
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">임대율</p>
-            <p className="font-medium text-white">{(occupancyRate * 100).toFixed(1)}%</p>
+            <p className="font-medium text-white">{occupancyRate ? occupancyRate.toFixed(1) : '0.0'}%</p>
           </div>
           <div className="bg-gray-800 p-3">
             <p className="text-xs text-gray-400">월 임대료</p>
@@ -139,7 +139,7 @@ export default function PropertyCard({
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
             <div
               className="h-full rounded-full bg-linear-to-r from-[#1ABCF7] to-[#A020F0]"
-              style={{ width: `${fundingPercentage}%` }}
+              style={{ width: `${actualFundingPercentage}%` }}
             ></div>
           </div>
           <button
