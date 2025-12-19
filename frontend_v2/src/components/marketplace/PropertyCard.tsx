@@ -139,7 +139,8 @@ export default function PropertyCard({
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-600">
             <div
               className="h-full rounded-full bg-linear-to-r from-[#1ABCF7] to-[#A020F0]"
-              style={{ width: `${actualFundingPercentage}%` }}
+
+              style={{ width: `${100 - actualFundingPercentage}%` }}
             ></div>
           </div>
           <button

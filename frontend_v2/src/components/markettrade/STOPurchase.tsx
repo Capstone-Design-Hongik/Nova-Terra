@@ -14,8 +14,6 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
 
   const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
-  const gasFee = 1500
-  const total = subtotal + gasFee
 
   const handleMaxClick = () => {
     setQuantity(maxAvailable)
@@ -150,26 +148,13 @@ export default function STOPurchase({ stoPrice, propertyName, propertyLocation, 
 
         {/* Price Summary */}
         <div className="rounded-xl bg-black/50 p-4 border border-gray-600 space-y-3 backdrop-blur-sm">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">소계 ({quantity} {symbol} x {pricePerToken.toLocaleString()} KRWT)</span>
-            <span className="text-white font-medium">{subtotal.toLocaleString()} KRWT</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <div className="flex items-center gap-1 text-gray-400">
-              예상 가스비
-              <svg className="w-3.5 h-3.5 cursor-help text-gray-400 hover:text-[#1ABCF7] transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-white font-medium">~ {gasFee.toLocaleString()}KRWT</span>
-          </div>
-          <div className="border-t border-gray-600 pt-3 mt-3 flex justify-between items-center">
-            <span className="text-base font-bold text-white">총 예상 비용</span>
+          <div className="flex justify-between items-center">
+            <span className="text-base font-bold text-white">총 결제 금액</span>
             <div className="text-right">
               <span className="block text-xl font-bold text-[#1ABCF7] drop-shadow-[0_0_8px_rgba(26,188,247,0.3)]">
-                {total.toLocaleString()} KRWT
+                {subtotal.toLocaleString()} KRWT
               </span>
-              <span className="block text-xs text-gray-400">KRWT 결제</span>
+              <span className="block text-xs text-gray-400">{quantity} {symbol} x {pricePerToken.toLocaleString()} KRWT</span>
             </div>
           </div>
         </div>

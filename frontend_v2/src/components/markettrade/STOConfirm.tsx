@@ -14,8 +14,6 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
 
   const pricePerToken = parseFloat(stoPrice.replace(/[^0-9.]/g, ''))
   const subtotal = quantity * pricePerToken
-  const gasFee = 1500
-  const total = subtotal + gasFee
   const balance = 5200000
 
   useEffect(() => {
@@ -89,27 +87,14 @@ export default function STOConfirm({ stoPrice, propertyName, quantity, onBack, o
 
         {/* Price Summary */}
         <div className="rounded-xl bg-black/50 p-4 border border-gray-600 space-y-3 backdrop-blur-sm">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">상품 금액 ({quantity} STO x KRWT {pricePerToken.toLocaleString()})</span>
-            <span className="text-white font-medium">KRWT {subtotal.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <div className="flex items-center gap-1 text-gray-400">
-              예상 가스비
-              <svg className="w-3.5 h-3.5 cursor-help text-gray-400 hover:text-[#1ABCF7] transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                <title>블록체인 네트워크 혼잡도에 따라 변동될 수 있습니다</title>
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-white font-medium">~KRWT {gasFee.toLocaleString()}</span>
-          </div>
-          <div className="border-t border-gray-600 pt-4 mt-3 flex justify-between items-center">
+          <div className="flex justify-between items-center">
             <span className="text-base font-bold text-white">최종 결제 금액</span>
             <div className="text-right">
               <span className="block text-2xl font-bold text-[#1ABCF7] drop-shadow-[0_0_10px_rgba(26,188,247,0.4)]">
-                KRWT {total.toLocaleString()}
+                KRWT {subtotal.toLocaleString()}
               </span>
-              <span className="block text-xs text-gray-400 mt-1">보유 KRW 잔액: KRWT {balance.toLocaleString()}</span>
+              <span className="block text-xs text-gray-400 mt-1">{quantity} STO x KRWT {pricePerToken.toLocaleString()}</span>
+              <span className="block text-xs text-gray-400">보유 KRW 잔액: KRWT {balance.toLocaleString()}</span>
             </div>
           </div>
         </div>
