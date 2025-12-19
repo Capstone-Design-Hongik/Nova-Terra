@@ -18,6 +18,7 @@ export default function MarketTrade() {
     stoPrice: string
     fundingPercentage: number
     investors: number
+    symbol: string
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -44,6 +45,7 @@ export default function MarketTrade() {
           stoPrice: `KRWT ${(data.totalValuation / data.totalTokens).toFixed(0)}`,
           fundingPercentage: 75,
           investors: 1000,
+          symbol: 'NPT', // TODO: API에서 symbol 가져오기
         })
       } catch (error) {
         console.error('부동산 상세 조회 실패:', error)
@@ -96,6 +98,7 @@ export default function MarketTrade() {
         stoPrice={currentProperty.stoPrice}
         fundingPercentage={currentProperty.fundingPercentage}
         investors={currentProperty.investors}
+        symbol={currentProperty.symbol}
       />
     </div>
   )

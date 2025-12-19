@@ -99,8 +99,6 @@ export default function Portfolio() {
   }, [walletAddress])
 
   const totalAssetValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0)
-  const totalUnclaimedRewards = assets.reduce((sum, asset) => sum + asset.unclaimedRewards, 0)
-  const cumulativeRewards = 8340500
   const averageYield = 6.8
 
   const handleClaim = (id: string) => {

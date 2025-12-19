@@ -16,6 +16,7 @@ interface PropertyDetailProps {
   stoPrice: string
   fundingPercentage: number
   investors: number
+  symbol: string
 }
 
 export default function PropertyDetail({
@@ -30,6 +31,7 @@ export default function PropertyDetail({
   stoPrice,
   fundingPercentage,
   investors,
+  symbol,
 }: PropertyDetailProps) {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
@@ -129,7 +131,7 @@ export default function PropertyDetail({
 
           {/* STO Purchase */}
           {step === 1 && (
-            <STOPurchase stoPrice={stoPrice} propertyName={name} propertyLocation={location} onNext={handleNext} />
+            <STOPurchase stoPrice={stoPrice} propertyName={name} propertyLocation={location} symbol={symbol} onNext={handleNext} />
           )}
           {step === 2 && (
             <STOConfirm
@@ -146,6 +148,7 @@ export default function PropertyDetail({
               quantity={quantity}
               totalAmount={totalAmount}
               transactionId={transactionId}
+              symbol={symbol}
               onViewPortfolio={handleViewPortfolio}
               onExploreMore={handleExploreMore}
             />
