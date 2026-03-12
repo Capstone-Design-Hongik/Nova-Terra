@@ -1,10 +1,11 @@
 package org.landmark.domain.blockchain.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.landmark.domain.blockchain.config.BlockchainConfig;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -29,13 +30,25 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class BlockchainWalletService {
 
+    @Nullable
     private final Web3j web3j;
+    @Nullable
     private final Credentials credentials;
     private final BlockchainConfig blockchainConfig;
     private final DefaultGasProvider gasProvider;
+
+    @Autowired
+    public BlockchainWalletService(@Nullable Web3j web3j,
+                                    @Nullable Credentials credentials,
+                                    BlockchainConfig blockchainConfig,
+                                    DefaultGasProvider gasProvider) {
+        this.web3j = web3j;
+        this.credentials = credentials;
+        this.blockchainConfig = blockchainConfig;
+        this.gasProvider = gasProvider;
+    }
 
     /* 현재 지갑 주소 조회 */
     public String getWalletAddress() {
