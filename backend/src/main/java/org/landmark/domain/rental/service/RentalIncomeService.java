@@ -35,6 +35,7 @@ public class RentalIncomeService {
     private final PropertyRepository propertyRepository;
     private final TossPaymentsClient tossPaymentsClient;
     private final org.landmark.domain.blockchain.service.BlockchainWalletService blockchainWalletService;
+    private final RentalIncomeTransactionService transactionService;
 
     /* Property별 임대 수익 전용 가상계좌 발급 */
     @Transactional
@@ -89,7 +90,7 @@ public class RentalIncomeService {
      * 임대 수익 입금 완료 처리 (Webhook에서 호출)
      *
      * 2-Phase 처리:
-     * Phase 1: DB에 RentalIncome PENDING 저장 (트랜잭션)
+     * Phase 1: DB에 RentalIncome PENDING 저장 (트랜잭션) — RentalIncomeTransactionService
      * Phase 2: 블록체인 호출 → 성공/실패 업데이트 (각각 별도 트랜잭션)
      *
      * 멱등성: paymentKey로 중복 체크하여 동일 webhook 재시도 시 안전하게 무시
@@ -110,7 +111,7 @@ public class RentalIncomeService {
                 log.info("현재 처리 중인 건입니다 - paymentKey: {}, id: {}", paymentKey, existingIncome.getId());
                 return;
             }
-            // FAILED인 경우 → 재시도 허용, 아래로 진행
+            // FAILED인 경우 → 재시도 허용
             if (!existingIncome.isRetryable()) {
                 log.warn("최대 재시도 횟수 초과 - paymentKey: {}, retryCount: {}",
                         paymentKey, existingIncome.getRetryCount());
@@ -121,38 +122,11 @@ public class RentalIncomeService {
             return;
         }
 
-        // Phase 1: DB에 RentalIncome 저장 (PENDING)
-        RentalIncome rentalIncome = saveRentalIncome(accountNumberOrOrderId, paymentKey, amount);
+        // Phase 1: DB에 RentalIncome 저장 (PENDING) — 별도 빈의 @Transactional
+        RentalIncome rentalIncome = transactionService.saveRentalIncome(accountNumberOrOrderId, paymentKey, amount);
 
         // Phase 2: 블록체인 호출 (DB 트랜잭션 밖에서 실행)
         executeBlockchainDistribution(rentalIncome);
-    }
-
-    /**
-     * Phase 1: RentalIncome 엔티티 생성 및 저장
-     */
-    @Transactional
-    protected RentalIncome saveRentalIncome(String accountNumberOrOrderId, String paymentKey, Long amount) {
-        PropertyVirtualAccount virtualAccount = propertyVirtualAccountRepository
-                .findByVirtualAccountNumber(accountNumberOrOrderId)
-                .or(() -> propertyVirtualAccountRepository.findByTossOrderId(accountNumberOrOrderId))
-                .orElseThrow(() -> {
-                    log.error("가상계좌를 찾을 수 없습니다 - accountNumberOrOrderId: {}", accountNumberOrOrderId);
-                    return new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND);
-                });
-
-        log.info("가상계좌 조회 성공 - propertyId: {}, accountNumber: {}",
-                virtualAccount.getPropertyId(), virtualAccount.getVirtualAccountNumber());
-
-        RentalIncome rentalIncome = RentalIncome.builder()
-                .propertyId(virtualAccount.getPropertyId())
-                .amount(amount)
-                .tenantName(null)
-                .tossOrderId(virtualAccount.getTossOrderId())
-                .build();
-
-        rentalIncome.completeDeposit(paymentKey);
-        return rentalIncomeRepository.save(rentalIncome);
     }
 
     /**
@@ -163,23 +137,21 @@ public class RentalIncomeService {
         log.info("블록체인 배당 분배 시작 - rentalIncomeId: {}, propertyId: {}", rentalIncome.getId(), propertyTokenAddress);
 
         try {
-            // 1. Snapshot 생성
             BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
             log.info("Snapshot 생성 완료 - snapshotId: {}", snapshotId);
 
-            // 2. 배당 생성
             BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
             String txHash = blockchainWalletService.createDividend(snapshotId, krwtAmount);
 
-            // 성공: DB 업데이트
-            updateDistributionSuccess(rentalIncome.getId(), txHash);
+            // 성공: DB 업데이트 — 별도 빈의 @Transactional
+            transactionService.updateDistributionSuccess(rentalIncome.getId(), txHash);
             log.info("임대 수익 분배 완료 - rentalIncomeId: {}, txHash: {}, snapshotId: {}, krwtAmount: {}",
                     rentalIncome.getId(), txHash, snapshotId, krwtAmount);
 
         } catch (Exception e) {
             log.error("임대 수익 분배 실패 - rentalIncomeId: {}, propertyId: {}",
                     rentalIncome.getId(), propertyTokenAddress, e);
-            updateDistributionFailed(rentalIncome.getId());
+            transactionService.updateDistributionFailed(rentalIncome.getId());
             throw new BusinessException(ErrorCode.RENTAL_INCOME_DISTRIBUTION_FAILED);
         }
     }
@@ -188,37 +160,8 @@ public class RentalIncomeService {
      * FAILED 건 블록체인 재시도
      */
     private void retryBlockchainDistribution(RentalIncome rentalIncome) {
-        incrementRetryCount(rentalIncome.getId());
-        resetToPending(rentalIncome.getId());
+        transactionService.incrementRetryAndResetToPending(rentalIncome.getId());
         executeBlockchainDistribution(rentalIncome);
-    }
-
-    @Transactional
-    protected void updateDistributionSuccess(String rentalIncomeId, String txHash) {
-        RentalIncome income = rentalIncomeRepository.findById(rentalIncomeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RENTAL_INCOME_NOT_FOUND));
-        income.completeDistribution(txHash);
-    }
-
-    @Transactional
-    protected void updateDistributionFailed(String rentalIncomeId) {
-        RentalIncome income = rentalIncomeRepository.findById(rentalIncomeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RENTAL_INCOME_NOT_FOUND));
-        income.failDistribution();
-    }
-
-    @Transactional
-    protected void incrementRetryCount(String rentalIncomeId) {
-        RentalIncome income = rentalIncomeRepository.findById(rentalIncomeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RENTAL_INCOME_NOT_FOUND));
-        income.incrementRetryCount();
-    }
-
-    @Transactional
-    protected void resetToPending(String rentalIncomeId) {
-        RentalIncome income = rentalIncomeRepository.findById(rentalIncomeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RENTAL_INCOME_NOT_FOUND));
-        income.resetToPending();
     }
 
     /* Property별 임대 수익 내역 조회 */
