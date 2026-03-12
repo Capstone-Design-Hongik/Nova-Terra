@@ -2,6 +2,7 @@ package org.landmark.domain.rental.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.landmark.global.blockchain.service.BlockchainWalletService;
 import org.landmark.global.toss.client.TossPaymentsClient;
 import org.landmark.global.toss.dto.TossVirtualAccountRequest;
 import org.landmark.global.toss.dto.TossVirtualAccountResponse;
@@ -34,7 +35,7 @@ public class RentalIncomeService {
     private final PropertyVirtualAccountRepository propertyVirtualAccountRepository;
     private final PropertyRepository propertyRepository;
     private final TossPaymentsClient tossPaymentsClient;
-    private final org.landmark.domain.blockchain.service.BlockchainWalletService blockchainWalletService;
+    private final BlockchainWalletService blockchainWalletService;
     private final RentalIncomeTransactionService transactionService;
 
     /* Property별 임대 수익 전용 가상계좌 발급 */

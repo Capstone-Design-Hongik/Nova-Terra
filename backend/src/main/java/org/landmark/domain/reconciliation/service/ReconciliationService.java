@@ -2,7 +2,7 @@ package org.landmark.domain.reconciliation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.blockchain.service.BlockchainWalletService;
+import org.landmark.global.blockchain.service.BlockchainWalletService;
 import org.landmark.domain.portfolio.repository.UserHoldingRepository;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.domain.PropertyStatus;

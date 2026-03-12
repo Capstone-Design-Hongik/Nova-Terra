@@ -1,7 +1,7 @@
-package org.landmark.domain.blockchain.service;
+package org.landmark.global.blockchain.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.blockchain.config.BlockchainConfig;
+import org.landmark.global.blockchain.config.BlockchainConfig;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;

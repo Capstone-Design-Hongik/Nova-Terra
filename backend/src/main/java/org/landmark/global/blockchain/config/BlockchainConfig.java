@@ -1,4 +1,4 @@
-package org.landmark.domain.blockchain.config;
+package org.landmark.global.blockchain.config;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
