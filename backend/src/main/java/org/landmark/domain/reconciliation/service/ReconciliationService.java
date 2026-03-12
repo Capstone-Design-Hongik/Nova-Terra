@@ -7,15 +7,12 @@ import org.landmark.domain.portfolio.repository.UserHoldingRepository;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.domain.PropertyStatus;
 import org.landmark.domain.properties.repository.PropertyRepository;
-import org.landmark.domain.reconciliation.domain.ReconciliationLog;
 import org.landmark.domain.reconciliation.domain.ReconciliationType;
-import org.landmark.domain.reconciliation.repository.ReconciliationLogRepository;
 import org.landmark.domain.rental.domain.RentalIncome;
 import org.landmark.domain.rental.domain.RentalIncomeStatus;
 import org.landmark.domain.rental.repository.RentalIncomeRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
@@ -30,8 +27,8 @@ public class ReconciliationService {
     private final PropertyRepository propertyRepository;
     private final UserHoldingRepository userHoldingRepository;
     private final RentalIncomeRepository rentalIncomeRepository;
-    private final ReconciliationLogRepository reconciliationLogRepository;
     private final BlockchainWalletService blockchainWalletService;
+    private final ReconciliationTransactionService transactionService;
 
     /**
      * 온·오프체인 보유량 대사 (매일 새벽 2시)
@@ -56,7 +53,7 @@ public class ReconciliationService {
                     log.error("잔액 불일치 감지 - propertyId: {}, DB합계: {}, 온체인totalSupply: {}",
                             property.getId(), dbTotal, onChainTotal);
 
-                    saveReconciliationLog(
+                    transactionService.saveReconciliationLog(
                             ReconciliationType.HOLDING_MISMATCH,
                             property.getId(),
                             dbTotal,
@@ -100,9 +97,9 @@ public class ReconciliationService {
                     log.error("TX 실패 감지 - rentalIncomeId: {}, txHash: {}, status: {}",
                             income.getId(), income.getDistributionTxHash(), receipt.getStatus());
 
-                    markDistributionAsFailed(income.getId());
+                    transactionService.markDistributionAsFailed(income.getId());
 
-                    saveReconciliationLog(
+                    transactionService.saveReconciliationLog(
                             ReconciliationType.DISTRIBUTION_TX_FAILED,
                             income.getPropertyId(),
                             income.getAmount(),
@@ -122,6 +119,8 @@ public class ReconciliationService {
 
     /**
      * FAILED 배당 자동 재시도 (5분마다)
+     *
+     * 2-Phase: DB 상태 변경(트랜잭션) → 블록체인 호출(트랜잭션 밖) → 결과 반영(트랜잭션)
      */
     @Scheduled(fixedDelay = 300000)
     public void retryFailedDistributions() {
@@ -142,49 +141,23 @@ public class ReconciliationService {
                 log.info("배당 재시도 - rentalIncomeId: {}, retryCount: {}",
                         income.getId(), income.getRetryCount());
 
-                income.incrementRetryCount();
-                income.resetToPending();
-                rentalIncomeRepository.save(income);
+                // Phase 1: DB 상태 변경 (트랜잭션)
+                transactionService.prepareRetry(income);
 
-                // 블록체인 호출
+                // Phase 2: 블록체인 호출 (트랜잭션 밖)
                 String propertyTokenAddress = income.getPropertyId();
                 BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
                 BigInteger krwtAmount = income.getKrwtAmountAsBigInteger();
                 String txHash = blockchainWalletService.createDividend(snapshotId, krwtAmount);
 
-                income.completeDistribution(txHash);
-                rentalIncomeRepository.save(income);
-
+                // Phase 3: 성공 반영 (트랜잭션)
+                transactionService.completeRetry(income, txHash);
                 log.info("배당 재시도 성공 - rentalIncomeId: {}, txHash: {}", income.getId(), txHash);
 
             } catch (Exception e) {
                 log.error("배당 재시도 실패 - rentalIncomeId: {}", income.getId(), e);
-                income.failDistribution();
-                rentalIncomeRepository.save(income);
+                transactionService.failRetry(income);
             }
         }
-    }
-
-    @Transactional
-    protected void saveReconciliationLog(ReconciliationType type, String propertyId,
-                                         Long offChainValue, BigInteger onChainValue,
-                                         String referenceId) {
-        ReconciliationLog logEntry = ReconciliationLog.builder()
-                .type(type)
-                .propertyId(propertyId)
-                .offChainValue(offChainValue)
-                .onChainValue(onChainValue)
-                .referenceId(referenceId)
-                .build();
-
-        reconciliationLogRepository.save(logEntry);
-    }
-
-    @Transactional
-    protected void markDistributionAsFailed(String rentalIncomeId) {
-        rentalIncomeRepository.findById(rentalIncomeId).ifPresent(income -> {
-            income.failDistribution();
-            rentalIncomeRepository.save(income);
-        });
     }
 }
