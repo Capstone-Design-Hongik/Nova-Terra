@@ -54,9 +54,13 @@ public class RentalWebhookController {
         log.info("임대 수익 입금 완료 시뮬레이션 - accountNumberOrOrderId: {}, amount: {}",
                 request.accountNumberOrOrderId(), request.amount());
 
+        String paymentKey = (request.paymentKey() != null && !request.paymentKey().isBlank())
+                ? request.paymentKey()
+                : "test_payment_key_" + System.currentTimeMillis();
+
         rentalIncomeService.completeRentalIncome(
                 request.accountNumberOrOrderId(),
-                "test_payment_key_" + System.currentTimeMillis(),
+                paymentKey,
                 request.amount()
         );
 
