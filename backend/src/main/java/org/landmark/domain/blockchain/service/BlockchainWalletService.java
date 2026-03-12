@@ -105,6 +105,48 @@ public class BlockchainWalletService {
         }
     }
 
+    /* PropertyToken의 총 발행량 조회 (대사용) */
+    public BigInteger getTotalSupply(String propertyTokenAddress) {
+        validateInitialized();
+
+        log.info("totalSupply 조회 - propertyTokenAddress: {}", propertyTokenAddress);
+        try {
+            Function function = new Function(
+                    "totalSupply",
+                    Collections.emptyList(),
+                    Arrays.asList(new TypeReference<Uint256>() {})
+            );
+
+            String encodedFunction = FunctionEncoder.encode(function);
+
+            org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
+                            credentials.getAddress(),
+                            propertyTokenAddress,
+                            encodedFunction),
+                    DefaultBlockParameterName.LATEST
+            ).send();
+
+            if (response.hasError()) {
+                log.error("totalSupply 조회 실패 - error: {}", response.getError().getMessage());
+                throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
+            }
+
+            List<org.web3j.abi.datatypes.Type> results = org.web3j.abi.FunctionReturnDecoder.decode(
+                    response.getValue(), function.getOutputParameters());
+
+            BigInteger totalSupply = (BigInteger) results.get(0).getValue();
+            log.info("totalSupply 조회 완료 - address: {}, totalSupply: {}", propertyTokenAddress, totalSupply);
+            return totalSupply;
+
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("totalSupply 조회 중 오류 발생 - address: {}", propertyTokenAddress, e);
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
+        }
+    }
+
     /* PropertyToken 컨트랙트의 snapshot 함수 호출 */
     public BigInteger createSnapshot(String propertyTokenAddress) {
         validateInitialized();
