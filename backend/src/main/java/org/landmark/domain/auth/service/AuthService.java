@@ -18,7 +18,9 @@ public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final RefreshTokenService refreshTokenService;
 
+    @Transactional
     public TokenResponse refreshToken(String refreshToken) {
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -27,11 +29,13 @@ public class AuthService {
         String userId = jwtTokenProvider.getUserId(refreshToken);
         String email = jwtTokenProvider.getEmail(refreshToken);
 
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtTokenProvider.createAccessToken(userId, email);
         String newRefreshToken = jwtTokenProvider.createRefreshToken(userId, email);
+
+        refreshTokenService.rotate(user, refreshToken, newRefreshToken);
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }

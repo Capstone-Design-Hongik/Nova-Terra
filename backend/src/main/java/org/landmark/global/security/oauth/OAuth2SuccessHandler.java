@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.landmark.domain.auth.service.RefreshTokenService;
 import org.landmark.domain.user.domain.User;
 import org.landmark.global.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${app.oauth2.redirect-uri:http://localhost:3000/oauth/callback}")
     private String redirectUri;
@@ -32,6 +34,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail());
+        refreshTokenService.store(user, refreshToken);
 
         log.info("Google 로그인 성공 - userId: {}, email: {}", user.getId(), user.getEmail());
 

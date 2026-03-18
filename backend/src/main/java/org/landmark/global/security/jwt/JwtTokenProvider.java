@@ -63,6 +63,10 @@ public class JwtTokenProvider {
         return parseClaims(token).get("email", String.class);
     }
 
+    public long getExpirationEpochSeconds(String token) {
+        return parseClaims(token).getExpiration().getTime() / 1000L;
+    }
+
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
