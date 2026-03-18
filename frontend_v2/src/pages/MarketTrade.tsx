@@ -63,7 +63,7 @@ export default function MarketTrade() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black">
-        <Topbar isConnected={true} />
+        <Topbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1ABCF7]"></div>
         </div>
@@ -74,7 +74,7 @@ export default function MarketTrade() {
   if (error || !currentProperty) {
     return (
       <div className="min-h-screen bg-black">
-        <Topbar isConnected={true} />
+        <Topbar />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <p className="text-white text-xl">부동산을 찾을 수 없습니다.</p>
         </div>
@@ -84,7 +84,7 @@ export default function MarketTrade() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Topbar isConnected={true} />
+      <Topbar />
 
       <PropertyDetail
         name={currentProperty.name}

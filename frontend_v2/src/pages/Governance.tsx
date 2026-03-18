@@ -154,7 +154,7 @@ export default function Governance() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Topbar isConnected={true} />
+      <Topbar />
 
       <main className="w-full px-4 md:px-10 py-8 mx-auto max-w-350">
         {/* Header */}

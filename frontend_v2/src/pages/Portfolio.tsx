@@ -143,7 +143,7 @@ export default function Portfolio() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Topbar isConnected={true} />
+      <Topbar />
 
       <section className="px-4 py-10 lg:px-10">
         <div className="mx-auto max-w-7xl">

@@ -171,7 +171,7 @@ export default function Marketplace() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Topbar isConnected={true} />
+      <Topbar />
 
       <section className="relative flex flex-col items-center justify-center gap-8 overflow-hidden px-4 text-center" style={{ marginTop: '120px' }}>
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-surface-dark via-background-dark to-background-dark opacity-60"></div>
