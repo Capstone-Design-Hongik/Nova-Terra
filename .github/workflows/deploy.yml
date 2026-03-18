@@ -58,21 +58,34 @@ jobs:
           script: |
             cd ~/Nova-Terra/backend
 
-            # (A) 새 .jar 파일 이름 찾기
+            # (A) .env 파일 생성 (nohup 백그라운드에서도 환경변수 유지)
+            cat > .env <<EOL
+            DB_URL=${DB_URL}
+            DB_USERNAME=${DB_USERNAME}
+            DB_PASSWORD=${DB_PASSWORD}
+            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+            JWT_SECRET=${JWT_SECRET}
+            BLOCKCHAIN_RPC_URL=${BLOCKCHAIN_RPC_URL}
+            BLOCKCHAIN_WALLET_PRIVATE_KEY=${BLOCKCHAIN_WALLET_PRIVATE_KEY}
+            BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS=${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}
+            BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS=${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}
+            TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
+            CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+            OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI}
+            EOL
+            chmod 600 .env
+
+            # (B) 새 .jar 파일 이름 찾기
             JAR_FILE_NAME=$(ls -t *.jar | grep -v -- '-plain.jar' | head -n 1)
 
-            # (B) 기존 Java 프로세스 찾기 (grep 제외)
+            # (C) 기존 Java 프로세스 종료
             PID=$(ps -ef | grep "java -jar" | grep -v grep | awk '{print $2}')
-
-            # (C) 기존 프로세스가 있으면 종료
             if [ -n "$PID" ]; then
               echo "Stopping previous server (PID: $PID)"
               kill -15 $PID || true
               sleep 5
-
-              # 아직 살아있으면 강제 종료
               if ps -p $PID > /dev/null; then
-                echo "Force killing process (PID: $PID)"
                 kill -9 $PID || true
                 sleep 2
               fi
@@ -91,23 +104,10 @@ jobs:
               mv nohup.out "nohup.out.$(date +%Y%m%d_%H%M%S).bak"
             fi
 
-            # (F) 새 서버 시작 (환경변수로 시크릿 주입)
+            # (F) .env 로드 후 서버 시작
             echo "Starting new server with $JAR_FILE_NAME"
-            nohup env \
-              DB_URL="${DB_URL}" \
-              DB_USERNAME="${DB_USERNAME}" \
-              DB_PASSWORD="${DB_PASSWORD}" \
-              GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}" \
-              GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET}" \
-              JWT_SECRET="${JWT_SECRET}" \
-              BLOCKCHAIN_RPC_URL="${BLOCKCHAIN_RPC_URL}" \
-              BLOCKCHAIN_WALLET_PRIVATE_KEY="${BLOCKCHAIN_WALLET_PRIVATE_KEY}" \
-              BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS="${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}" \
-              BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS="${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}" \
-              TOSS_SECRET_KEY="${TOSS_SECRET_KEY}" \
-              CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}" \
-              OAUTH2_REDIRECT_URI="${OAUTH2_REDIRECT_URI}" \
-              java -Dspring.profiles.active=dev -jar $JAR_FILE_NAME > nohup.out 2>&1 &
+            set -a && source .env && set +a
+            nohup java -Dspring.profiles.active=dev -jar $JAR_FILE_NAME > nohup.out 2>&1 &
 
             # (G) 시작 확인
             sleep 10
@@ -115,13 +115,10 @@ jobs:
 
             if [ -n "$NEW_PID" ]; then
               echo "✅ New server started successfully (PID: $NEW_PID)"
-              echo "==== Server Status ===="
               ps aux | grep java | grep -v grep
-              echo "==== Recent Logs ===="
               tail -n 20 nohup.out
             else
               echo "❌ Failed to start new server"
-              echo "==== Full Error Log ===="
               cat nohup.out
               exit 1
             fi
