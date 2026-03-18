@@ -58,37 +58,30 @@ jobs:
           script: |
             cd ~/Nova-Terra/backend
 
-            # (A) .env 파일 생성 (nohup 백그라운드에서도 환경변수 유지)
-            cat > .env <<EOL
-            DB_URL=${DB_URL}
-            DB_USERNAME=${DB_USERNAME}
-            DB_PASSWORD=${DB_PASSWORD}
-            GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-            GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-            JWT_SECRET=${JWT_SECRET}
-            BLOCKCHAIN_RPC_URL=${BLOCKCHAIN_RPC_URL}
-            BLOCKCHAIN_WALLET_PRIVATE_KEY=${BLOCKCHAIN_WALLET_PRIVATE_KEY}
-            BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS=${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}
-            BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS=${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}
-            TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
-            CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-            OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI}
-            EOL
-            chmod 600 .env
+            # (A) 환경변수 export (nohup 자식 프로세스에 전달)
+            export DB_URL
+            export DB_USERNAME
+            export DB_PASSWORD
+            export GOOGLE_CLIENT_ID
+            export GOOGLE_CLIENT_SECRET
+            export JWT_SECRET
+            export BLOCKCHAIN_RPC_URL
+            export BLOCKCHAIN_WALLET_PRIVATE_KEY
+            export BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS
+            export BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS
+            export TOSS_SECRET_KEY
+            export CORS_ALLOWED_ORIGINS
+            export OAUTH2_REDIRECT_URI
 
             # (B) 새 .jar 파일 이름 찾기
             JAR_FILE_NAME=$(ls -t *.jar | grep -v -- '-plain.jar' | head -n 1)
 
             # (C) 기존 Java 프로세스 종료
-            PID=$(ps -ef | grep "java -jar" | grep -v grep | awk '{print $2}')
+            PID=$(ps -ef | grep "java.*-jar" | grep -v grep | awk '{print $2}')
             if [ -n "$PID" ]; then
               echo "Stopping previous server (PID: $PID)"
-              kill -15 $PID || true
-              sleep 5
-              if ps -p $PID > /dev/null; then
-                kill -9 $PID || true
-                sleep 2
-              fi
+              kill -9 $PID || true
+              sleep 3
             fi
 
             # (D) 포트 확인 및 정리
@@ -104,9 +97,8 @@ jobs:
               mv nohup.out "nohup.out.$(date +%Y%m%d_%H%M%S).bak"
             fi
 
-            # (F) .env 로드 후 서버 시작
+            # (F) 서버 시작
             echo "Starting new server with $JAR_FILE_NAME"
-            set -a && source .env && set +a
             nohup java -Dspring.profiles.active=dev -jar $JAR_FILE_NAME > nohup.out 2>&1 &
 
             # (G) 시작 확인
