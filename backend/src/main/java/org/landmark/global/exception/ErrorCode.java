@@ -15,6 +15,12 @@ public enum ErrorCode {
   PROPOSAL_CANNOT_CANCEL(HttpStatus.BAD_REQUEST, "이미 종료된(통과/부결/취소) 제안은 취소할 수 없습니다."),
   INVALID_PROPOSAL_DATE(HttpStatus.BAD_REQUEST, "투표 종료 시간은 시작 시간보다 미래여야 합니다."),
 
+  // 401 Unauthorized
+  UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+  EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+
   // 403 Forbidden
   FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "해당 요청에 대한 권한이 없습니다."),
 

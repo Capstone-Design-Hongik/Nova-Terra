@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Users")
@@ -20,29 +20,59 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
     @Column(name = "created_at", updatable = false)
     private Long createdAt;
 
-    // --- 연관관계 ---
-
     @PrePersist
     protected void onCreate() {
-        // 현재 시간을 초 단위 Unix timestamp로 저장
         this.createdAt = System.currentTimeMillis() / 1000L;
     }
 
     @Builder
-    public User(String walletAddress, String email, String passwordHash, String name) {
+    public User(String walletAddress, String email, String passwordHash, String name,
+                String profileImageUrl, AuthProvider provider, String providerId) {
         this.id = walletAddress;
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
+        this.profileImageUrl = profileImageUrl;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
+    public static User createGoogleUser(String email, String name, String profileImageUrl, String providerId) {
+        return User.builder()
+                .walletAddress(UUID.randomUUID().toString())
+                .email(email)
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .provider(AuthProvider.GOOGLE)
+                .providerId(providerId)
+                .build();
+    }
+
+    public void updateGoogleInfo(String name, String profileImageUrl) {
+        this.name = name;
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void linkWallet(String walletAddress) {
+        this.id = walletAddress;
+    }
 }

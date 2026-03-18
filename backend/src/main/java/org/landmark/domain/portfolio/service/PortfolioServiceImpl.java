@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PortfolioServiceImpl implements PortfolioService {
 
-    // TODO: 블록체인 설정 완료 후 BlockchainWalletService로 변경
     private final UserHoldingRepository userHoldingRepository;
 
     @Override

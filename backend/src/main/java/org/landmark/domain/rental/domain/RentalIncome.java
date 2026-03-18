@@ -41,8 +41,11 @@ public class RentalIncome {
     @Column(name = "toss_order_id", unique = true)
     private String tossOrderId;
 
-    @Column(name = "toss_payment_key")
+    @Column(name = "toss_payment_key", unique = true)
     private String tossPaymentKey;
+
+    @Column(name = "retry_count", nullable = false)
+    private int retryCount = 0;
 
     @CreationTimestamp
     @Column(name = "deposit_date", nullable = false, updatable = false)
@@ -76,6 +79,21 @@ public class RentalIncome {
     /* 분배 실패 처리 */
     public void failDistribution() {
         this.status = RentalIncomeStatus.FAILED;
+    }
+
+    /* 재시도 횟수 증가 */
+    public void incrementRetryCount() {
+        this.retryCount++;
+    }
+
+    /* 재시도 가능 여부 (최대 3회) */
+    public boolean isRetryable() {
+        return this.retryCount < 3;
+    }
+
+    /* PENDING 상태로 재설정 (재시도 시) */
+    public void resetToPending() {
+        this.status = RentalIncomeStatus.PENDING;
     }
 
     /* 블록체인 전송을 위한 KRWT 수량 */

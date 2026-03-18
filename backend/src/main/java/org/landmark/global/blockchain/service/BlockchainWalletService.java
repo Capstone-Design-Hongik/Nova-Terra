@@ -1,10 +1,11 @@
-package org.landmark.domain.blockchain.service;
+package org.landmark.global.blockchain.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.landmark.domain.blockchain.config.BlockchainConfig;
+import org.landmark.global.blockchain.config.BlockchainConfig;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -29,13 +30,25 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class BlockchainWalletService {
 
+    @Nullable
     private final Web3j web3j;
+    @Nullable
     private final Credentials credentials;
     private final BlockchainConfig blockchainConfig;
     private final DefaultGasProvider gasProvider;
+
+    @Autowired
+    public BlockchainWalletService(@Nullable Web3j web3j,
+                                    @Nullable Credentials credentials,
+                                    BlockchainConfig blockchainConfig,
+                                    DefaultGasProvider gasProvider) {
+        this.web3j = web3j;
+        this.credentials = credentials;
+        this.blockchainConfig = blockchainConfig;
+        this.gasProvider = gasProvider;
+    }
 
     /* 현재 지갑 주소 조회 */
     public String getWalletAddress() {
@@ -101,6 +114,48 @@ public class BlockchainWalletService {
 
         } catch (Exception e) {
             log.error("KRWT 잔액 조회 중 오류 발생", e);
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
+        }
+    }
+
+    /* PropertyToken의 총 발행량 조회 (대사용) */
+    public BigInteger getTotalSupply(String propertyTokenAddress) {
+        validateInitialized();
+
+        log.info("totalSupply 조회 - propertyTokenAddress: {}", propertyTokenAddress);
+        try {
+            Function function = new Function(
+                    "totalSupply",
+                    Collections.emptyList(),
+                    Arrays.asList(new TypeReference<Uint256>() {})
+            );
+
+            String encodedFunction = FunctionEncoder.encode(function);
+
+            org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
+                    org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
+                            credentials.getAddress(),
+                            propertyTokenAddress,
+                            encodedFunction),
+                    DefaultBlockParameterName.LATEST
+            ).send();
+
+            if (response.hasError()) {
+                log.error("totalSupply 조회 실패 - error: {}", response.getError().getMessage());
+                throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
+            }
+
+            List<org.web3j.abi.datatypes.Type> results = org.web3j.abi.FunctionReturnDecoder.decode(
+                    response.getValue(), function.getOutputParameters());
+
+            BigInteger totalSupply = (BigInteger) results.get(0).getValue();
+            log.info("totalSupply 조회 완료 - address: {}, totalSupply: {}", propertyTokenAddress, totalSupply);
+            return totalSupply;
+
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("totalSupply 조회 중 오류 발생 - address: {}", propertyTokenAddress, e);
             throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
         }
     }
