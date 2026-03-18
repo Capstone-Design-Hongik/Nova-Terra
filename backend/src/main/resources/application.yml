@@ -27,3 +27,5 @@ toss:
 app:
   cors:
     allowed-origins: http://localhost:3000,http://localhost:8080
+  oauth2:
+    redirect-uri: http://localhost:3000/oauth/callback
