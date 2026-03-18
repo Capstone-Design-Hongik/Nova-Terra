@@ -1,0 +1,73 @@
+# Database Configuration
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  # Google OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: email, profile
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET}
+
+# AWS Configuration
+cloud:
+  aws:
+    s3:
+      bucket: novaterra-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+# Blockchain Configuration (Giwa Chain - Ethereum 호환)
+blockchain:
+  network:
+    rpc-url: ${BLOCKCHAIN_RPC_URL}
+    chain-id: 91342
+
+  wallet:
+    private-key: ${BLOCKCHAIN_WALLET_PRIVATE_KEY}
+  contract:
+    property-token-address: ${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}
+    dividend-distributor-address: ${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}
+
+# Toss Payments Secret Key
+toss:
+  payments:
+    secret-key: ${TOSS_SECRET_KEY}
+
+# Payment Mock Configuration
+payment:
+  mock:
+    enabled: false
+    account-number: 1002-962-486375
+    bank-code: '20'
+    bank-name: 우리은행
+
+# Application Settings
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  oauth2:
+    redirect-uri: ${OAUTH2_REDIRECT_URI}
+  swagger:
+    servers:
+      - url: http://localhost:8080
+        description: Local HTTP Server
+      - url: http://3.39.211.182:8080
+        description: Develop HTTP Server
