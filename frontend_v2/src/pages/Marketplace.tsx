@@ -6,6 +6,7 @@ import PropertyCard from '../components/marketplace/PropertyCard'
 import PropertyDetailPanel from '../components/marketplace/PropertyDetailPanel'
 import STOPurchasePanel from '../components/marketplace/STOPurchasePanel'
 import arrowdownIcon from '../assets/arrowdown.svg'
+import PropertyMap from '../components/marketplace/PropertyMap'
 import { getProperties, getBuildingTypeLabel, getBuildingTypeColor } from '../apis/properties'
 import { getPropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
 import type { PropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
@@ -29,6 +30,66 @@ interface Property {
   dividendCycle: string
   nextDividend: string
 }
+
+const MOCK_PROPERTIES: Property[] = [
+  {
+    id: 'mock-1',
+    name: '강남 프라임 오피스',
+    location: '서울 강남구',
+    locationDetail: '서울특별시 강남구 테헤란로 152',
+    type: '오피스',
+    typeColor: 'bg-blue-500',
+    image: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800',
+    occupancyRate: 95,
+    monthlyRent: 85000000,
+    totalValue: 12000000000,
+    stoPrice: 100000,
+    fundingPercentage: 72,
+    investors: 1243,
+    description: '강남 핵심 업무지구에 위치한 프리미엄 오피스 빌딩. 대형 IT 기업 앵커 테넌트 입주.',
+    highlights: ['주요 임차인: 삼성SDS, 카카오', '전용면적: 4500㎡', '주차 공간: 200면'],
+    dividendCycle: '매월',
+    nextDividend: '15일 후',
+  },
+  {
+    id: 'mock-2',
+    name: '판교 테크노밸리 지식산업센터',
+    location: '경기 성남시',
+    locationDetail: '경기도 성남시 분당구 판교역로 235',
+    type: '지식산업센터',
+    typeColor: 'bg-purple-500',
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
+    occupancyRate: 98,
+    monthlyRent: 62000000,
+    totalValue: 8500000000,
+    stoPrice: 50000,
+    fundingPercentage: 58,
+    investors: 876,
+    description: '판교 테크노밸리 내 최신 지식산업센터. 스타트업 및 IT 기업 밀집 지역.',
+    highlights: ['주요 임차인: 카카오게임즈, 크래프톤', '전용면적: 3200㎡', '주차 공간: 150면'],
+    dividendCycle: '매월',
+    nextDividend: '22일 후',
+  },
+  {
+    id: 'mock-3',
+    name: '해운대 마린시티 상업시설',
+    location: '부산 해운대구',
+    locationDetail: '부산광역시 해운대구 마린시티2로 33',
+    type: '상업시설',
+    typeColor: 'bg-green-500',
+    image: 'https://images.unsplash.com/photo-1555636222-cae831e670b3?w=800',
+    occupancyRate: 89,
+    monthlyRent: 38000000,
+    totalValue: 5200000000,
+    stoPrice: 30000,
+    fundingPercentage: 41,
+    investors: 532,
+    description: '해운대 마린시티 랜드마크 상업시설. 관광객 및 고소득 거주자 밀집 상권.',
+    highlights: ['주요 임차인: 스타벅스, CGV', '전용면적: 2100㎡', '주차 공간: 80면'],
+    dividendCycle: '매월',
+    nextDividend: '8일 후',
+  },
+]
 
 export default function Marketplace() {
   const [visibleCount, setVisibleCount] = useState(6)
@@ -121,7 +182,8 @@ export default function Marketplace() {
         }))
         setProperties(transformedProperties)
       } catch (error) {
-        console.error('부동산 데이터 로드 실패:', error)
+        console.error('부동산 데이터 로드 실패, 목데이터 사용:', error)
+        setProperties(MOCK_PROPERTIES)
       } finally {
         setLoading(false)
       }
@@ -188,7 +250,13 @@ export default function Marketplace() {
         <SearchBar />
       </section>
 
-      <div className="w-full border-b border-gray-500 mt-20 "></div>
+      <section className="px-4 mt-16 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <PropertyMap />
+        </div>
+      </section>
+
+      <div className="w-full border-b border-gray-500 mt-10"></div>
       <FilterBar />
       <div className="w-full border-b border-gray-500"></div>
 
