@@ -77,11 +77,11 @@ app:
 # Stripe Identity (KYC)
 stripe:
   base-url: https://api.stripe.com
-  secret-key: ${STRIPE_SECRET_KEY}
+  secret-key: ${STRIPE_SECRET_KEY:}
 
 # Plaid (Credit Check)
 plaid:
   base-url: https://sandbox.plaid.com
-  client-id: ${PLAID_CLIENT_ID}
-  secret: ${PLAID_SECRET}
-  webhook-url: ${PLAID_WEBHOOK_URL}
+  client-id: ${PLAID_CLIENT_ID:}
+  secret: ${PLAID_SECRET:}
+  webhook-url: ${PLAID_WEBHOOK_URL:}
