@@ -33,12 +33,6 @@ public class BlockchainConfig {
     @Value("${blockchain.contract.dividend-distributor-address:}")
     private String dividendDistributorAddress;
 
-    @Value("${blockchain.contract.kyc-address:}")
-    private String kycContractAddress;
-
-    @Value("${blockchain.contract.credit-address:}")
-    private String creditContractAddress;
-
     /* Web3j 인스턴스 생성 */
     @Bean
     public Web3j web3j() {

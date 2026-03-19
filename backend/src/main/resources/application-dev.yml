@@ -45,8 +45,6 @@ blockchain:
   contract:
     property-token-address: ${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}
     dividend-distributor-address: ${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}
-    kyc-address: ${BLOCKCHAIN_KYC_ADDRESS:}
-    credit-address: ${BLOCKCHAIN_CREDIT_ADDRESS:}
 
 # Toss Payments Secret Key
 toss:
@@ -74,14 +72,3 @@ app:
       - url: http://3.39.211.182:8080
         description: Develop HTTP Server
 
-# Stripe Identity (KYC)
-stripe:
-  base-url: https://api.stripe.com
-  secret-key: ${STRIPE_SECRET_KEY:}
-
-# Plaid (Credit Check)
-plaid:
-  base-url: https://sandbox.plaid.com
-  client-id: ${PLAID_CLIENT_ID:}
-  secret: ${PLAID_SECRET:}
-  webhook-url: ${PLAID_WEBHOOK_URL:}

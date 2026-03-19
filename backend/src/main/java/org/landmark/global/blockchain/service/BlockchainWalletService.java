@@ -9,9 +9,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -277,93 +275,6 @@ public class BlockchainWalletService {
         }
     }
 
-    /* KYC 컨트랙트에 신원 해시 등록 */
-    public String submitKycVerification(String walletAddress, String idHashHex) {
-        validateInitialized();
-
-        String contractAddress = blockchainConfig.getKycContractAddress();
-        if (contractAddress == null || contractAddress.isBlank()) {
-            throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
-        }
-
-        log.info("KYC 온체인 등록 시작 - walletAddress: {}", walletAddress);
-        try {
-            Function function = new Function(
-                    "registerKyc",
-                    Arrays.asList(
-                            new Address(walletAddress),
-                            new Bytes32(hexToBytes32(idHashHex))
-                    ),
-                    Collections.emptyList()
-            );
-
-            TransactionManager txManager = new RawTransactionManager(web3j, credentials, blockchainConfig.getChainId());
-            EthSendTransaction tx = txManager.sendTransaction(
-                    gasProvider.getGasPrice(), gasProvider.getGasLimit(),
-                    contractAddress, FunctionEncoder.encode(function), BigInteger.ZERO
-            );
-
-            if (tx.hasError()) {
-                log.error("KYC 온체인 등록 실패 - error: {}", tx.getError().getMessage());
-                throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
-            }
-
-            String txHash = tx.getTransactionHash();
-            log.info("KYC 온체인 등록 성공 - txHash: {}", txHash);
-            return txHash;
-
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("KYC 온체인 등록 중 오류 발생", e);
-            throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
-        }
-    }
-
-    /* Credit 컨트랙트에 신용 점수 등록 */
-    public String submitCreditVerification(String walletAddress, String reportHashHex, int score) {
-        validateInitialized();
-
-        String contractAddress = blockchainConfig.getCreditContractAddress();
-        if (contractAddress == null || contractAddress.isBlank()) {
-            throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
-        }
-
-        log.info("Credit 온체인 등록 시작 - walletAddress: {}, score: {}", walletAddress, score);
-        try {
-            Function function = new Function(
-                    "registerCredit",
-                    Arrays.asList(
-                            new Address(walletAddress),
-                            new Bytes32(hexToBytes32(reportHashHex)),
-                            new Uint256(BigInteger.valueOf(score))
-                    ),
-                    Collections.emptyList()
-            );
-
-            TransactionManager txManager = new RawTransactionManager(web3j, credentials, blockchainConfig.getChainId());
-            EthSendTransaction tx = txManager.sendTransaction(
-                    gasProvider.getGasPrice(), gasProvider.getGasLimit(),
-                    contractAddress, FunctionEncoder.encode(function), BigInteger.ZERO
-            );
-
-            if (tx.hasError()) {
-                log.error("Credit 온체인 등록 실패 - error: {}", tx.getError().getMessage());
-                throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
-            }
-
-            String txHash = tx.getTransactionHash();
-            log.info("Credit 온체인 등록 성공 - txHash: {}", txHash);
-            return txHash;
-
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Credit 온체인 등록 중 오류 발생", e);
-            throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
-        }
-    }
-
     /* 트랜잭션 영수증 조회 (트랜잭션 성공 여부 확인) */
     public TransactionReceipt getTransactionReceipt(String txHash) {
         validateInitialized();
@@ -434,15 +345,6 @@ public class BlockchainWalletService {
 
         log.error("Snapshot 이벤트를 찾을 수 없습니다 - txHash: {}", receipt.getTransactionHash());
         throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
-    }
-
-    /* 64자 hex 문자열을 bytes32로 변환 */
-    private static byte[] hexToBytes32(String hex) {
-        byte[] bytes = new byte[32];
-        for (int i = 0; i < 32; i++) {
-            bytes[i] = (byte) Integer.parseInt(hex, i * 2, i * 2 + 2, 16);
-        }
-        return bytes;
     }
 
     /* Web3j와 Credentials 초기화 여부 검증 */
