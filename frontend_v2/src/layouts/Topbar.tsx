@@ -1,41 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { BrowserProvider } from 'ethers'
+import { useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import copyIcon from '../assets/copy.svg'
+import walletIcon from '../assets/wallet.png'
 import OnChainIDModal from '../components/OnChainIDModal'
 
-interface TopbarProps {
-  onConnectWallet?: () => void
-  isConnected?: boolean
-  walletAddress?: string
-}
-
-export default function Topbar({ onConnectWallet, isConnected, walletAddress: externalWalletAddress }: TopbarProps) {
+export default function Topbar() {
   const location = useLocation()
-  const [internalWalletAddress, setInternalWalletAddress] = useState<string>('')
+  const { walletAddress, isWalletConnected, connectWallet } = useAuth()
   const [isIDModalOpen, setIsIDModalOpen] = useState(false)
-
-  useEffect(() => {
-    if (!externalWalletAddress) {
-      const getConnectedWallet = async () => {
-        try {
-          if (typeof window.ethereum !== 'undefined') {
-            const provider = new BrowserProvider(window.ethereum)
-            const accounts = await provider.listAccounts()
-            if (accounts.length > 0) {
-              setInternalWalletAddress(accounts[0].address)
-            }
-          }
-        } catch (error) {
-          console.error('지갑 주소 가져오기 실패:', error)
-        }
-      }
-
-      getConnectedWallet()
-    }
-  }, [externalWalletAddress])
-
-  const walletAddress = externalWalletAddress || internalWalletAddress
 
   const handleCopyAddress = () => {
     if (walletAddress) {
@@ -84,7 +57,7 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
       </nav>
 
       <div className="flex items-center gap-4 relative">
-        {isConnected && walletAddress ? (
+        {isWalletConnected ? (
           <>
             <button
               onClick={handleCopyAddress}
@@ -122,9 +95,10 @@ export default function Topbar({ onConnectWallet, isConnected, walletAddress: ex
           </>
         ) : (
           <button
-            onClick={onConnectWallet}
-            className="flex flex-col items-center justify-center gap-2.5 rounded-full bg-[#1ABCF7] py-3 pr-5 pl-7 text-sm font-bold text-black transition-transform hover:scale-105 active:scale-95"
+            onClick={connectWallet}
+            className="cursor-pointer bg-[#1ABCF7] text-black font-semibold rounded-lg hover:bg-[#15a8dc] transition duration-200 flex items-center gap-3 py-3 pr-5 pl-7"
           >
+            <img src={walletIcon} alt="wallet" className="w-5 h-5" />
             지갑 연결
           </button>
         )}
