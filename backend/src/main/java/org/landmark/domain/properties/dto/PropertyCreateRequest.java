@@ -29,7 +29,9 @@ public record PropertyCreateRequest(
     @NotNull Long totalTokens,
     @NotNull BigDecimal pricePerToken,
     BigDecimal expenseRate,
-    BigDecimal feeRate
+    BigDecimal feeRate,
+    BigDecimal latitude,
+    BigDecimal longitude
 ) {
     public Property toEntity(String coverImageUrl) {
       return Property.builder()
@@ -58,6 +60,8 @@ public record PropertyCreateRequest(
           .pricePerToken(pricePerToken)
           .expenseRate(expenseRate)
           .feeRate(feeRate)
+          .latitude(latitude)
+          .longitude(longitude)
           .build();
     }
 }

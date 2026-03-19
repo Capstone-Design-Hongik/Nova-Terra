@@ -3,6 +3,7 @@ package org.landmark.domain.properties.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.landmark.domain.properties.dto.PropertyListResponse;
 import org.landmark.domain.properties.dto.PropertyResponse;
 import org.landmark.domain.properties.service.PropertyService;
 import org.landmark.global.dto.ApiResponse;
@@ -22,8 +23,8 @@ public class PropertyController {
 
     @Operation(summary = "부동산 목록 조회", description = "등록된 모든 부동산 상품 목록을 조회합니다.")
     @GetMapping
-    public ApiResponse<List<PropertyResponse>> getAllProperties() {
-        List<PropertyResponse> properties = propertyService.getAllProperties();
+    public ApiResponse<List<PropertyListResponse>> getAllProperties() {
+        List<PropertyListResponse> properties = propertyService.getAllProperties();
         return ApiResponse.ok(200, "부동산 목록 조회 성공", properties);
     }
 
