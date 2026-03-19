@@ -12,6 +12,7 @@ import org.landmark.domain.governance.dto.ProposalResponse;
 import org.landmark.domain.governance.service.GovernanceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,9 +42,10 @@ public class GovernanceController {
   @Operation(summary = "제안 생성", description = "새로운 거버넌스 제안을 생성합니다.")
   @PostMapping("/proposals")
   public ResponseEntity<ApiResponse<ProposalResponse>> createProposal(
-      @RequestParam String userId, // 임시로 파라미터로 받음
+      Authentication authentication,
       @Valid @RequestBody ProposalCreateRequest request
   ) {
+    String userId = (String) authentication.getPrincipal();
     ProposalResponse newProposal = governanceService.createProposal(userId, request);
 
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,9 +55,10 @@ public class GovernanceController {
   @Operation(summary = "제안 취소", description = "생성된 거버넌스 제안을 취소합니다.")
   @DeleteMapping("/proposals/{proposalId}")
   public ResponseEntity<ApiResponse<Object>> cancelProposal(
-      @RequestParam String userId, // 임시로 파라미터로 받음
+      Authentication authentication,
       @PathVariable Long proposalId
   ) {
+    String userId = (String) authentication.getPrincipal();
     Long canceledId = governanceService.cancelProposal(userId, proposalId);
 
     Map<String, Long> responseData = Map.of("proposalId", canceledId);
