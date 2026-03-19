@@ -30,7 +30,7 @@ public class Proposal {
     private Property property;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proposer_address")  // User의 PK (wallet_address)를 참조
+    @JoinColumn(name = "proposer_id")
     private User proposer;
 
     @Column(nullable = false)
