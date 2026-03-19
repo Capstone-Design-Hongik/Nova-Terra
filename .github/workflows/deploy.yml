@@ -99,7 +99,7 @@ jobs:
 
             # (F) 서버 시작
             echo "Starting new server with $JAR_FILE_NAME"
-            nohup java -Dspring.profiles.active=dev -Dserver.forward-headers-strategy=framework -jar $JAR_FILE_NAME > nohup.out 2>&1 &
+            nohup java -Dspring.profiles.active=dev -Dserver.forward-headers-strategy=framework -Dlogging.level.org.springframework.security=DEBUG -jar $JAR_FILE_NAME > nohup.out 2>&1 &
 
             # (G) 시작 확인
             sleep 10
