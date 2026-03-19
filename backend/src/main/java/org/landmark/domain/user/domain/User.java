@@ -13,9 +13,13 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
+
     @Id
-    @Column(name = "wallet_address", length = 42)
+    @Column(name = "id", length = 36, updatable = false, nullable = false)
     private String id;
+
+    @Column(name = "wallet_address", length = 42, unique = true)
+    private String walletAddress;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -45,9 +49,9 @@ public class User {
     }
 
     @Builder
-    public User(String walletAddress, String email, String passwordHash, String name,
+    public User(String email, String passwordHash, String name,
                 String profileImageUrl, AuthProvider provider, String providerId) {
-        this.id = walletAddress;
+        this.id = UUID.randomUUID().toString();
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
@@ -58,7 +62,6 @@ public class User {
 
     public static User createGoogleUser(String email, String name, String profileImageUrl, String providerId) {
         return User.builder()
-                .walletAddress(UUID.randomUUID().toString())
                 .email(email)
                 .name(name)
                 .profileImageUrl(profileImageUrl)
@@ -73,6 +76,6 @@ public class User {
     }
 
     public void linkWallet(String walletAddress) {
-        this.id = walletAddress;
+        this.walletAddress = walletAddress;
     }
 }
