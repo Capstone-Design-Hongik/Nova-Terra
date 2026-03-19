@@ -73,6 +73,6 @@ app:
     servers:
       - url: http://localhost:8080
         description: Local HTTP Server
-      - url: https://novaterra.duckdns.org
+      - url: https://novaterra-hongik.duckdns.org
         description: Develop Server
 
