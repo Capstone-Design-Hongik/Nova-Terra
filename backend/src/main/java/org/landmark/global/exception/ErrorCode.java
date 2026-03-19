@@ -20,6 +20,8 @@ public enum ErrorCode {
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
   EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
   INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+  KYC_NOT_VERIFIED(HttpStatus.UNAUTHORIZED, "KYC 인증이 필요합니다."),
+  CREDIT_NOT_VERIFIED(HttpStatus.UNAUTHORIZED, "신용 인증이 필요합니다."),
 
   // 403 Forbidden
   FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "해당 요청에 대한 권한이 없습니다."),
@@ -31,11 +33,18 @@ public enum ErrorCode {
 
   // 422 Unprocessable Entity
   ALREADY_MINTED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 토큰이 발행된 부동산입니다."),
+  WALLET_NOT_LINKED(HttpStatus.UNPROCESSABLE_ENTITY, "지갑이 연결되지 않았습니다."),
+  KYC_SESSION_ALREADY_USED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 처리된 KYC 세션입니다."),
+  CREDIT_ALREADY_VERIFIED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 신용 인증이 완료되었습니다."),
   VALUATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "부동산 가치 평가에 실패했습니다."),
+  PLAID_REPORT_NOT_READY(HttpStatus.UNPROCESSABLE_ENTITY, "신용 리포트가 아직 준비되지 않았습니다."),
 
   // 404 Not Found - Rental Income
   VIRTUAL_ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 가상계좌입니다."),
   RENTAL_INCOME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 임대 수익 기록입니다."),
+  KYC_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "KYC 세션을 찾을 수 없습니다."),
+  CREDIT_NOT_FOUND(HttpStatus.NOT_FOUND, "신용 기록을 찾을 수 없습니다."),
+  CREDIT_NOT_STARTED(HttpStatus.NOT_FOUND, "신용 검증이 시작되지 않았습니다."),
 
   // 422 Unprocessable Entity - Rental Income
   VIRTUAL_ACCOUNT_ALREADY_EXISTS(HttpStatus.UNPROCESSABLE_ENTITY, "이미 발급된 가상계좌가 있습니다."),
@@ -44,6 +53,9 @@ public enum ErrorCode {
   // 500 Internal Server Error
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
   PAYMENT_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "결제 API 통신 중 오류가 발생했습니다."),
+  STRIPE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Stripe 설정이 누락되었습니다."),
+  PLAID_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Plaid 설정이 누락되었습니다."),
+  PLAID_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Plaid 요청에 실패했습니다."),
 
   // Blockchain - Connection & Server
   BLOCKCHAIN_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "블록체인 서버와의 통신 중 오류가 발생했습니다."),
