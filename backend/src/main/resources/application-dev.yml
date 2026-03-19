@@ -1,3 +1,7 @@
+# Server Configuration
+server:
+  forward-headers-strategy: native
+
 # Database Configuration
 spring:
   datasource:
@@ -69,6 +73,6 @@ app:
     servers:
       - url: http://localhost:8080
         description: Local HTTP Server
-      - url: http://3.39.211.182:8080
-        description: Develop HTTP Server
+      - url: https://novaterra.duckdns.org
+        description: Develop Server
 

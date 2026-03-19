@@ -91,6 +91,12 @@ public class Property {
     @Column(name = "fee_rate")
     private BigDecimal feeRate; // 플랫폼 수수료 비율
 
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitude;
+
     @Column(name = "mint_tx_hash", length = 66)
     private String mintTxHash;  // 토큰 발행 트랜잭션 해시 (블록체인 민팅 후 저장)
 
@@ -105,7 +111,8 @@ public class Property {
                     String direction, Integer roomCount, Integer bathroomCount,
                     Long managementFee, BigDecimal occupancyRate, String majorTenants,
                     Long totalMonthlyRent, BigDecimal totalValuation, Long totalTokens,
-                    BigDecimal pricePerToken, BigDecimal expenseRate, BigDecimal feeRate) {
+                    BigDecimal pricePerToken, BigDecimal expenseRate, BigDecimal feeRate,
+                    BigDecimal latitude, BigDecimal longitude) {
 
         // 필수 값
         this.id = stoTokenAddress;
@@ -133,7 +140,8 @@ public class Property {
         this.totalMonthlyRent = totalMonthlyRent;
         this.expenseRate = expenseRate;
         this.feeRate = feeRate;
-
+        this.latitude = latitude;
+        this.longitude = longitude;
 
         // 초기 상태값 설정
         this.status = PropertyStatus.FUNDING; // 관리자가 등록 시 '청약 중' 상태로 시작

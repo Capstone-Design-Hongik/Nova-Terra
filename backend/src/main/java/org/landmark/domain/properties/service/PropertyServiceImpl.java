@@ -6,6 +6,7 @@ import org.landmark.global.exception.ErrorCode;
 import org.landmark.global.service.S3Service;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.dto.PropertyCreateRequest;
+import org.landmark.domain.properties.dto.PropertyListResponse;
 import org.landmark.domain.properties.dto.PropertyResponse;
 import org.landmark.domain.properties.repository.PropertyRepository;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,10 @@ public class PropertyServiceImpl implements PropertyService {
   }
 
   @Transactional(readOnly = true)
-  public List<PropertyResponse> getAllProperties() {
+  public List<PropertyListResponse> getAllProperties() {
     return propertyRepository.findAll()
             .stream()
-            .map(PropertyResponse::from)
+            .map(PropertyListResponse::from)
             .toList();
   }
 
