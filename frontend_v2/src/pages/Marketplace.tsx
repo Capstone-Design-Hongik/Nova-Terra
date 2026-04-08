@@ -315,7 +315,7 @@ export default function Marketplace() {
         isOpen={isPurchasePanelOpen}
         onClose={handleClosePurchasePanel}
         property={purchaseProperty}
-        symbol={blockchainData[purchaseProperty?.id]?.symbol || ''}
+        symbol={blockchainData[purchaseProperty?.id ?? '']?.symbol || ''}
       />
     </div>
   )

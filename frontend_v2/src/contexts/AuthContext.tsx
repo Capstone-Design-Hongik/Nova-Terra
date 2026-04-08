@@ -89,7 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const accounts = await provider.listAccounts()
       if (accounts.length > 0) {
-        setWalletAddress(accounts[0].address)
+        const address = accounts[0].address
+        setWalletAddress(address)
+        await instance.patch('/api/v1/users/me/wallet', { walletAddress: address })
       }
     } catch (error) {
       console.error('지갑 연결 실패:', error)
