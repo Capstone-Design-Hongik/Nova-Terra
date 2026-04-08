@@ -1,6 +1,6 @@
 export default function Onboarding() {
   const handleGoogleLogin = () => {
-    window.location.href = 'http://3.39.211.182:8080/oauth2/authorization/google'
+    window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`
   }
 
   return (

@@ -1,15 +1,19 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function OAuthCallback() {
   const navigate = useNavigate()
   const { setTokens } = useAuth()
+  const processed = useRef(false)
 
   useEffect(() => {
+    if (processed.current) return
+    processed.current = true
+
     const params = new URLSearchParams(window.location.search)
-    const accessToken = params.get('access_token')
-    const refreshToken = params.get('refresh_token')
+    const accessToken = params.get('accessToken') ?? params.get('access_token')
+    const refreshToken = params.get('refreshToken') ?? params.get('refresh_token')
 
     if (accessToken && refreshToken) {
       setTokens(accessToken, refreshToken)
