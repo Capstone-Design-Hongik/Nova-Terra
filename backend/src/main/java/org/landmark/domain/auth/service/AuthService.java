@@ -40,6 +40,11 @@ public class AuthService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
+    @Transactional
+    public void logout(String userId) {
+        refreshTokenService.revokeAll(userId);
+    }
+
     public UserInfoResponse getUserInfo(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

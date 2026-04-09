@@ -27,6 +27,14 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(200,"토큰 재발급 성공", tokenResponse));
     }
 
+    @Operation(summary = "로그아웃", description = "현재 사용자의 Refresh Token을 무효화합니다.")
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(Authentication authentication) {
+        String userId = (String) authentication.getPrincipal();
+        authService.logout(userId);
+        return ApiResponse.ok(200, "로그아웃 성공");
+    }
+
     @Operation(summary = "내 정보 조회", description = "현재 로그인된 사용자의 정보를 조회합니다.")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getMyInfo(Authentication authentication) {
