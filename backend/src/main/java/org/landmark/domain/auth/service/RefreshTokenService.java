@@ -66,6 +66,11 @@ public class RefreshTokenService {
         }
     }
 
+    @Transactional
+    public void revokeAll(String userId) {
+        refreshTokenRepository.revokeAllActiveByUserId(userId, nowEpochSeconds());
+    }
+
     private static long nowEpochSeconds() {
         return Instant.now().getEpochSecond();
     }
