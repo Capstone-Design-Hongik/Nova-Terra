@@ -5,8 +5,10 @@ interface Props {
 }
 
 export default function PropertyInfoCard({ property }: Props) {
-  const occupancyRate = (property.occupancyRate * 100).toFixed(1)
-  const annualYield = ((property.totalMonthlyRent * 12) / property.totalValuation * 100).toFixed(1)
+  const occupancyRate = ((property.occupancyRate ?? 0) * 100).toFixed(1)
+  const annualYield = property.totalValuation
+    ? (((property.totalMonthlyRent ?? 0) * 12) / property.totalValuation * 100).toFixed(1)
+    : '0.0'
 
   return (
     <div className="bg-[#1c1f2b] relative overflow-hidden">
@@ -36,11 +38,11 @@ export default function PropertyInfoCard({ property }: Props) {
           </div>
           <div>
             <p className="text-[10px] text-gray-400 uppercase mb-1">총 발행 토큰</p>
-            <p className="text-sm font-bold text-white">{property.totalTokens.toLocaleString()}</p>
+            <p className="text-sm font-bold text-white">{(property.totalTokens ?? 0).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[10px] text-gray-400 uppercase mb-1">자산 가치</p>
-            <p className="text-sm font-bold text-white">{(property.totalValuation / 1e8).toFixed(1)}억</p>
+            <p className="text-sm font-bold text-white">{((property.totalValuation ?? 0) / 1e8).toFixed(1)}억</p>
           </div>
         </div>
 
