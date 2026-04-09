@@ -18,6 +18,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,16 +38,20 @@ public class SecurityConfig {
     private String[] allowedOrigins;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/**",
+            "/api/v1/auth/refresh",
             "/oauth2/**",
             "/login/oauth2/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
-            "/api/v1/properties/**",
             "/api/v1/webhook/**",
             "/api/v1/admin/**"
     };
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,13 +61,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // TODO: 프론트 Google OAuth2 연동 후 원복
-                // .authorizeHttpRequests(auth -> auth
-                //         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                //         .anyRequest().authenticated()
-                // )
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
