@@ -17,10 +17,13 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -74,13 +77,11 @@ public class BlockchainWalletService {
             throw new BusinessException(ErrorCode.BLOCKCHAIN_BALANCE_QUERY_FAILED);
         }
     }
-    private static final String KRWT_TOKEN_ADDRESS = "0x233E008B74e27d51a88c933F6A1b2c79C8e6A4F3";
-
     public BigInteger getKrwtBalance(String targetAddress) {
         validateInitialized();
 
+        String krwtAddress = blockchainConfig.getKrwtTokenAddress();
         log.info("KRWT 잔액 조회 시작 - targetAddress: {}", targetAddress);
-        log.info("[DEBUG] Snapshot TX FROM: {}", credentials.getAddress());
         try {
             // balanceOf(address account) 함수 정의
             Function function = new Function(
@@ -95,7 +96,7 @@ public class BlockchainWalletService {
             org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
                     org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
                             credentials.getAddress(), // 호출 주체
-                            KRWT_TOKEN_ADDRESS,      // KRWT 토큰 컨트랙트 주소
+                            krwtAddress,             // KRWT 토큰 컨트랙트 주소
                             encodedFunction),
                     DefaultBlockParameterName.LATEST
             ).send();
@@ -271,6 +272,60 @@ public class BlockchainWalletService {
             throw e;
         } catch (Exception e) {
             log.error("배당 생성 중 오류 발생 - snapshotId: {}, amount: {}", snapshotId, amount, e);
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
+        }
+    }
+
+    /* KRWT mint — 지정 nonce로 raw transaction 전송 (영수증 대기 없음) */
+    public String mintKrwt(String toAddress, BigInteger amount, long nonce) {
+        validateInitialized();
+
+        String krwtAddress = blockchainConfig.getKrwtTokenAddress();
+        if (krwtAddress == null || krwtAddress.isEmpty()) {
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
+        }
+
+        log.info("KRWT mint 전송 - to: {}, amount: {}, nonce: {}", toAddress, amount, nonce);
+
+        Function function = new Function(
+                "mint",
+                Arrays.asList(
+                        new org.web3j.abi.datatypes.Address(toAddress),
+                        new Uint256(amount)
+                ),
+                Collections.emptyList()
+        );
+        return sendRawWithNonce(krwtAddress, FunctionEncoder.encode(function), BigInteger.valueOf(nonce));
+    }
+
+    /* 지정된 nonce로 raw transaction 서명 및 전송 (영수증 대기는 호출부에서) */
+    public String sendRawWithNonce(String contractAddress, String encodedFunction, BigInteger nonce) {
+        validateInitialized();
+        try {
+            RawTransaction rawTx = RawTransaction.createTransaction(
+                    nonce,
+                    gasProvider.getGasPrice(),
+                    gasProvider.getGasLimit(),
+                    contractAddress,
+                    BigInteger.ZERO,
+                    encodedFunction
+            );
+            byte[] signed = TransactionEncoder.signMessage(rawTx, blockchainConfig.getChainId(), credentials);
+            String hexValue = Numeric.toHexString(signed);
+
+            EthSendTransaction response = web3j.ethSendRawTransaction(hexValue).send();
+            if (response.hasError()) {
+                String msg = response.getError().getMessage();
+                log.error("Raw TX 전송 실패 - nonce: {}, error: {}", nonce, msg);
+                throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
+            }
+            String txHash = response.getTransactionHash();
+            log.info("Raw TX 전송 성공 - nonce: {}, txHash: {}", nonce, txHash);
+            return txHash;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Raw TX 전송 중 오류 - nonce: {}", nonce, e);
             throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
         }
     }
