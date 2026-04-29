@@ -17,7 +17,8 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Onboarding />} />
+          <Route path="/" element={<Marketplace />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/trade/:id" element={<MarketTrade />} />
