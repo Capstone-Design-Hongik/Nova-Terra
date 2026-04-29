@@ -19,7 +19,7 @@ public class PropertyVirtualAccount {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "property_id", nullable = false, unique = true)
+    @Column(name = "property_id", nullable = false)
     private String propertyId;
 
     @Column(name = "virtual_account_number", nullable = false, unique = true)

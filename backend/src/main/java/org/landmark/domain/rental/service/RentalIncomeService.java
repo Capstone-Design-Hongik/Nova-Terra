@@ -47,13 +47,6 @@ public class RentalIncomeService {
         var property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
-        propertyVirtualAccountRepository.findByPropertyId(propertyId)
-                .ifPresent(existing -> {
-                    log.warn("이미 발급된 가상계좌가 있습니다 - propertyId: {}, accountNumber: {}",
-                            propertyId, existing.getVirtualAccountNumber());
-                    throw new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS);
-                });
-
         String orderId = generateRentalOrderId(propertyId);
         TossVirtualAccountRequest tossRequest = new TossVirtualAccountRequest(
                 amount,
@@ -178,19 +171,18 @@ public class RentalIncomeService {
                 .toList();
     }
 
-    /* Property별 가상계좌 조회 */
+    /* Property별 가상계좌 목록 조회 (최신순) */
     @Transactional(readOnly = true)
-    public PropertyVirtualAccountResponse getVirtualAccountByProperty(String propertyId) {
-        PropertyVirtualAccount virtualAccount = propertyVirtualAccountRepository.findByPropertyId(propertyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND));
-
-        return new PropertyVirtualAccountResponse(
-                virtualAccount.getId(),
-                virtualAccount.getPropertyId(),
-                virtualAccount.getVirtualAccountNumber(),
-                virtualAccount.getBankName(),
-                virtualAccount.getCreatedAt()
-        );
+    public List<PropertyVirtualAccountResponse> getVirtualAccountsByProperty(String propertyId) {
+        return propertyVirtualAccountRepository.findAllByPropertyIdOrderByCreatedAtDesc(propertyId).stream()
+                .map(va -> new PropertyVirtualAccountResponse(
+                        va.getId(),
+                        va.getPropertyId(),
+                        va.getVirtualAccountNumber(),
+                        va.getBankName(),
+                        va.getCreatedAt()
+                ))
+                .toList();
     }
 
     private RentalIncomeResponse toResponse(RentalIncome rentalIncome) {
