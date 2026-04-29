@@ -27,14 +27,23 @@ public class BlockchainConfig {
     @Value("${blockchain.wallet.private-key:}")
     private String privateKey;
 
-    @Value("${blockchain.contract.property-token-address:}")
-    private String propertyTokenAddress;
-
-    @Value("${blockchain.contract.dividend-distributor-address:}")
-    private String dividendDistributorAddress;
-
     @Value("${blockchain.contract.krwt-token-address:}")
     private String krwtTokenAddress;
+
+    @Value("${blockchain.contract.token-factory-address:}")
+    private String tokenFactoryAddress;
+
+    @Value("${blockchain.contract.identity-registry-address:}")
+    private String identityRegistryAddress;
+
+    @Value("${blockchain.contract.claim-topics-registry-address:}")
+    private String claimTopicsRegistryAddress;
+
+    @Value("${blockchain.contract.trusted-issuers-registry-address:}")
+    private String trustedIssuersRegistryAddress;
+
+    @Value("${blockchain.contract.modular-compliance-address:}")
+    private String modularComplianceAddress;
 
     /* Web3j 인스턴스 생성 */
     @Bean

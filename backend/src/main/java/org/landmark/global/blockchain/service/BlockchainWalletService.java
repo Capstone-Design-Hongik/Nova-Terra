@@ -220,15 +220,15 @@ public class BlockchainWalletService {
     }
 
     /* DividendDistributor 컨트랙트의 createDividend 함수 호출 */
-    public String createDividend(BigInteger snapshotId, BigInteger amount) {
+    public String createDividend(String dividendDistributorAddress, BigInteger snapshotId, BigInteger amount) {
         validateInitialized();
 
-        if (blockchainConfig.getDividendDistributorAddress() == null ||
-            blockchainConfig.getDividendDistributorAddress().isEmpty()) {
+        if (dividendDistributorAddress == null || dividendDistributorAddress.isEmpty()) {
             throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
         }
 
-        log.info("배당 생성 시작 - snapshotId: {}, amount: {}", snapshotId, amount);
+        log.info("배당 생성 시작 - distributorAddress: {}, snapshotId: {}, amount: {}",
+                dividendDistributorAddress, snapshotId, amount);
 
         try {
             // createDividend(uint256 snapshotId, uint256 amount) 함수
@@ -254,7 +254,7 @@ public class BlockchainWalletService {
             EthSendTransaction transactionResponse = txManager.sendTransaction(
                 gasProvider.getGasPrice(),
                 gasProvider.getGasLimit(),
-                blockchainConfig.getDividendDistributorAddress(),
+                dividendDistributorAddress,
                 encodedFunction,
                 BigInteger.ZERO
             );

@@ -6,6 +6,7 @@ import org.landmark.global.blockchain.service.BlockchainWalletService;
 import org.landmark.global.toss.client.TossPaymentsClient;
 import org.landmark.global.toss.dto.TossVirtualAccountRequest;
 import org.landmark.global.toss.dto.TossVirtualAccountResponse;
+import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.repository.PropertyRepository;
 import org.landmark.domain.rental.domain.PropertyVirtualAccount;
 import org.landmark.domain.rental.domain.RentalIncome;
@@ -137,12 +138,16 @@ public class RentalIncomeService {
         String propertyTokenAddress = rentalIncome.getPropertyId();
         log.info("블록체인 배당 분배 시작 - rentalIncomeId: {}, propertyId: {}", rentalIncome.getId(), propertyTokenAddress);
 
+        Property property = propertyRepository.findById(propertyTokenAddress)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
+
         try {
             BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
             log.info("Snapshot 생성 완료 - snapshotId: {}", snapshotId);
 
             BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
-            String txHash = blockchainWalletService.createDividend(snapshotId, krwtAmount);
+            String txHash = blockchainWalletService.createDividend(
+                    property.getDividendDistributorAddress(), snapshotId, krwtAmount);
 
             // 성공: DB 업데이트 — 별도 빈의 @Transactional
             transactionService.updateDistributionSuccess(rentalIncome.getId(), txHash);
