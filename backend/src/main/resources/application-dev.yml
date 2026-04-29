@@ -47,8 +47,12 @@ blockchain:
   wallet:
     private-key: ${BLOCKCHAIN_WALLET_PRIVATE_KEY}
   contract:
-    property-token-address: ${BLOCKCHAIN_PROPERTY_TOKEN_ADDRESS}
-    dividend-distributor-address: ${BLOCKCHAIN_DIVIDEND_DISTRIBUTOR_ADDRESS}
+    krwt-token-address: ${BLOCKCHAIN_KRWT_TOKEN_ADDRESS}
+    token-factory-address: ${BLOCKCHAIN_TOKEN_FACTORY_ADDRESS}
+    identity-registry-address: ${BLOCKCHAIN_IDENTITY_REGISTRY_ADDRESS}
+    claim-topics-registry-address: ${BLOCKCHAIN_CLAIM_TOPICS_REGISTRY_ADDRESS}
+    trusted-issuers-registry-address: ${BLOCKCHAIN_TRUSTED_ISSUERS_REGISTRY_ADDRESS}
+    modular-compliance-address: ${BLOCKCHAIN_MODULAR_COMPLIANCE_ADDRESS}
 
 # Toss Payments Secret Key
 toss:

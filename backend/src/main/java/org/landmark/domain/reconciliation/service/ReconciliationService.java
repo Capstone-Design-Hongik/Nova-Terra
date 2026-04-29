@@ -6,6 +6,8 @@ import org.landmark.global.blockchain.service.BlockchainWalletService;
 import org.landmark.domain.portfolio.repository.UserHoldingRepository;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.domain.PropertyStatus;
+import org.landmark.global.exception.BusinessException;
+import org.landmark.global.exception.ErrorCode;
 import org.landmark.domain.properties.repository.PropertyRepository;
 import org.landmark.domain.reconciliation.domain.ReconciliationType;
 import org.landmark.domain.rental.domain.RentalIncome;
@@ -164,9 +166,12 @@ public class ReconciliationService {
 
                 // Phase 2: 블록체인 호출 (트랜잭션 밖)
                 String propertyTokenAddress = income.getPropertyId();
+                Property property = propertyRepository.findById(propertyTokenAddress)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
                 BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
                 BigInteger krwtAmount = income.getKrwtAmountAsBigInteger();
-                String txHash = blockchainWalletService.createDividend(snapshotId, krwtAmount);
+                String txHash = blockchainWalletService.createDividend(
+                        property.getDividendDistributorAddress(), snapshotId, krwtAmount);
 
                 // Phase 3: 성공 반영 (트랜잭션)
                 transactionService.completeRetry(income, txHash);

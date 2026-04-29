@@ -9,6 +9,8 @@ public record PropertyCreateRequest(
     @NotNull String stoTokenAddress,
     @NotNull String daoTokenAddress,
     @NotNull String daoContractAddress,
+    @NotNull String dividendDistributorAddress,
+    @NotNull String maxBalanceModuleAddress,
     @NotNull String name,
     String description,
     String address,
@@ -38,6 +40,8 @@ public record PropertyCreateRequest(
           .stoTokenAddress(stoTokenAddress)
           .daoTokenAddress(daoTokenAddress)
           .daoContractAddress(daoContractAddress)
+          .dividendDistributorAddress(dividendDistributorAddress)
+          .maxBalanceModuleAddress(maxBalanceModuleAddress)
           .name(name)
           .description(description)
           .address(address)

@@ -20,8 +20,14 @@ public class Property {
     @Column(name = "dao_token_address", length = 42, unique = true) //의결권(DAO) 토큰 주소
     private String daoTokenAddress;
 
-    @Column(name = "dao_contract_address", length = 42, unique = true)  // 의사결정 DAO 토큰 주소
+    @Column(name = "dao_contract_address", length = 42, unique = true)  // 의사결정 DAO 컨트랙트 주소
     private String daoContractAddress;
+
+    @Column(name = "dividend_distributor_address", length = 42, unique = true) // 배당 분배 컨트랙트 주소
+    private String dividendDistributorAddress;
+
+    @Column(name = "max_balance_module_address", length = 42, unique = true) // 최대 보유량 제한 모듈 주소
+    private String maxBalanceModuleAddress;
 
     @Column(nullable = false)
     private String name;
@@ -105,7 +111,9 @@ public class Property {
     private PropertyStatus status; // 부동산 상품의 현재 상태
 
     @Builder
-    public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress, String name, String description, String address, String coverImageUrl,
+    public Property(String stoTokenAddress, String daoTokenAddress, String daoContractAddress,
+                    String dividendDistributorAddress, String maxBalanceModuleAddress,
+                    String name, String description, String address, String coverImageUrl,
                     BuildingType buildingType, BigDecimal exclusiveAreaSqm, Integer totalFloors,
                     String floor, Long useApprovalDate, Integer parkingSpaces,
                     String direction, Integer roomCount, Integer bathroomCount,
@@ -118,6 +126,8 @@ public class Property {
         this.id = stoTokenAddress;
         this.daoTokenAddress = daoTokenAddress;
         this.daoContractAddress = daoContractAddress;
+        this.dividendDistributorAddress = dividendDistributorAddress;
+        this.maxBalanceModuleAddress = maxBalanceModuleAddress;
         this.name = name;
         this.totalValuation = totalValuation;
         this.totalTokens = totalTokens;
