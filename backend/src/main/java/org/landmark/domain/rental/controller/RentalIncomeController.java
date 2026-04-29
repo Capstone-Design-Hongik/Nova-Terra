@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/rental")
+@RequestMapping("/api/v1/admin/rental")
 @RequiredArgsConstructor
 @Tag(name = "Rental Income", description = "임대 수익 관리 API")
 public class RentalIncomeController {
@@ -32,12 +32,13 @@ public class RentalIncomeController {
         return ApiResponse.ok(200, "가상계좌 발급 성공", response);
     }
 
-    @Operation(summary = "임대 수익 가상계좌 조회", description = "Property별 임대 수익 가상계좌 정보를 조회합니다.")
+    @Operation(summary = "임대 수익 가상계좌 목록 조회",
+            description = "Property별로 발급된 가상계좌 전체 목록을 최신순으로 반환합니다.")
     @GetMapping("/properties/{propertyId}/virtual-accounts")
-    public ApiResponse<PropertyVirtualAccountResponse> getVirtualAccount(@PathVariable String propertyId) {
-        log.info("임대 수익 가상계좌 조회 요청 - propertyId: {}", propertyId);
-        PropertyVirtualAccountResponse response = rentalIncomeService.getVirtualAccountByProperty(propertyId);
-        return ApiResponse.ok(200, "가상계좌 조회 성공", response);
+    public ApiResponse<List<PropertyVirtualAccountResponse>> getVirtualAccounts(@PathVariable String propertyId) {
+        log.info("임대 수익 가상계좌 목록 조회 요청 - propertyId: {}", propertyId);
+        List<PropertyVirtualAccountResponse> responses = rentalIncomeService.getVirtualAccountsByProperty(propertyId);
+        return ApiResponse.ok(200, "가상계좌 목록 조회 성공", responses);
     }
 
     @Operation(summary = "임대 수익 내역 조회", description = "Property별 임대 수익 입금 내역을 조회합니다.")
