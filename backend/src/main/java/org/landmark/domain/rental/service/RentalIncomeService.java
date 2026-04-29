@@ -138,9 +138,9 @@ public class RentalIncomeService {
         BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
 
         try {
-            // Step 1: KRW 입금량과 1:1로 KRWT mint → distributor에 입고 (컨펌 대기)
-            blockchainWalletService.mintKrwtAndWait(distributorAddress, krwtAmount);
-            log.info("KRWT mint 완료 - distributor: {}, amount: {}", distributorAddress, krwtAmount);
+            // Step 1: 백엔드 지갑 → distributor로 KRWT 1:1 transfer (컨펌 대기)
+            blockchainWalletService.transferKrwtAndWait(distributorAddress, krwtAmount);
+            log.info("KRWT transfer 완료 - distributor: {}, amount: {}", distributorAddress, krwtAmount);
 
             // Step 2: PropertyToken 스냅샷
             BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);

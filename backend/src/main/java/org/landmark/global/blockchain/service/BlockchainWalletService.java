@@ -298,8 +298,8 @@ public class BlockchainWalletService {
         return sendRawWithNonce(krwtAddress, FunctionEncoder.encode(function), BigInteger.valueOf(nonce));
     }
 
-    /* KRWT mint 후 영수증 컨펌까지 대기 (RawTransactionManager 사용 — 자체 nonce 관리). 임대 수익 분배 흐름에서 사용. */
-    public TransactionReceipt mintKrwtAndWait(String toAddress, BigInteger amount) {
+    /* KRWT transfer 후 영수증 컨펌까지 대기. 백엔드 지갑 → 지정 주소로 KRWT 이체. 임대 수익 분배 흐름에서 사용. */
+    public TransactionReceipt transferKrwtAndWait(String toAddress, BigInteger amount) {
         validateInitialized();
 
         String krwtAddress = blockchainConfig.getKrwtTokenAddress();
@@ -307,15 +307,15 @@ public class BlockchainWalletService {
             throw new BusinessException(ErrorCode.BLOCKCHAIN_NOT_INITIALIZED);
         }
 
-        log.info("KRWT mint (sync) 시작 - to: {}, amount: {}", toAddress, amount);
+        log.info("KRWT transfer (sync) 시작 - to: {}, amount: {}", toAddress, amount);
 
         Function function = new Function(
-                "mint",
+                "transfer",
                 Arrays.asList(
                         new org.web3j.abi.datatypes.Address(toAddress),
                         new Uint256(amount)
                 ),
-                Collections.emptyList()
+                Arrays.asList(new TypeReference<org.web3j.abi.datatypes.Bool>() {})
         );
         String encodedFunction = FunctionEncoder.encode(function);
 
@@ -333,26 +333,26 @@ public class BlockchainWalletService {
             );
 
             if (response.hasError()) {
-                log.error("KRWT mint 전송 실패 - error: {}", response.getError().getMessage());
+                log.error("KRWT transfer 전송 실패 - error: {}", response.getError().getMessage());
                 throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
             }
 
             String txHash = response.getTransactionHash();
-            log.info("KRWT mint TX 전송 성공 - txHash: {}", txHash);
+            log.info("KRWT transfer TX 전송 성공 - txHash: {}", txHash);
 
             TransactionReceipt receipt = waitForTransactionReceipt(txHash);
             if (!"0x1".equals(receipt.getStatus())) {
-                log.error("KRWT mint 트랜잭션 revert - txHash: {}, status: {}", txHash, receipt.getStatus());
+                log.error("KRWT transfer 트랜잭션 revert - txHash: {}, status: {}", txHash, receipt.getStatus());
                 throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
             }
 
-            log.info("KRWT mint 컨펌 완료 - txHash: {}, to: {}, amount: {}", txHash, toAddress, amount);
+            log.info("KRWT transfer 컨펌 완료 - txHash: {}, to: {}, amount: {}", txHash, toAddress, amount);
             return receipt;
 
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("KRWT mint sync 중 오류 - to: {}, amount: {}", toAddress, amount, e);
+            log.error("KRWT transfer sync 중 오류 - to: {}, amount: {}", toAddress, amount, e);
             throw new BusinessException(ErrorCode.BLOCKCHAIN_TRANSACTION_FAILED);
         }
     }

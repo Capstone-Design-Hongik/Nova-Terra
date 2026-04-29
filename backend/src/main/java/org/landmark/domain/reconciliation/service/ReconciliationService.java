@@ -170,7 +170,7 @@ public class ReconciliationService {
                         .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
                 String distributorAddress = property.getDividendDistributorAddress();
                 BigInteger krwtAmount = income.getKrwtAmountAsBigInteger();
-                blockchainWalletService.mintKrwtAndWait(distributorAddress, krwtAmount);
+                blockchainWalletService.transferKrwtAndWait(distributorAddress, krwtAmount);
                 BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
                 String txHash = blockchainWalletService.createDividend(
                         distributorAddress, snapshotId, krwtAmount);
