@@ -168,10 +168,12 @@ public class ReconciliationService {
                 String propertyTokenAddress = income.getPropertyId();
                 Property property = propertyRepository.findById(propertyTokenAddress)
                         .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
-                BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
+                String distributorAddress = property.getDividendDistributorAddress();
                 BigInteger krwtAmount = income.getKrwtAmountAsBigInteger();
+                blockchainWalletService.mintKrwtAndWait(distributorAddress, krwtAmount);
+                BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
                 String txHash = blockchainWalletService.createDividend(
-                        property.getDividendDistributorAddress(), snapshotId, krwtAmount);
+                        distributorAddress, snapshotId, krwtAmount);
 
                 // Phase 3: 성공 반영 (트랜잭션)
                 transactionService.completeRetry(income, txHash);
