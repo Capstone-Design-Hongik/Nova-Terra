@@ -134,13 +134,21 @@ public class RentalIncomeService {
         Property property = propertyRepository.findById(propertyTokenAddress)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
+        String distributorAddress = property.getDividendDistributorAddress();
+        BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
+
         try {
+            // Step 1: 백엔드 지갑 → distributor로 KRWT 1:1 transfer (컨펌 대기)
+            blockchainWalletService.transferKrwtAndWait(distributorAddress, krwtAmount);
+            log.info("KRWT transfer 완료 - distributor: {}, amount: {}", distributorAddress, krwtAmount);
+
+            // Step 2: PropertyToken 스냅샷
             BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
             log.info("Snapshot 생성 완료 - snapshotId: {}", snapshotId);
 
-            BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
+            // Step 3: 분배 실행
             String txHash = blockchainWalletService.createDividend(
-                    property.getDividendDistributorAddress(), snapshotId, krwtAmount);
+                    distributorAddress, snapshotId, krwtAmount);
 
             // 성공: DB 업데이트 — 별도 빈의 @Transactional
             transactionService.updateDistributionSuccess(rentalIncome.getId(), txHash);
