@@ -138,15 +138,15 @@ public class RentalIncomeService {
         BigInteger krwtAmount = rentalIncome.getKrwtAmountAsBigInteger();
 
         try {
-            // Step 1: 백엔드 지갑 → distributor로 KRWT 1:1 transfer (컨펌 대기)
-            blockchainWalletService.transferKrwtAndWait(distributorAddress, krwtAmount);
-            log.info("KRWT transfer 완료 - distributor: {}, amount: {}", distributorAddress, krwtAmount);
-
-            // Step 2: PropertyToken 스냅샷
+            // Step 1: PropertyToken 스냅샷 — 분배 기준 시점의 토큰 보유량 기록
             BigInteger snapshotId = blockchainWalletService.createSnapshot(propertyTokenAddress);
             log.info("Snapshot 생성 완료 - snapshotId: {}", snapshotId);
 
-            // Step 3: 분배 실행
+            // Step 2: distributor가 백엔드 지갑의 KRWT를 transferFrom할 수 있도록 approve
+            blockchainWalletService.approveKrwtAndWait(distributorAddress, krwtAmount);
+            log.info("KRWT approve 완료 - spender: {}, amount: {}", distributorAddress, krwtAmount);
+
+            // Step 3: 분배 실행 (내부적으로 KRWT.transferFrom 호출됨)
             String txHash = blockchainWalletService.createDividend(
                     distributorAddress, snapshotId, krwtAmount);
 
