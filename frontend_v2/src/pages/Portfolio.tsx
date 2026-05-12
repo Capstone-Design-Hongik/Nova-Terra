@@ -4,8 +4,9 @@ import PortfolioAssetCard from '../components/portfolio/PortfolioAssetCard'
 import PortfolioDetailPanel from '../components/portfolio/PortfolioDetailPanel'
 import ClaimHistoryPanel from '../components/portfolio/ClaimHistoryPanel'
 import { getPortfolio, type PropertyResponse } from '../apis/properties'
-import { getPropertyInfo } from '../apis/blockchain/contracts/tokenFactory'
+import { getPropertyInfoByTokenAddress } from '../apis/blockchain/contracts/tokenFactory'
 import { getTotalClaimable } from '../apis/blockchain/contracts/dividendDistributor'
+import { getPropertyBasicInfo } from '../apis/blockchain/contracts/propertyToken'
 
 interface Asset {
   id: string
@@ -37,17 +38,31 @@ export default function Portfolio() {
         const transformedAssets: Asset[] = await Promise.all(
           holdings.map(async (holding) => {
             let unclaimedRewards = 0
+            let currentValue = holding.property.pricePerToken * holding.amount
+            let symbol = 'STO'
 
-            try {
-              // TokenFactory에서 dividendAddress 가져오기
-              const propertyInfo = await getPropertyInfo('3') // TODO: 실제 propertyId 사용해야 함
+            const isEthAddress = /^0x[0-9a-fA-F]{40}$/.test(holding.property.id)
 
-              // DividendDistributor에서 미수령 배당금 조회
-              const totalClaimable = await getTotalClaimable(propertyInfo.dividendAddress)
-              unclaimedRewards = Number(totalClaimable)
-            } catch (error) {
-              console.error(`${holding.property.name} 미수령 수익 조회 실패:`, error)
-              unclaimedRewards = 0 // 실패하면 0으로 설정
+            if (isEthAddress) {
+              // 토큰 가격 + 심볼 (PropertyToken 직접 조회)
+              try {
+                const tokenInfo = await getPropertyBasicInfo(holding.property.id)
+                currentValue = Number(tokenInfo.tokenPrice) * holding.amount
+                symbol = tokenInfo.symbol || 'STO'
+              } catch (error) {
+                console.error(`${holding.property.name} 토큰 정보 조회 실패:`, error)
+              }
+
+              // 미수령 배당금 (TokenFactory → DividendDistributor)
+              try {
+                const propertyInfo = await getPropertyInfoByTokenAddress(holding.property.id)
+                if (propertyInfo && propertyInfo.dividendAddress !== '0x0000000000000000000000000000000000000000') {
+                  const totalClaimable = await getTotalClaimable(propertyInfo.dividendAddress)
+                  unclaimedRewards = Number(BigInt(totalClaimable) / BigInt(10 ** 18))
+                }
+              } catch (error) {
+                console.error(`${holding.property.name} 미수령 수익 조회 실패:`, error)
+              }
             }
 
             return {
@@ -57,9 +72,9 @@ export default function Portfolio() {
               image: holding.property.coverImageUrl,
               status: holding.property.status === 'ACTIVE' ? 'active' : 'preparing',
               holdingAmount: holding.amount,
-              currentValue: holding.property.pricePerToken * holding.amount,
-              unclaimedRewards: unclaimedRewards, // 블록체인에서 가져온 실제 값
-              symbol: 'NPT', // TODO: API에서 symbol 추가 필요
+              currentValue,
+              unclaimedRewards,
+              symbol,
               propertyData: holding.property,
             }
           })
@@ -102,9 +117,8 @@ export default function Portfolio() {
     setTimeout(() => setClaimAsset(null), 300)
   }
 
-  const handleClaimMonth = (month: string, amount: number) => {
-    alert(`${month} 수익 KRWT${amount.toLocaleString()}를 클레임합니다!`)
-    // TODO: 실제 클레임 로직 구현
+  const handleClaimMonth = (_month: string, _amount: number) => {
+    // ClaimHistoryPanel 내부에서 처리
   }
 
   const handleDetailPanelClaim = () => {

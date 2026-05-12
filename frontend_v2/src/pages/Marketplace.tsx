@@ -298,8 +298,13 @@ export default function Marketplace() {
                   totalSupply={blockchainData[property.id]?.totalSupply}
                   maxSupply={blockchainData[property.id]?.maxSupply}
                   remainingSupply={blockchainData[property.id]?.remainingSupply || '0'}
-                  symbol={blockchainData[property.id]?.symbol || ''}
+                  symbol={blockchainData[property.id]?.symbol || 'STO'}
                   {...property}
+                  stoPrice={
+                    blockchainData[property.id]?.tokenPrice
+                      ? Number(blockchainData[property.id].tokenPrice)
+                      : property.stoPrice
+                  }
                   onClick={() => handlePropertyClick(property)}
                   onPurchaseClick={() => handlePurchaseClick(property)}
                 />

@@ -86,10 +86,15 @@ export const getDividendInfo = async (
   try {
     const contract = await getDividendDistributorContract(contractAddress)
 
-    const [dividend, unclaimedAmount] = await Promise.all([
-      contract.dividends(dividendId),
-      contract.getUnclaimedAmount(dividendId),
-    ])
+    const dividend = await contract.dividends(dividendId)
+
+    let unclaimedAmount = '0'
+    try {
+      const raw = await contract.getUnclaimedAmount(dividendId)
+      unclaimedAmount = raw.toString()
+    } catch {
+      // 컨트랙트 오버플로우 등 내부 에러 시 0으로 처리
+    }
 
     return {
       snapshotId: dividend[0].toString(),
@@ -98,7 +103,7 @@ export const getDividendInfo = async (
       claimedAmount: dividend[3].toString(),
       timestamp: dividend[4].toString(),
       active: dividend[5],
-      unclaimedAmount: unclaimedAmount.toString(),
+      unclaimedAmount,
     }
   } catch (error) {
     console.error('배당 정보 조회 실패:', error)
