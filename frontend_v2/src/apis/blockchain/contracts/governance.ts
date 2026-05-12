@@ -237,16 +237,19 @@ export const createOnChainProposal = async (
 // ============================================
 //       투표 (트랜잭션)
 // ============================================
+// support: 0=반대, 1=찬성, 2=기권(기권은 트랜잭션 없이 로컬 처리)
 export const castVote = async (
   contractAddress: string,
   proposalId: number,
-  support: 0 | 1 | 2  // 0=반대, 1=찬성, 2=기권
+  support: 0 | 1 | 2
 ): Promise<string> => {
+  if (support === 2) return 'abstain'  // 기권은 온체인 불필요
   try {
     const provider = await getProvider()
     const signer = await provider.getSigner()
     const contract = new Contract(contractAddress, GOVERNANCE_ABI, signer)
-    const tx = await contract.castVote(proposalId, support)
+    // 배포된 컨트랙트는 vote(uint256, bool) — true=찬성, false=반대
+    const tx = await contract.vote(proposalId, support === 1)
     const receipt = await tx.wait()
     return receipt.hash
   } catch (error) {

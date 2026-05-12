@@ -96,8 +96,8 @@ export default function GovernanceProposalPanel({ isOpen, onClose, property }: G
           status,
           deadline: status === 'active' ? formatDeadline(deadlineTs) : undefined,
           endTime: deadlineTs,
-          voteFor: Number(BigInt(p.forVotes) / BigInt(10 ** 18)),
-          voteAgainst: Number(BigInt(p.againstVotes) / BigInt(10 ** 18)),
+          voteFor: Number(BigInt(p.forVotes)),
+          voteAgainst: Number(BigInt(p.againstVotes)),
         }
       })
       setProposals(transformed)

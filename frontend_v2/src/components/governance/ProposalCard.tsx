@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import VoteConfirmModal from './VoteConfirmModal'
 import { getDelegateOf, selfDelegate } from '../../apis/blockchain/contracts/governanceToken'
-import { castVote } from '../../apis/blockchain/contracts/governance'
+import { castVote, checkHasVoted } from '../../apis/blockchain/contracts/governance'
 import { getWalletAddress } from '../../apis/blockchain/provider'
 
 interface ProposalCardProps {
@@ -53,6 +53,13 @@ export default function ProposalCard({
   const [myVote, setMyVote] = useState<VoteType | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [voteError, setVoteError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (status !== 'active' || !governanceAddress) return
+    checkHasVoted(governanceAddress, onChainProposalId)
+      .then((voted) => { if (voted) setHasVoted(true) })
+      .catch(() => { /* 지갑 미연결 등 무시 */ })
+  }, [governanceAddress, onChainProposalId, status])
 
   const handleVoteClick = (type: VoteType) => {
     setVoteType(type)
@@ -112,7 +119,7 @@ export default function ProposalCard({
   const isActive = status === 'active'
   const isCompleted = status === 'executed' || status === 'passed' || status === 'rejected'
 
-  const voteLabel = myVote === 'for' ? '찬성' : myVote === 'against' ? '반대' : '기권'
+  const voteLabel = myVote === 'for' ? '찬성' : myVote === 'against' ? '반대' : myVote === 'abstain' ? '기권' : '투표'
   const voteLabelColor = myVote === 'for' ? 'text-[#1ABCF7]' : myVote === 'against' ? 'text-red-400' : 'text-gray-400'
   const voteBgColor = myVote === 'for' ? 'bg-[#1ABCF7]/20 border-[#1ABCF7]/30' : myVote === 'against' ? 'bg-red-500/20 border-red-500/30' : 'bg-gray-600/20 border-gray-600/30'
 
