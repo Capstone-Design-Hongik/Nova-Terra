@@ -5,6 +5,11 @@ import { getProvider } from '../provider'
 // TokenFactory 컨트랙트 주소 (환경변수나 config에서 가져오거나 하드코딩)
 const TOKEN_FACTORY_ADDRESS = '0x4959CF91F289D61BEA0f177f18291b94dC4Bed35' // 실제 주소
 
+// TokenFactory에 미등록된 컨트랙트의 dividendAddress 수동 매핑
+const DIVIDEND_ADDRESS_FALLBACK: Record<string, string> = {
+  '0x6f22dE7b12c17896Bb12ec88CCC9B7554c05b30c': '0x89644E13433f4e6Eb07aE42459929DcF906dAeA1',
+}
+
 // PropertyInfo 타입 정의
 export interface PropertyInfo {
   tokenAddress: string           // PropertyToken 주소
@@ -58,6 +63,20 @@ export const getPropertyInfoByTokenAddress = async (tokenAddress: string): Promi
         }
       }
     }
+    // TokenFactory에 없으면 fallback 매핑에서 찾기
+    const fallbackDividend = DIVIDEND_ADDRESS_FALLBACK[tokenAddress]
+    if (fallbackDividend) {
+      return {
+        tokenAddress,
+        dividendAddress: fallbackDividend,
+        governanceAddress: '0x0000000000000000000000000000000000000000',
+        propertyId: '0',
+        totalSupply: '0',
+        tokenPrice: '0',
+        initialized: true,
+      }
+    }
+
     return null
   } catch (error) {
     console.error('TokenAddress로 Property 정보 조회 실패:', error)
