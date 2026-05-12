@@ -240,13 +240,13 @@ export const createOnChainProposal = async (
 export const castVote = async (
   contractAddress: string,
   proposalId: number,
-  support: boolean  // true=찬성, false=반대
+  support: 0 | 1 | 2  // 0=반대, 1=찬성, 2=기권
 ): Promise<string> => {
   try {
     const provider = await getProvider()
     const signer = await provider.getSigner()
     const contract = new Contract(contractAddress, GOVERNANCE_ABI, signer)
-    const tx = await contract.vote(proposalId, support)
+    const tx = await contract.castVote(proposalId, support)
     const receipt = await tx.wait()
     return receipt.hash
   } catch (error) {
