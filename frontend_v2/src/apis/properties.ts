@@ -122,15 +122,20 @@ export type ProposalStatus = 'PENDING' | 'ACTIVE' | 'PASSED' | 'FAILED' | 'CANCE
 
 export interface ProposalResponse {
   id: string
+  onChainProposalId: string | null
   title: string
   description: string
   propertyId: string
   propertyName: string
-  proposerName: string
+  daoContractAddress: string
+  totalTokens: number
+  proposerAddress: string
   startAt: number
-  endTime: number
+  endAt: number
   choices: string[]
   status: ProposalStatus
+  voteFor: number
+  voteAgainst: number
 }
 
 export interface ProposalsApiResponse {

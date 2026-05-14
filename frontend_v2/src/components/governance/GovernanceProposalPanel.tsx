@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import ProposalCard from './ProposalCard'
 import CreateProposalModal from './CreateProposalModal'
 import { getPropertyInfoByTokenAddress } from '../../apis/blockchain/contracts/tokenFactory'
-import { getGovernanceBasicInfo, getAllProposals, type ProposalInfo } from '../../apis/blockchain/contracts/governance'
-import { getTotalSupply } from '../../apis/blockchain/contracts/governanceToken'
+import { getGovernanceBasicInfo } from '../../apis/blockchain/contracts/governance'
+import { getProposalsByProperty, mapProposalStatusToUI } from '../../apis/properties'
 
 interface Proposal {
   id: string
@@ -13,10 +13,12 @@ interface Proposal {
   description: string
   status: 'active' | 'passed' | 'rejected' | 'executed'
   deadline?: string
+  startAt?: number
   endTime?: number
   voteFor: number
   voteAgainst: number
   participationRate: number
+  proposer?: string
 }
 
 interface PropertyInfo {
@@ -46,17 +48,6 @@ const formatDeadline = (deadlineTs: number): string | undefined => {
   return `${hours}시간 ${mins}분 후 종료`
 }
 
-const toStatus = (p: ProposalInfo): 'active' | 'passed' | 'rejected' | 'executed' => {
-  if (p.executed) return 'executed'
-  if (p.isActive) return 'active'
-  return p.forPercentage >= 50 ? 'passed' : 'rejected'
-}
-
-const parseDesc = (raw: string) => {
-  const idx = raw.indexOf('\n\n')
-  if (idx === -1) return { title: raw, description: '' }
-  return { title: raw.slice(0, idx), description: raw.slice(idx + 2) }
-}
 
 export default function GovernanceProposalPanel({ isOpen, onClose, property }: GovernanceProposalPanelProps) {
   const [selectedFilter, setSelectedFilter] = useState('전체')
@@ -73,45 +64,38 @@ export default function GovernanceProposalPanel({ isOpen, onClose, property }: G
       setIsLoading(true)
       setError(null)
 
+      // 투표 기능을 위한 거버넌스 컨트랙트 주소 조회
       const propInfo = await getPropertyInfoByTokenAddress(property.id)
       if (!propInfo || propInfo.governanceAddress === '0x0000000000000000000000000000000000000000') {
         setError('Governance 컨트랙트를 찾을 수 없습니다.')
         return
       }
-      const govAddr = propInfo.governanceAddress
-      setGovernanceAddress(govAddr)
+      setGovernanceAddress(propInfo.governanceAddress)
 
-      const govInfo = await getGovernanceBasicInfo(govAddr)
+      const govInfo = await getGovernanceBasicInfo(propInfo.governanceAddress)
       setGovernanceTokenAddress(govInfo.governanceToken)
 
-      const [onChain, totalSupplyStr] = await Promise.all([
-        getAllProposals(govAddr),
-        getTotalSupply(govInfo.governanceToken).catch(() => '0'),
-      ])
-      const totalSupplyBN = BigInt(totalSupplyStr)
+      // 제안 목록 API 조회 (onChainProposalId 포함)
+      const apiProposals = await getProposalsByProperty(property.id)
 
-      const transformed: Proposal[] = onChain.map((p, idx) => {
-        const { title, description } = parseDesc(p.description)
-        const deadlineTs = Number(p.deadline)
-        const status = toStatus(p)
-        const forBN = BigInt(p.forVotes)
-        const againstBN = BigInt(p.againstVotes)
-        const totalVotesBN = forBN + againstBN
-        const participationRate = totalSupplyBN > 0n
-          ? Number((totalVotesBN * 10000n) / totalSupplyBN) / 100
-          : 0
+      const transformed: Proposal[] = apiProposals.map((p, idx) => {
+        const status = mapProposalStatusToUI(p.status)
+        const totalVotes = p.voteFor + p.voteAgainst
+        const participationRate = p.totalTokens > 0 ? (totalVotes / p.totalTokens) * 100 : 0
         return {
-          id: p.proposalId.toString(),
-          onChainProposalId: p.proposalId,
-          proposalNumber: `#${onChain.length - idx}`,
-          title,
-          description,
+          id: p.id,
+          onChainProposalId: p.onChainProposalId != null ? Number(p.onChainProposalId) : 0,
+          proposalNumber: `#${apiProposals.length - idx}`,
+          title: p.title,
+          description: p.description,
           status,
-          deadline: status === 'active' ? formatDeadline(deadlineTs) : undefined,
-          endTime: deadlineTs,
-          voteFor: Number(forBN),
-          voteAgainst: Number(againstBN),
+          deadline: status === 'active' ? formatDeadline(p.endAt) : undefined,
+          startAt: p.startAt,
+          endTime: p.endAt,
+          voteFor: p.voteFor,
+          voteAgainst: p.voteAgainst,
           participationRate,
+          proposer: p.proposerAddress ?? undefined,
         }
       })
       setProposals(transformed)
@@ -202,7 +186,7 @@ export default function GovernanceProposalPanel({ isOpen, onClose, property }: G
               {isLoading && (
                 <div className="flex flex-col items-center gap-3 py-12">
                   <div className="w-10 h-10 border-4 border-[#1ABCF7] border-t-transparent rounded-full animate-spin" />
-                  <p className="text-gray-400 text-sm">블록체인에서 불러오는 중...</p>
+                  <p className="text-gray-400 text-sm">불러오는 중...</p>
                 </div>
               )}
               {error && !isLoading && (

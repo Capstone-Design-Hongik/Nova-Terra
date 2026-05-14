@@ -59,10 +59,16 @@ export default function ProposalCard({
   const [voteError, setVoteError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (status !== 'active' || !governanceAddress) return
-    checkHasVoted(governanceAddress, onChainProposalId)
-      .then((voted) => { if (voted) setHasVoted(true) })
-      .catch(() => { /* 지갑 미연결 등 무시 */ })
+    if (status !== 'active' || !governanceAddress || !onChainProposalId) return
+    ;(async () => {
+      try {
+        const walletAddress = await getWalletAddress()
+        const voted = await checkHasVoted(governanceAddress, onChainProposalId, walletAddress)
+        if (voted) setHasVoted(true)
+      } catch {
+        /* 지갑 미연결 등 무시 */
+      }
+    })()
   }, [governanceAddress, onChainProposalId, status])
 
   const handleVoteClick = (type: VoteType) => {
