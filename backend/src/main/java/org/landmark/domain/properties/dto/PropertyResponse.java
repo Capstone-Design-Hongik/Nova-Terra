@@ -33,9 +33,10 @@ public record PropertyResponse(
         BigDecimal feeRate,
         BigDecimal latitude,
         BigDecimal longitude,
-        PropertyStatus status
+        PropertyStatus status,
+        long investorCount
 ) {
-    public static PropertyResponse from(Property property) {
+    public static PropertyResponse from(Property property, long investorCount) {
         return new PropertyResponse(
                 property.getId(),
                 property.getDaoContractAddress(),
@@ -63,7 +64,8 @@ public record PropertyResponse(
                 property.getFeeRate(),
                 property.getLatitude(),
                 property.getLongitude(),
-                property.getStatus()
+                property.getStatus(),
+                investorCount
         );
     }
 }
