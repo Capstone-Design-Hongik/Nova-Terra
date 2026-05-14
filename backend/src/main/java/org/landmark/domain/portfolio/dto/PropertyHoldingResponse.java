@@ -7,9 +7,9 @@ public record PropertyHoldingResponse(
     PropertyResponse property,
     Long amount  // 보유 토큰 수량
 ) {
-    public static PropertyHoldingResponse from(UserHolding holding) {
+    public static PropertyHoldingResponse from(UserHolding holding, long investorCount) {
         return new PropertyHoldingResponse(
-            PropertyResponse.from(holding.getProperty()),
+            PropertyResponse.from(holding.getProperty(), investorCount),
             holding.getAmount()
         );
     }

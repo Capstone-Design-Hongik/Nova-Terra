@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,8 +33,20 @@ public class PortfolioServiceImpl implements PortfolioService {
             return PortfolioResponse.of(userId, List.of());
         }
 
+        List<String> propertyIds = holdings.stream()
+            .map(h -> h.getProperty().getId())
+            .collect(Collectors.toList());
+
+        Map<String, Long> investorCountMap = userHoldingRepository
+            .countGroupByPropertyIdIn(propertyIds)
+            .stream()
+            .collect(Collectors.toMap(
+                row -> (String) row[0],
+                row -> (Long) row[1]
+            ));
+
         List<PropertyHoldingResponse> propertyHoldings = holdings.stream()
-            .map(PropertyHoldingResponse::from)
+            .map(h -> PropertyHoldingResponse.from(h, investorCountMap.getOrDefault(h.getProperty().getId(), 0L)))
             .collect(Collectors.toList());
 
         log.info("사용자 포트폴리오 조회 완료 - userId: {}, 보유 부동산 수: {}", userId, propertyHoldings.size());
