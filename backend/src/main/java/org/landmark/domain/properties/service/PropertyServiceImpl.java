@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.landmark.global.exception.BusinessException;
 import org.landmark.global.exception.ErrorCode;
 import org.landmark.global.service.S3Service;
+import org.landmark.domain.portfolio.repository.UserHoldingRepository;
 import org.landmark.domain.properties.domain.Property;
 import org.landmark.domain.properties.dto.PropertyCreateRequest;
 import org.landmark.domain.properties.dto.PropertyListResponse;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PropertyServiceImpl implements PropertyService {
   private final PropertyRepository propertyRepository;
+  private final UserHoldingRepository userHoldingRepository;
   private final S3Service s3Service;
 
   @Transactional
@@ -48,6 +50,7 @@ public class PropertyServiceImpl implements PropertyService {
     Property property = propertyRepository.findById(propertyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
-    return PropertyResponse.from(property);
+    long investorCount = userHoldingRepository.countByPropertyId(propertyId);
+    return PropertyResponse.from(property, investorCount);
   }
 }

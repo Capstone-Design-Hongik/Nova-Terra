@@ -27,4 +27,6 @@ public interface UserHoldingRepository extends JpaRepository<UserHolding, Long> 
 
     /* 특정 Property의 보유자 목록 조회 (대사용) */
     List<UserHolding> findByPropertyId(String propertyId);
+
+    long countByPropertyId(String propertyId);
 }
