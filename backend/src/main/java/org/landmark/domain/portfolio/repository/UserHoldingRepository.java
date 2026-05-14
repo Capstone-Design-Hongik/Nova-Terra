@@ -29,4 +29,7 @@ public interface UserHoldingRepository extends JpaRepository<UserHolding, Long> 
     List<UserHolding> findByPropertyId(String propertyId);
 
     long countByPropertyId(String propertyId);
+
+    @Query("SELECT h.property.id, COUNT(h) FROM UserHolding h WHERE h.property.id IN :propertyIds GROUP BY h.property.id")
+    List<Object[]> countGroupByPropertyIdIn(@Param("propertyIds") List<String> propertyIds);
 }
